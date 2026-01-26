@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { TileCode } from 'common';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -17,6 +17,7 @@ import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
 import { TileRack } from './TileRack';
 import { ViableHandCard, ViableHandData } from './ViableHandCard';
+import { CallAdvisor } from './CallAdvisor';
 import type { Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
@@ -147,6 +148,34 @@ const useStyles = createUseStyles((theme: Theme) => ({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  tabs: {
+    display: 'flex',
+    borderBottom: `1px solid ${theme.colors.border}`,
+    marginBottom: theme.spacing.md,
+  },
+  tab: {
+    flex: 1,
+    padding: theme.spacing.md,
+    backgroundColor: 'transparent',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    color: theme.colors.textSecondary,
+    cursor: 'pointer',
+    fontSize: theme.fontSizes.md,
+    fontWeight: 500,
+    transition: 'all 0.2s',
+    '&:hover': {
+      color: theme.colors.text,
+      backgroundColor: theme.colors.surfaceHover,
+    },
+  },
+  tabActive: {
+    color: theme.colors.primary,
+    borderBottomColor: theme.colors.primary,
+    '&:hover': {
+      color: theme.colors.primary,
+    },
+  },
   '@media (max-width: 900px)': {
     analyzer: {
       gridTemplateColumns: '1fr',
@@ -155,6 +184,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 }));
 
 type InputMode = 'hand' | 'drawn';
+type ActiveTab = 'analysis' | 'calls';
 
 export function HandAnalyzer() {
   const classes = useStyles();
@@ -166,9 +196,10 @@ export function HandAnalyzer() {
   const isHandFull = useAppSelector(selectIsHandFull);
 
   const [inputMode, setInputMode] = useState<InputMode>('hand');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('analysis');
 
   // Query for analysis
-  const { data: analysisData, isLoading, error, refetch } = trpc.analysis.analyzeHand.useQuery(
+  const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
     {
       playerState: {
         tiles,
@@ -256,41 +287,60 @@ export function HandAnalyzer() {
       </div>
 
       <div className={classes.rightPanel}>
-        <div className={classes.section}>
-          <h2 className={classes.sectionTitle}>
-            <span className={classes.sectionIcon}>📊</span>
-            Recommended Hands
-            {results.length > 0 && (
-              <span style={{ fontWeight: 'normal', fontSize: '14px', color: '#999', marginLeft: 'auto' }}>
-                {results.length} viable hand{results.length !== 1 ? 's' : ''}
-              </span>
-            )}
-          </h2>
-
-          {tiles.length < 3 ? (
-            <div className={classes.placeholder}>
-              <div className={classes.placeholderIcon}>🀄</div>
-              <p>Add at least 3 tiles to see recommendations</p>
-            </div>
-          ) : isLoading ? (
-            <div className={classes.loading}>Analyzing hands...</div>
-          ) : error ? (
-            <div className={classes.error}>Error analyzing hand. Please try again.</div>
-          ) : results.length === 0 ? (
-            <div className={classes.placeholder}>
-              <p>No viable hands found with current tiles.</p>
-              <p style={{ fontSize: '12px', marginTop: '8px' }}>
-                Try adding more tiles or different combinations.
-              </p>
-            </div>
-          ) : (
-            <div className={classes.resultsList}>
-              {results.map((result, index) => (
-                <ViableHandCard key={result.handId} data={result} rank={index + 1} />
-              ))}
-            </div>
-          )}
+        <div className={classes.tabs}>
+          <button
+            className={`${classes.tab} ${activeTab === 'analysis' ? classes.tabActive : ''}`}
+            onClick={() => setActiveTab('analysis')}
+          >
+            Hand Analysis
+          </button>
+          <button
+            className={`${classes.tab} ${activeTab === 'calls' ? classes.tabActive : ''}`}
+            onClick={() => setActiveTab('calls')}
+          >
+            Call Advisor
+          </button>
         </div>
+
+        {activeTab === 'analysis' ? (
+          <div className={classes.section}>
+            <h2 className={classes.sectionTitle}>
+              <span className={classes.sectionIcon}>&#128202;</span>
+              Recommended Hands
+              {results.length > 0 && (
+                <span style={{ fontWeight: 'normal', fontSize: '14px', color: '#999', marginLeft: 'auto' }}>
+                  {results.length} viable hand{results.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </h2>
+
+            {tiles.length < 3 ? (
+              <div className={classes.placeholder}>
+                <div className={classes.placeholderIcon}>&#127000;</div>
+                <p>Add at least 3 tiles to see recommendations</p>
+              </div>
+            ) : isLoading ? (
+              <div className={classes.loading}>Analyzing hands...</div>
+            ) : error ? (
+              <div className={classes.error}>Error analyzing hand. Please try again.</div>
+            ) : results.length === 0 ? (
+              <div className={classes.placeholder}>
+                <p>No viable hands found with current tiles.</p>
+                <p style={{ fontSize: '12px', marginTop: '8px' }}>
+                  Try adding more tiles or different combinations.
+                </p>
+              </div>
+            ) : (
+              <div className={classes.resultsList}>
+                {results.map((result, index) => (
+                  <ViableHandCard key={result.handId} data={result} rank={index + 1} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <CallAdvisor />
+        )}
       </div>
     </div>
   );

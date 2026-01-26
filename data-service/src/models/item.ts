@@ -1,4 +1,4 @@
-import { get, getOne, query } from '../../../common/src/db.js';
+import { get, getOne, query } from '../db.js';
 import type { Item, CreateItem, UpdateItem } from 'common';
 
 interface ItemRow {

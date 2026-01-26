@@ -19,6 +19,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['common'],
+    exclude: ['pg', 'pg-pool', 'pg-types', 'postgres-bytea'],
   },
 });

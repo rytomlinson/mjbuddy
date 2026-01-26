@@ -1,4 +1,4 @@
-import { get, getOne, query } from '../../../common/src/db.js';
+import { get, getOne, query } from '../db.js';
 import type { CardHand, CreateCardHand, UpdateCardHand, PatternGroup } from 'common';
 
 interface CardHandRow {

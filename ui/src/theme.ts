@@ -1,18 +1,29 @@
 export const theme = {
   colors: {
-    primary: '#FF6B00',
-    primaryHover: '#FF8533',
-    primaryActive: '#E65C00',
-    background: '#121212',
-    surface: '#1E1E1E',
-    surfaceHover: '#2A2A2A',
-    border: '#333333',
-    text: '#FFFFFF',
-    textSecondary: '#B3B3B3',
-    textMuted: '#808080',
-    error: '#FF5252',
-    success: '#4CAF50',
-    warning: '#FFC107',
+    // Scarlet/rose red to complement cherry blossoms
+    primary: '#B84A4A',
+    primaryHover: '#C65858',
+    primaryActive: '#A03E3E',
+    // Backgrounds
+    background: 'transparent',
+    surface: 'rgba(255, 253, 250, 0.88)',
+    surfaceHover: 'rgba(255, 253, 250, 0.95)',
+    border: 'rgba(139, 125, 107, 0.25)',
+    // Text - warm dark tones
+    text: '#2D2A26',
+    textSecondary: '#5C564E',
+    textMuted: '#8B7D6B',
+    // Status colors - muted to match aesthetic
+    error: '#B84A4A',
+    success: '#5B8A6F',
+    warning: '#C9A55C',
+    // Accent colors from the image
+    accent: {
+      sage: '#6B8E7A',
+      gold: '#C9A55C',
+      blush: '#C4A4A4',
+      slate: '#7A8B9A',
+    },
   },
   spacing: {
     xs: '4px',
@@ -32,6 +43,11 @@ export const theme = {
     lg: '16px',
     xl: '20px',
     xxl: '24px',
+  },
+  fontWeights: {
+    normal: 400,
+    medium: 500,
+    bold: 600,
   },
 } as const;
 

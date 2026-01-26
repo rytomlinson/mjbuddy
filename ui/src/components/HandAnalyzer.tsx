@@ -11,14 +11,13 @@ import {
   removeTile,
   clearTiles,
   setDrawnTile,
-  resetHand,
 } from '../slices/handSlice';
 import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
 import { TileRack } from './TileRack';
 import { ViableHandCard, ViableHandData, CallHighlight } from './ViableHandCard';
 import { Tile } from './Tile';
-import type { Theme } from '../theme';
+import { theme, type Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   analyzer: {
@@ -40,18 +39,15 @@ const useStyles = createUseStyles((theme: Theme) => ({
     gap: theme.spacing.lg,
   },
   header: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.md,
     marginBottom: theme.spacing.md,
   },
-  title: {
-    fontSize: theme.fontSizes.xxl,
-    color: theme.colors.text,
-    margin: 0,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    fontSize: theme.fontSizes.md,
-    color: theme.colors.textSecondary,
-    margin: 0,
+  logo: {
+    height: '100px',
+    width: 'auto',
+    objectFit: 'contain',
   },
   section: {
     backgroundColor: theme.colors.surface,
@@ -108,7 +104,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     opacity: 0.5,
   },
   tip: {
-    backgroundColor: 'rgba(255, 107, 0, 0.1)',
+    backgroundColor: 'rgba(184, 74, 74, 0.1)',
     borderRadius: theme.borderRadius.sm,
     padding: theme.spacing.md,
     marginTop: theme.spacing.md,
@@ -121,7 +117,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     overflowY: 'auto',
   },
   adviceBox: {
-    backgroundColor: 'rgba(255, 107, 0, 0.1)',
+    backgroundColor: 'rgba(184, 74, 74, 0.1)',
     borderRadius: theme.borderRadius.sm,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
@@ -157,54 +153,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     padding: theme.spacing.lg,
     color: theme.colors.error,
   },
-  resetButton: {
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-    cursor: 'pointer',
-    fontSize: theme.fontSizes.sm,
-    '&:hover': {
-      backgroundColor: theme.colors.surfaceHover,
-      color: theme.colors.error,
-    },
-  },
-  headerRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  headerControls: {
-    display: 'flex',
-    gap: theme.spacing.sm,
-    alignItems: 'center',
-  },
-  yearSelector: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.xs,
-  },
-  yearLabel: {
-    fontSize: theme.fontSizes.sm,
-    color: theme.colors.textSecondary,
-  },
-  yearSelect: {
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.text,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    fontSize: theme.fontSizes.sm,
-    cursor: 'pointer',
-    '&:hover': {
-      borderColor: theme.colors.primary,
-    },
-    '&:focus': {
-      outline: 'none',
-      borderColor: theme.colors.primary,
-    },
-  },
   callableSection: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
@@ -231,7 +179,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   callableTileSelected: {
     borderColor: theme.colors.primary,
-    boxShadow: '0 0 8px rgba(255, 107, 0, 0.5)',
+    boxShadow: '0 0 8px rgba(184, 74, 74, 0.5)',
   },
   callableEmpty: {
     fontSize: theme.fontSizes.sm,
@@ -259,24 +207,22 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontWeight: 'bold',
     marginLeft: theme.spacing.xs,
   },
+  // Hide on mobile
+  hideOnMobile: {
+    display: 'block',
+  },
   '@media (max-width: 900px)': {
     analyzer: {
       gridTemplateColumns: '1fr',
       padding: theme.spacing.md,
       gap: theme.spacing.md,
     },
-    title: {
-      fontSize: theme.fontSizes.xl,
+    logo: {
+      height: '80px',
     },
-    subtitle: {
-      fontSize: theme.fontSizes.sm,
-    },
-    headerRow: {
-      flexDirection: 'column',
-      gap: theme.spacing.sm,
-    },
-    resetButton: {
-      alignSelf: 'flex-start',
+    // Hide header on mobile
+    hideOnMobile: {
+      display: 'none',
     },
   },
   '@media (max-width: 480px)': {
@@ -285,9 +231,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
     section: {
       padding: theme.spacing.sm,
-    },
-    title: {
-      fontSize: theme.fontSizes.lg,
     },
     modeButton: {
       padding: theme.spacing.xs,
@@ -314,11 +257,7 @@ export function HandAnalyzer() {
   const isHandFull = useAppSelector(selectIsHandFull);
 
   const [inputMode, setInputMode] = useState<InputMode>('hand');
-  const [selectedYearId, setSelectedYearId] = useState<number | undefined>(undefined);
   const [selectedCallableTile, setSelectedCallableTile] = useState<number | null>(null);
-
-  // Query for card years
-  const { data: cardYears } = trpc.cardYear.list.useQuery();
 
   // Query for analysis
   const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
@@ -328,7 +267,6 @@ export function HandAnalyzer() {
         drawnTile: drawnTile ?? undefined,
         exposedMelds,
       },
-      cardYearId: selectedYearId,
       maxResults: 10,
     },
     {
@@ -345,7 +283,6 @@ export function HandAnalyzer() {
         drawnTile: drawnTile ?? undefined,
         exposedMelds,
       },
-      cardYearId: selectedYearId,
     },
     {
       enabled: tiles.length >= 3,
@@ -362,7 +299,6 @@ export function HandAnalyzer() {
         drawnTile: drawnTile ?? undefined,
         exposedMelds,
       },
-      cardYearId: selectedYearId,
     },
     {
       enabled: tiles.length >= 3,
@@ -391,10 +327,6 @@ export function HandAnalyzer() {
   const handleClear = () => {
     dispatch(clearTiles());
     dispatch(setDrawnTile(null));
-  };
-
-  const handleReset = () => {
-    dispatch(resetHand());
   };
 
   const results: ViableHandData[] = analysisData?.results ?? [];
@@ -451,34 +383,53 @@ export function HandAnalyzer() {
     return disabled;
   })();
 
+  // Callable tiles content (rendered in two places for mobile/desktop layout)
+  const renderCallableTiles = () => (
+    <>
+      <h2 className={classes.sectionTitle}>
+        <span className={classes.sectionIcon}>&#128227;</span>
+        Callable Tiles
+        {callableTiles.length > 0 && (
+          <span className={classes.callCount}>{callableTiles.length}</span>
+        )}
+      </h2>
+      <p className={classes.callableLabel}>
+        Tiles you can call if discarded:
+      </p>
+      {callableTiles.length === 0 ? (
+        <p className={classes.callableEmpty}>
+          No tiles can be called right now. You need more matching tiles in your hand to make a call.
+        </p>
+      ) : (
+        <div className={classes.callableTiles}>
+          {callableTiles.map((ct) => (
+            <div
+              key={ct.tile}
+              className={`${classes.callableTile} ${selectedCallableTile === ct.tile ? classes.callableTileSelected : ''}`}
+              onClick={() => handleCallableTileClick(ct.tile)}
+              title={`${ct.calls.length} hand${ct.calls.length !== 1 ? 's' : ''} can call this`}
+            >
+              <Tile code={ct.tile} size="medium" />
+            </div>
+          ))}
+        </div>
+      )}
+      {callableTiles.length > 0 && (
+        <p className={classes.callableLabel} style={{ marginTop: '8px' }}>
+          {selectedCallableTile
+            ? 'Highlighted hands below show which tiles you would expose when making this call.'
+            : 'Click a tile to see which hands you can call it for.'}
+        </p>
+      )}
+    </>
+  );
+
   return (
     <div className={classes.analyzer}>
       <div className={classes.leftPanel}>
-        <div className={classes.headerRow}>
-          <div className={classes.header}>
-            <h1 className={classes.title}>Mah Jongg Buddy</h1>
-            <p className={classes.subtitle}>Enter your tiles to find the best hands</p>
-          </div>
-          <div className={classes.headerControls}>
-            <div className={classes.yearSelector}>
-              <span className={classes.yearLabel}>Card:</span>
-              <select
-                className={classes.yearSelect}
-                value={selectedYearId ?? ''}
-                onChange={(e) => setSelectedYearId(e.target.value ? Number(e.target.value) : undefined)}
-              >
-                <option value="">Active Year</option>
-                {cardYears?.map((year) => (
-                  <option key={year.id} value={year.id}>
-                    {year.year} {year.isActive ? '(Active)' : ''}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <button className={classes.resetButton} onClick={handleReset}>
-              Reset All
-            </button>
-          </div>
+        {/* Header - hidden on mobile */}
+        <div className={`${classes.header} ${classes.hideOnMobile}`}>
+          <img src="/mjb_logo.png" alt="Mah Jongg Buddy" className={classes.logo} />
         </div>
 
         <TileRack
@@ -506,7 +457,7 @@ export function HandAnalyzer() {
           <TilePicker onTileSelect={handleTileSelect} disabledTiles={disabledTiles} />
         </div>
 
-        <div className={classes.tip}>
+        <div className={`${classes.tip} ${classes.hideOnMobile}`}>
           <strong>Tip:</strong> Click tiles in your hand to remove them. The analysis updates automatically as you add tiles.
         </div>
       </div>
@@ -515,41 +466,7 @@ export function HandAnalyzer() {
         {/* Callable Tiles Section */}
         {tiles.length >= 3 && (
           <div className={classes.callableSection}>
-            <h2 className={classes.sectionTitle}>
-              <span className={classes.sectionIcon}>&#128227;</span>
-              Callable Tiles
-              {callableTiles.length > 0 && (
-                <span className={classes.callCount}>{callableTiles.length}</span>
-              )}
-            </h2>
-            <p className={classes.callableLabel}>
-              Tiles you can call if discarded:
-            </p>
-            {callableTiles.length === 0 ? (
-              <p className={classes.callableEmpty}>
-                No tiles can be called right now. You need more matching tiles in your hand to make a call.
-              </p>
-            ) : (
-              <div className={classes.callableTiles}>
-                {callableTiles.map((ct) => (
-                  <div
-                    key={ct.tile}
-                    className={`${classes.callableTile} ${selectedCallableTile === ct.tile ? classes.callableTileSelected : ''}`}
-                    onClick={() => handleCallableTileClick(ct.tile)}
-                    title={`${ct.calls.length} hand${ct.calls.length !== 1 ? 's' : ''} can call this`}
-                  >
-                    <Tile code={ct.tile} size="medium" />
-                  </div>
-                ))}
-              </div>
-            )}
-            {callableTiles.length > 0 && (
-              <p className={classes.callableLabel} style={{ marginTop: '8px' }}>
-                {selectedCallableTile
-                  ? 'Highlighted hands below show which tiles you would expose when making this call.'
-                  : 'Click a tile to see which hands you can call it for.'}
-              </p>
-            )}
+            {renderCallableTiles()}
           </div>
         )}
 
@@ -559,7 +476,7 @@ export function HandAnalyzer() {
             <span className={classes.sectionIcon}>&#128202;</span>
             Recommended Hands
             {results.length > 0 && (
-              <span style={{ fontWeight: 'normal', fontSize: '14px', color: '#999', marginLeft: 'auto' }}>
+              <span style={{ fontWeight: 'normal', fontSize: '14px', color: theme.colors.textMuted, marginLeft: 'auto' }}>
                 {results.length} viable hand{results.length !== 1 ? 's' : ''}
               </span>
             )}

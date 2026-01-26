@@ -17,8 +17,8 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   cardHighlighted: {
     borderColor: theme.colors.primary,
-    backgroundColor: 'rgba(255, 107, 0, 0.1)',
-    boxShadow: '0 0 12px rgba(255, 107, 0, 0.3)',
+    backgroundColor: 'rgba(184, 74, 74, 0.1)',
+    boxShadow: '0 0 12px rgba(184, 74, 74, 0.3)',
   },
   cardTop: {
     display: 'flex',
@@ -168,7 +168,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    backgroundColor: '#FF6B00',
+    backgroundColor: '#B84A4A',
   },
   legendText: {
     color: theme.colors.textMuted,
@@ -213,12 +213,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
     color: 'white',
   },
   tileExposed: {
-    boxShadow: '0 0 0 3px #FF6B00',
+    boxShadow: '0 0 0 3px #B84A4A',
     borderRadius: theme.borderRadius.sm,
     animation: '$pulse 1.5s ease-in-out infinite',
   },
   indicatorExposed: {
-    backgroundColor: '#FF6B00',
+    backgroundColor: '#B84A4A',
     color: 'white',
   },
   callBadge: {
@@ -236,10 +236,10 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   '@keyframes pulse': {
     '0%, 100%': {
-      boxShadow: '0 0 0 3px #FF6B00',
+      boxShadow: '0 0 0 3px #B84A4A',
     },
     '50%': {
-      boxShadow: '0 0 0 5px rgba(255, 107, 0, 0.5)',
+      boxShadow: '0 0 0 5px rgba(184, 74, 74, 0.5)',
     },
   },
   // Mobile responsive

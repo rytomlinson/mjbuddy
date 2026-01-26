@@ -84,7 +84,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   joker: {
     color: theme.colors.primary,
-    background: `linear-gradient(135deg, #FFFFF0 0%, #FFF3E0 100%)`,
+    background: `linear-gradient(135deg, #FFFFF0 0%, #F5E6E6 100%)`,
     fontWeight: 'bold',
   },
   // Number display

@@ -4,31 +4,37 @@ import { Tile } from './Tile';
 import type { Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
-  rack: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.sm,
-  },
   rackLabel: {
-    color: theme.colors.textSecondary,
+    color: theme.colors.text,
     fontSize: theme.fontSizes.sm,
+    fontWeight: 600,
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: theme.spacing.sm,
   },
   tileCount: {
-    color: theme.colors.textMuted,
+    color: theme.colors.textSecondary,
     fontSize: theme.fontSizes.sm,
+    fontWeight: 600,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
   },
   tiles: {
     display: 'flex',
+    flexDirection: 'column',
     gap: theme.spacing.xs,
-    flexWrap: 'wrap',
     minHeight: '60px',
-    padding: theme.spacing.sm,
+    padding: theme.spacing.md,
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     border: `1px solid ${theme.colors.border}`,
+  },
+  tilesContent: {
+    display: 'flex',
+    gap: theme.spacing.xs,
+    flexWrap: 'wrap',
   },
   tilesWithDrawn: {
     display: 'flex',
@@ -126,7 +132,7 @@ export function TileRack({
   const displayTiles = sorted ? sortTiles(tiles) : tiles;
 
   return (
-    <div className={classes.rack}>
+    <div className={classes.tiles}>
       <div className={classes.rackLabel}>
         <span>{label}</span>
         <span className={classes.tileCount}>
@@ -138,7 +144,7 @@ export function TileRack({
           )}
         </span>
       </div>
-      <div className={classes.tiles}>
+      <div className={classes.tilesContent}>
         {displayTiles.length === 0 && !drawnTile ? (
           <div className={classes.empty}>Click tiles below to add to your hand</div>
         ) : (

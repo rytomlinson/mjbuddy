@@ -31,12 +31,8 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   honorRow: {
     display: 'flex',
-    gap: theme.spacing.sm,
+    gap: theme.spacing.xs,
     flexWrap: 'wrap',
-  },
-  specialRow: {
-    display: 'flex',
-    gap: theme.spacing.sm,
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -55,10 +51,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
       marginBottom: '2px',
     },
     honorRow: {
-      gap: theme.spacing.xs,
-    },
-    specialRow: {
-      gap: theme.spacing.xs,
+      gap: '2px',
     },
   },
 }));
@@ -122,7 +115,7 @@ export function TilePicker({ onTileSelect, disabledTiles, selectedTiles = [] }: 
       {renderSuitRow(TileType.CRAK, 'Craks')}
 
       <div className={classes.section}>
-        <div className={classes.sectionTitle}>Winds</div>
+        <div className={classes.sectionTitle}>Winds, Dragons & Special</div>
         <div className={classes.honorRow}>
           {windTiles.map((tile) => (
             <Tile
@@ -134,12 +127,6 @@ export function TilePicker({ onTileSelect, disabledTiles, selectedTiles = [] }: 
               onClick={() => onTileSelect(tile)}
             />
           ))}
-        </div>
-      </div>
-
-      <div className={classes.section}>
-        <div className={classes.sectionTitle}>Dragons</div>
-        <div className={classes.honorRow}>
           {dragonTiles.map((tile) => (
             <Tile
               key={tile}
@@ -150,12 +137,6 @@ export function TilePicker({ onTileSelect, disabledTiles, selectedTiles = [] }: 
               onClick={() => onTileSelect(tile)}
             />
           ))}
-        </div>
-      </div>
-
-      <div className={classes.section}>
-        <div className={classes.sectionTitle}>Special</div>
-        <div className={classes.specialRow}>
           <Tile
             code={flowerTile}
             size="small"

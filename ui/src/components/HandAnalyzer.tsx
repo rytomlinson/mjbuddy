@@ -167,6 +167,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     marginTop: theme.spacing.sm,
   },
   callableTile: {
+    position: 'relative',
     cursor: 'pointer',
     borderRadius: theme.borderRadius.sm,
     padding: '2px',
@@ -180,6 +181,22 @@ const useStyles = createUseStyles((theme: Theme) => ({
   callableTileSelected: {
     borderColor: theme.colors.primary,
     boxShadow: '0 0 8px rgba(184, 74, 74, 0.5)',
+  },
+  callableTileBadge: {
+    position: 'absolute',
+    top: '-6px',
+    right: '-6px',
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    borderRadius: '50%',
+    minWidth: '18px',
+    height: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
   },
   callableEmpty: {
     fontSize: theme.fontSizes.sm,
@@ -387,15 +404,8 @@ export function HandAnalyzer() {
   const renderCallableTiles = () => (
     <>
       <h2 className={classes.sectionTitle}>
-        <span className={classes.sectionIcon}>&#128227;</span>
-        Callable Tiles
-        {callableTiles.length > 0 && (
-          <span className={classes.callCount}>{callableTiles.length}</span>
-        )}
+        Tiles Callable When Discarded ({callableTiles.length})
       </h2>
-      <p className={classes.callableLabel}>
-        Tiles you can call if discarded:
-      </p>
       {callableTiles.length === 0 ? (
         <p className={classes.callableEmpty}>
           No tiles can be called right now. You need more matching tiles in your hand to make a call.
@@ -410,15 +420,14 @@ export function HandAnalyzer() {
               title={`${ct.calls.length} hand${ct.calls.length !== 1 ? 's' : ''} can call this`}
             >
               <Tile code={ct.tile} size="medium" />
+              <div className={classes.callableTileBadge}>{ct.calls.length}</div>
             </div>
           ))}
         </div>
       )}
-      {callableTiles.length > 0 && (
+      {selectedCallableTile && (
         <p className={classes.callableLabel} style={{ marginTop: '8px' }}>
-          {selectedCallableTile
-            ? 'Highlighted hands below show which tiles you would expose when making this call.'
-            : 'Click a tile to see which hands you can call it for.'}
+          Highlighted hands below show which tiles you would expose when making this call.
         </p>
       )}
     </>
@@ -473,13 +482,7 @@ export function HandAnalyzer() {
         {/* Recommended Hands Section */}
         <div className={classes.section}>
           <h2 className={classes.sectionTitle}>
-            <span className={classes.sectionIcon}>&#128202;</span>
-            Recommended Hands
-            {results.length > 0 && (
-              <span style={{ fontWeight: 'normal', fontSize: '14px', color: theme.colors.textMuted, marginLeft: 'auto' }}>
-                {results.length} viable hand{results.length !== 1 ? 's' : ''}
-              </span>
-            )}
+            Recommended Hands ({results.length} viable)
           </h2>
 
           {tiles.length >= 3 && (

@@ -92,12 +92,11 @@ export const analysisRouter = router({
     }),
 
   /**
-   * Check what calls are available for a discarded tile
+   * Get all callable tiles and what hands they apply to
    */
-  analyzeCall: authedProcedure
+  getCallableTiles: authedProcedure
     .input(
       z.object({
-        discardedTile: TileCodeSchema,
         playerState: PlayerHandStateSchema,
         cardYearId: z.number().optional(),
       })
@@ -108,7 +107,7 @@ export const analysisRouter = router({
       if (!cardYearId) {
         const activeYear = await getActiveCardYear();
         if (!activeYear) {
-          return { calls: [] };
+          return { callableTiles: [] };
         }
         cardYearId = activeYear.id;
       }
@@ -116,7 +115,7 @@ export const analysisRouter = router({
       // Get all hands
       const hands = await getHandsByCardYear(cardYearId);
 
-      // First analyze hand to get viable hands
+      // Analyze hand to get viable hands
       const playerState: PlayerHandState = {
         tiles: input.playerState.tiles,
         drawnTile: input.playerState.drawnTile,
@@ -125,20 +124,63 @@ export const analysisRouter = router({
 
       const viableHands = analyzeAllHands(hands, playerState, 20);
 
-      // Then analyze what we can call
-      const callAdvice = analyzeCall(input.discardedTile, viableHands, playerState);
+      // Collect all unique needed tiles across viable hands
+      const neededTilesSet = new Set<number>();
+      for (const result of viableHands) {
+        for (const tile of result.neededTiles) {
+          neededTilesSet.add(tile);
+        }
+      }
 
-      return {
-        calls: callAdvice.map((c) => ({
-          handId: c.hand.id,
-          handName: c.hand.displayName,
-          displayPattern: c.hand.displayPattern,
-          canCall: c.canCall,
-          callType: c.callType,
-          newDistance: c.newDistance,
-          points: c.hand.points,
-        })),
-      };
+      // For each needed tile, check if it's callable
+      const callableTiles: Array<{
+        tile: number;
+        calls: Array<{
+          handId: number;
+          handName: string;
+          callType: 'pung' | 'kong' | 'quint' | 'win';
+          exposedTiles: number[];
+          newDistance: number;
+          points: number;
+        }>;
+      }> = [];
+
+      for (const tile of neededTilesSet) {
+        const callAdvice = analyzeCall(tile, viableHands, playerState);
+
+        if (callAdvice.length > 0) {
+          const calls = callAdvice
+            .filter(c => c.canCall && c.callType)
+            .map(c => {
+              // Figure out which tiles would be exposed
+              // For a call, you expose the called tile plus tiles from your hand
+              const exposedTiles: number[] = [tile];
+
+              // Find how many of this tile the player has
+              const playerTileCount = playerState.tiles.filter(t => t === tile).length;
+
+              // Add player's matching tiles to exposed
+              for (let i = 0; i < playerTileCount; i++) {
+                exposedTiles.push(tile);
+              }
+
+              return {
+                handId: c.hand.id,
+                handName: c.hand.displayName,
+                callType: c.callType as 'pung' | 'kong' | 'quint' | 'win',
+                exposedTiles,
+                newDistance: c.newDistance,
+                points: c.hand.points,
+              };
+            });
+
+          if (calls.length > 0) {
+            callableTiles.push({ tile, calls });
+          }
+        }
+      }
+
+      return { callableTiles };
     }),
 
   /**

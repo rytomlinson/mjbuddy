@@ -10,10 +10,15 @@ const useStyles = createUseStyles((theme: Theme) => ({
     padding: theme.spacing.md,
     border: `1px solid ${theme.colors.border}`,
     marginBottom: theme.spacing.sm,
-    transition: 'border-color 0.2s',
+    transition: 'all 0.2s',
     '&:hover': {
       borderColor: theme.colors.primary,
     },
+  },
+  cardHighlighted: {
+    borderColor: theme.colors.primary,
+    backgroundColor: 'rgba(255, 107, 0, 0.1)',
+    boxShadow: '0 0 12px rgba(255, 107, 0, 0.3)',
   },
   cardTop: {
     display: 'flex',
@@ -159,6 +164,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
     borderRadius: '50%',
     backgroundColor: '#FF5252',
   },
+  legendDotExpose: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#FF6B00',
+  },
   legendText: {
     color: theme.colors.textMuted,
   },
@@ -200,6 +211,36 @@ const useStyles = createUseStyles((theme: Theme) => ({
   indicatorNeed: {
     backgroundColor: '#FF5252',
     color: 'white',
+  },
+  tileExposed: {
+    boxShadow: '0 0 0 3px #FF6B00',
+    borderRadius: theme.borderRadius.sm,
+    animation: '$pulse 1.5s ease-in-out infinite',
+  },
+  indicatorExposed: {
+    backgroundColor: '#FF6B00',
+    color: 'white',
+  },
+  callBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    borderRadius: theme.borderRadius.sm,
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
+    marginLeft: theme.spacing.sm,
+    textTransform: 'uppercase',
+  },
+  '@keyframes pulse': {
+    '0%, 100%': {
+      boxShadow: '0 0 0 3px #FF6B00',
+    },
+    '50%': {
+      boxShadow: '0 0 0 5px rgba(255, 107, 0, 0.5)',
+    },
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -257,13 +298,22 @@ export interface ViableHandData {
   viabilityScore: number;
 }
 
+export interface CallHighlight {
+  handId: number;
+  callType: string;
+  exposedTiles: TileCode[];
+}
+
 interface ViableHandCardProps {
   data: ViableHandData;
   rank: number;
+  callHighlight?: CallHighlight;
 }
 
-export function ViableHandCard({ data, rank }: ViableHandCardProps) {
+export function ViableHandCard({ data, rank, callHighlight }: ViableHandCardProps) {
   const classes = useStyles();
+
+  const isHighlighted = callHighlight?.handId === data.handId;
 
   const getDistanceClass = () => {
     if (data.distance <= 2) return classes.distanceGood;
@@ -278,11 +328,16 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
   };
 
   return (
-    <div className={classes.card}>
+    <div className={`${classes.card} ${isHighlighted ? classes.cardHighlighted : ''}`}>
       <div className={classes.cardTop}>
         <div className={classes.handInfo}>
           <h3 className={classes.handName}>
             #{rank} {data.handName}
+            {isHighlighted && callHighlight && (
+              <span className={classes.callBadge}>
+                {callHighlight.callType}
+              </span>
+            )}
           </h3>
           <p className={classes.pattern}>{data.displayPattern}</p>
         </div>
@@ -328,12 +383,20 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
                 <div className={classes.legendDotNeed} />
                 <span className={classes.legendText}>Need</span>
               </div>
+              {isHighlighted && (
+                <div className={classes.legendItem}>
+                  <div className={classes.legendDotExpose} />
+                  <span className={classes.legendText}>Expose</span>
+                </div>
+              )}
             </div>
           </div>
           <div className={classes.allTiles}>
             {(() => {
               // Create a copy of needed tiles to track which are still needed
               const neededCopy = [...data.neededTiles];
+              // Create a copy of exposed tiles to track which ones to highlight
+              const exposedCopy = isHighlighted && callHighlight ? [...callHighlight.exposedTiles] : [];
 
               return data.fullHandTiles.map((tile, i) => {
                 // Check if this tile is in the needed list
@@ -345,13 +408,31 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
                   neededCopy.splice(neededIndex, 1);
                 }
 
+                // Check if this tile would be exposed in a call
+                const exposedIndex = exposedCopy.indexOf(tile);
+                const isExposed = exposedIndex !== -1;
+                if (isExposed) {
+                  exposedCopy.splice(exposedIndex, 1);
+                }
+
+                // Determine the tile class
+                let tileClass = isNeeded ? classes.tileNeed : classes.tileHave;
+                let indicatorClass = isNeeded ? classes.indicatorNeed : classes.indicatorHave;
+                let indicatorText = isNeeded ? '?' : '\u2713';
+
+                if (isExposed) {
+                  tileClass = classes.tileExposed;
+                  indicatorClass = classes.indicatorExposed;
+                  indicatorText = '\u2191'; // Up arrow for "expose"
+                }
+
                 return (
                   <div key={i} className={classes.tileWrapper}>
-                    <div className={isNeeded ? classes.tileNeed : classes.tileHave}>
+                    <div className={tileClass}>
                       <Tile code={tile} size="small" />
                     </div>
-                    <div className={`${classes.tileIndicator} ${isNeeded ? classes.indicatorNeed : classes.indicatorHave}`}>
-                      {isNeeded ? '?' : '\u2713'}
+                    <div className={`${classes.tileIndicator} ${indicatorClass}`}>
+                      {indicatorText}
                     </div>
                   </div>
                 );

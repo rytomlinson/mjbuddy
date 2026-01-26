@@ -179,6 +179,40 @@ const useStyles = createUseStyles((theme: Theme) => ({
   '@media (max-width: 900px)': {
     analyzer: {
       gridTemplateColumns: '1fr',
+      padding: theme.spacing.md,
+      gap: theme.spacing.md,
+    },
+    title: {
+      fontSize: theme.fontSizes.xl,
+    },
+    subtitle: {
+      fontSize: theme.fontSizes.sm,
+    },
+    headerRow: {
+      flexDirection: 'column',
+      gap: theme.spacing.sm,
+    },
+    resetButton: {
+      alignSelf: 'flex-start',
+    },
+  },
+  '@media (max-width: 480px)': {
+    analyzer: {
+      padding: theme.spacing.sm,
+    },
+    section: {
+      padding: theme.spacing.sm,
+    },
+    title: {
+      fontSize: theme.fontSizes.lg,
+    },
+    tab: {
+      padding: theme.spacing.sm,
+      fontSize: theme.fontSizes.sm,
+    },
+    modeButton: {
+      padding: theme.spacing.xs,
+      fontSize: theme.fontSizes.sm,
     },
   },
 }));

@@ -128,6 +128,35 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontSize: theme.fontSizes.lg,
     fontWeight: 'bold',
   },
+  // Mobile responsive
+  '@media (max-width: 480px)': {
+    section: {
+      padding: theme.spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: theme.fontSizes.md,
+    },
+    tileGrid: {
+      gap: theme.spacing.xs,
+    },
+    tileRow: {
+      gap: '2px',
+    },
+    rowLabel: {
+      minWidth: '45px',
+      fontSize: '11px',
+    },
+    selectedDiscard: {
+      padding: theme.spacing.xs,
+      gap: theme.spacing.sm,
+    },
+    winAlert: {
+      padding: theme.spacing.sm,
+    },
+    winAlertText: {
+      fontSize: theme.fontSizes.md,
+    },
+  },
 }));
 
 export function CallAdvisor() {

@@ -77,6 +77,29 @@ const useStyles = createUseStyles((theme: Theme) => ({
       backgroundColor: 'rgba(255,82,82,0.1)',
     },
   },
+  // Mobile responsive
+  '@media (max-width: 480px)': {
+    tiles: {
+      minHeight: '50px',
+      padding: theme.spacing.xs,
+    },
+    mainTiles: {
+      gap: '2px',
+    },
+    tilesWithDrawn: {
+      gap: '2px',
+      flexWrap: 'wrap',
+    },
+    drawnSeparator: {
+      height: '40px',
+      marginLeft: theme.spacing.xs,
+      marginRight: theme.spacing.xs,
+    },
+    empty: {
+      fontSize: theme.fontSizes.sm,
+      padding: theme.spacing.sm,
+    },
+  },
 }));
 
 interface TileRackProps {

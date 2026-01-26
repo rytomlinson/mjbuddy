@@ -38,6 +38,29 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     gap: theme.spacing.sm,
   },
+  // Mobile responsive
+  '@media (max-width: 480px)': {
+    picker: {
+      padding: theme.spacing.sm,
+    },
+    section: {
+      marginBottom: theme.spacing.sm,
+    },
+    sectionTitle: {
+      fontSize: '10px',
+      marginBottom: theme.spacing.xs,
+    },
+    tileRow: {
+      gap: '2px',
+      marginBottom: '2px',
+    },
+    honorRow: {
+      gap: theme.spacing.xs,
+    },
+    specialRow: {
+      gap: theme.spacing.xs,
+    },
+  },
 }));
 
 interface TilePickerProps {

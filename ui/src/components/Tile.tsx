@@ -102,6 +102,27 @@ const useStyles = createUseStyles((theme: Theme) => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // Mobile responsive
+  '@media (max-width: 480px)': {
+    tile: {
+      width: '32px',
+      height: '42px',
+      fontSize: theme.fontSizes.md,
+    },
+    tileSmall: {
+      width: '26px',
+      height: '34px',
+      fontSize: theme.fontSizes.sm,
+    },
+    tileLarge: {
+      width: '40px',
+      height: '52px',
+      fontSize: theme.fontSizes.lg,
+    },
+    symbol: {
+      fontSize: '0.6em',
+    },
+  },
 }));
 
 interface TileProps {

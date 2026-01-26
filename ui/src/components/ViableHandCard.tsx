@@ -137,6 +137,35 @@ const useStyles = createUseStyles((theme: Theme) => ({
     gap: theme.spacing.xs,
     flexWrap: 'wrap',
   },
+  // Mobile responsive
+  '@media (max-width: 480px)': {
+    card: {
+      padding: theme.spacing.sm,
+    },
+    cardTop: {
+      flexDirection: 'column',
+      gap: theme.spacing.sm,
+    },
+    stats: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      gap: theme.spacing.sm,
+    },
+    handName: {
+      fontSize: theme.fontSizes.sm,
+    },
+    pattern: {
+      fontSize: '11px',
+    },
+    distanceValue: {
+      fontSize: theme.fontSizes.md,
+      padding: `2px ${theme.spacing.xs}`,
+    },
+    neededTiles: {
+      gap: '2px',
+    },
+  },
 }));
 
 export interface ViableHandData {

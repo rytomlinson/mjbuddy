@@ -122,20 +122,84 @@ const useStyles = createUseStyles((theme: Theme) => ({
     backgroundColor: 'rgba(142, 36, 170, 0.2)',
     color: '#CE93D8',
   },
-  neededSection: {
+  tilesSection: {
     marginTop: theme.spacing.sm,
     paddingTop: theme.spacing.sm,
     borderTop: `1px solid ${theme.colors.border}`,
   },
-  neededLabel: {
+  tilesHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  tilesLabel: {
     fontSize: theme.fontSizes.sm,
     color: theme.colors.textMuted,
-    marginBottom: theme.spacing.xs,
   },
-  neededTiles: {
+  legend: {
     display: 'flex',
+    gap: theme.spacing.md,
+    fontSize: theme.fontSizes.sm,
+  },
+  legendItem: {
+    display: 'flex',
+    alignItems: 'center',
     gap: theme.spacing.xs,
+  },
+  legendDotHave: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#4CAF50',
+  },
+  legendDotNeed: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: '#FF5252',
+  },
+  legendText: {
+    color: theme.colors.textMuted,
+  },
+  allTiles: {
+    display: 'flex',
+    gap: '3px',
     flexWrap: 'wrap',
+  },
+  tileWrapper: {
+    position: 'relative',
+  },
+  tileHave: {
+    opacity: 1,
+    boxShadow: '0 0 0 2px #4CAF50',
+    borderRadius: theme.borderRadius.sm,
+  },
+  tileNeed: {
+    opacity: 0.6,
+    boxShadow: '0 0 0 2px #FF5252',
+    borderRadius: theme.borderRadius.sm,
+  },
+  tileIndicator: {
+    position: 'absolute',
+    top: '-4px',
+    right: '-4px',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '10px',
+    fontWeight: 'bold',
+  },
+  indicatorHave: {
+    backgroundColor: '#4CAF50',
+    color: 'white',
+  },
+  indicatorNeed: {
+    backgroundColor: '#FF5252',
+    color: 'white',
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -162,8 +226,19 @@ const useStyles = createUseStyles((theme: Theme) => ({
       fontSize: theme.fontSizes.md,
       padding: `2px ${theme.spacing.xs}`,
     },
-    neededTiles: {
+    allTiles: {
       gap: '2px',
+    },
+    legend: {
+      gap: theme.spacing.sm,
+      fontSize: '10px',
+    },
+    tileIndicator: {
+      width: '12px',
+      height: '12px',
+      fontSize: '8px',
+      top: '-3px',
+      right: '-3px',
     },
   },
 }));
@@ -176,6 +251,7 @@ export interface ViableHandData {
   points: number;
   isConcealed: boolean;
   neededTiles: TileCode[];
+  fullHandTiles: TileCode[];
   jokersUsable: number;
   probability: number;
   viabilityScore: number;
@@ -239,18 +315,48 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
         )}
       </div>
 
-      {data.neededTiles.length > 0 && (
-        <div className={classes.neededSection}>
-          <div className={classes.neededLabel}>Need:</div>
-          <div className={classes.neededTiles}>
-            {data.neededTiles.slice(0, 8).map((tile, i) => (
-              <Tile key={i} code={tile} size="small" />
-            ))}
-            {data.neededTiles.length > 8 && (
-              <span style={{ alignSelf: 'center', color: '#999' }}>
-                +{data.neededTiles.length - 8} more
-              </span>
-            )}
+      {data.fullHandTiles.length > 0 && (
+        <div className={classes.tilesSection}>
+          <div className={classes.tilesHeader}>
+            <span className={classes.tilesLabel}>Complete hand:</span>
+            <div className={classes.legend}>
+              <div className={classes.legendItem}>
+                <div className={classes.legendDotHave} />
+                <span className={classes.legendText}>Have</span>
+              </div>
+              <div className={classes.legendItem}>
+                <div className={classes.legendDotNeed} />
+                <span className={classes.legendText}>Need</span>
+              </div>
+            </div>
+          </div>
+          <div className={classes.allTiles}>
+            {(() => {
+              // Create a copy of needed tiles to track which are still needed
+              const neededCopy = [...data.neededTiles];
+
+              return data.fullHandTiles.map((tile, i) => {
+                // Check if this tile is in the needed list
+                const neededIndex = neededCopy.indexOf(tile);
+                const isNeeded = neededIndex !== -1;
+
+                // Remove from needed copy so we don't double-count
+                if (isNeeded) {
+                  neededCopy.splice(neededIndex, 1);
+                }
+
+                return (
+                  <div key={i} className={classes.tileWrapper}>
+                    <div className={isNeeded ? classes.tileNeed : classes.tileHave}>
+                      <Tile code={tile} size="small" />
+                    </div>
+                    <div className={`${classes.tileIndicator} ${isNeeded ? classes.indicatorNeed : classes.indicatorHave}`}>
+                      {isNeeded ? '?' : '\u2713'}
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       )}

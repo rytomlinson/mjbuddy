@@ -61,20 +61,33 @@ export const analysisRouter = router({
 
       // Map results to serializable format
       return {
-        results: results.map((r) => ({
-          handId: r.hand.id,
-          handName: r.hand.displayName,
-          displayPattern: r.hand.displayPattern,
-          category: r.hand.categoryId,
-          distance: r.distance,
-          points: r.hand.points,
-          isConcealed: r.hand.isConcealed,
-          neededTiles: r.neededTiles,
-          jokersUsable: r.jokersUsable,
-          matchedGroups: r.matchedGroups,
-          probability: r.probability,
-          viabilityScore: r.viabilityScore,
-        })),
+        results: results.map((r) => {
+          // Build full hand tiles from best variation
+          const fullHandTiles: number[] = [];
+          if (r.bestVariation) {
+            for (const group of r.bestVariation.groups) {
+              for (let i = 0; i < group.count; i++) {
+                fullHandTiles.push(group.tile);
+              }
+            }
+          }
+
+          return {
+            handId: r.hand.id,
+            handName: r.hand.displayName,
+            displayPattern: r.hand.displayPattern,
+            category: r.hand.categoryId,
+            distance: r.distance,
+            points: r.hand.points,
+            isConcealed: r.hand.isConcealed,
+            neededTiles: r.neededTiles,
+            fullHandTiles,
+            jokersUsable: r.jokersUsable,
+            matchedGroups: r.matchedGroups,
+            probability: r.probability,
+            viabilityScore: r.viabilityScore,
+          };
+        }),
         cardYearId,
       };
     }),

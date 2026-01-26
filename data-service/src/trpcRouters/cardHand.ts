@@ -1,0 +1,81 @@
+import { z } from 'zod';
+import { router, authedProcedure } from '../trpc.js';
+import { CreateCardHandSchema, UpdateCardHandSchema, CreateHandCategorySchema } from 'common';
+import {
+  getHandsByCategory,
+  getHandsByCardYear,
+  getCardHandById,
+  createCardHand,
+  updateCardHand,
+  deleteCardHand,
+} from '../models/cardHand.js';
+import {
+  getCategoriesByCardYear,
+  getHandCategoryById,
+  createHandCategory,
+  deleteHandCategory,
+} from '../models/handCategory.js';
+
+export const cardHandRouter = router({
+  // Category operations
+  listCategories: authedProcedure
+    .input(z.object({ cardYearId: z.number() }))
+    .query(async ({ input }) => {
+      return getCategoriesByCardYear(input.cardYearId);
+    }),
+
+  getCategoryById: authedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      return getHandCategoryById(input.id);
+    }),
+
+  createCategory: authedProcedure
+    .input(CreateHandCategorySchema)
+    .mutation(async ({ input }) => {
+      return createHandCategory(input);
+    }),
+
+  deleteCategory: authedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return deleteHandCategory(input.id);
+    }),
+
+  // Hand operations
+  listByCategory: authedProcedure
+    .input(z.object({ categoryId: z.number() }))
+    .query(async ({ input }) => {
+      return getHandsByCategory(input.categoryId);
+    }),
+
+  listByCardYear: authedProcedure
+    .input(z.object({ cardYearId: z.number() }))
+    .query(async ({ input }) => {
+      return getHandsByCardYear(input.cardYearId);
+    }),
+
+  getById: authedProcedure
+    .input(z.object({ id: z.number() }))
+    .query(async ({ input }) => {
+      return getCardHandById(input.id);
+    }),
+
+  create: authedProcedure
+    .input(CreateCardHandSchema)
+    .mutation(async ({ input }) => {
+      return createCardHand(input);
+    }),
+
+  update: authedProcedure
+    .input(UpdateCardHandSchema)
+    .mutation(async ({ input }) => {
+      return updateCardHand(input);
+    }),
+
+  delete: authedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return deleteCardHand(input.id);
+    }),
+});

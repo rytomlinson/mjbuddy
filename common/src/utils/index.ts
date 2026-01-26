@@ -1,3 +1,7 @@
+export * from './tileUtils.js';
+export * from './patternUtils.js';
+export * from './analysisEngine.js';
+
 export function formatDate(date: Date): string {
   return date.toISOString();
 }

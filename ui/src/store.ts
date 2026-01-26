@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { itemReducer } from './slices/itemSlice';
+import { handReducer } from './slices/handSlice';
 
 export const store = configureStore({
   reducer: {
     items: itemReducer,
+    hand: handReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

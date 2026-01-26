@@ -5,10 +5,10 @@ import { ThemeProvider } from 'react-jss';
 import { store } from './store';
 import { trpc, createTrpcClient } from './trpc';
 import { theme } from './theme';
-import { ItemList } from './components';
+import { HandAnalyzer } from './components';
 
 function AppContent() {
-  return <ItemList />;
+  return <HandAnalyzer />;
 }
 
 export function App() {

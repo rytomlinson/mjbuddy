@@ -305,9 +305,12 @@ export function HandAnalyzer() {
 
   const handleTileClick = (_tile: TileCode, index: number) => {
     if (index === -1) {
+      // Discarding the drawn tile
       dispatch(setDrawnTile(null));
     } else {
+      // Discarding from hand - also clear the drawn tile (completes the turn)
       dispatch(removeTile(index));
+      dispatch(setDrawnTile(null));
     }
   };
 
@@ -416,13 +419,13 @@ export function HandAnalyzer() {
           drawnTile={drawnTile ?? undefined}
           onTileClick={handleTileClick}
           onClear={handleClear}
+          mode={inputMode}
+          onModeChange={setInputMode}
         />
 
         <TilePicker
           onTileSelect={handleTileSelect}
           disabledTiles={disabledTiles}
-          inputMode={inputMode}
-          onModeChange={setInputMode}
         />
 
         <div className={`${classes.tip} ${classes.hideOnMobile}`}>

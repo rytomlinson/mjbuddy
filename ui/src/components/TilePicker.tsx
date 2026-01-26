@@ -35,32 +35,11 @@ const useStyles = createUseStyles((theme: Theme) => ({
     gap: theme.spacing.xs,
     flexWrap: 'wrap',
   },
-  modeToggle: {
-    display: 'flex',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.md,
-  },
-  modeButton: {
-    flex: 1,
-    padding: theme.spacing.sm,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    cursor: 'pointer',
-    fontSize: theme.fontSizes.md,
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: theme.colors.surfaceHover,
-    },
-  },
-  modeButtonActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-    color: 'white',
-    '&:hover': {
-      backgroundColor: theme.colors.primaryHover,
-    },
+  header: {
+    color: theme.colors.text,
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 600,
+    marginBottom: theme.spacing.sm,
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -81,24 +60,13 @@ const useStyles = createUseStyles((theme: Theme) => ({
     honorRow: {
       gap: '2px',
     },
-    modeToggle: {
-      gap: theme.spacing.xs,
-      marginBottom: theme.spacing.sm,
-    },
-    modeButton: {
-      padding: theme.spacing.xs,
-      fontSize: theme.fontSizes.sm,
-    },
   },
 }));
-
-type InputMode = 'hand' | 'drawn';
 
 interface TilePickerProps {
   onTileSelect: (tile: TileCode) => void;
   disabledTiles?: Set<TileCode>;
   selectedTiles?: TileCode[];
-  inputMode?: InputMode;
   onModeChange?: (mode: InputMode) => void;
 }
 
@@ -106,8 +74,6 @@ export function TilePicker({
   onTileSelect,
   disabledTiles,
   selectedTiles = [],
-  inputMode = 'hand',
-  onModeChange,
 }: TilePickerProps) {
   const classes = useStyles();
 
@@ -156,22 +122,7 @@ export function TilePicker({
 
   return (
     <div className={classes.picker}>
-      {onModeChange && (
-        <div className={classes.modeToggle}>
-          <button
-            className={`${classes.modeButton} ${inputMode === 'hand' ? classes.modeButtonActive : ''}`}
-            onClick={() => onModeChange('hand')}
-          >
-            Add to Hand
-          </button>
-          <button
-            className={`${classes.modeButton} ${inputMode === 'drawn' ? classes.modeButtonActive : ''}`}
-            onClick={() => onModeChange('drawn')}
-          >
-            Set Drawn Tile
-          </button>
-        </div>
-      )}
+      <div className={classes.header}>Inventory</div>
       {renderSuitRow(TileType.DOT, 'Dots')}
       {renderSuitRow(TileType.BAM, 'Bams')}
       {renderSuitRow(TileType.CRAK, 'Craks')}

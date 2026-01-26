@@ -148,6 +148,36 @@ const useStyles = createUseStyles((theme: Theme) => ({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  headerControls: {
+    display: 'flex',
+    gap: theme.spacing.sm,
+    alignItems: 'center',
+  },
+  yearSelector: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+  },
+  yearLabel: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textSecondary,
+  },
+  yearSelect: {
+    backgroundColor: theme.colors.surface,
+    color: theme.colors.text,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.borderRadius.sm,
+    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    fontSize: theme.fontSizes.sm,
+    cursor: 'pointer',
+    '&:hover': {
+      borderColor: theme.colors.primary,
+    },
+    '&:focus': {
+      outline: 'none',
+      borderColor: theme.colors.primary,
+    },
+  },
   tabs: {
     display: 'flex',
     borderBottom: `1px solid ${theme.colors.border}`,
@@ -231,6 +261,10 @@ export function HandAnalyzer() {
 
   const [inputMode, setInputMode] = useState<InputMode>('hand');
   const [activeTab, setActiveTab] = useState<ActiveTab>('analysis');
+  const [selectedYearId, setSelectedYearId] = useState<number | undefined>(undefined);
+
+  // Query for card years
+  const { data: cardYears } = trpc.cardYear.list.useQuery();
 
   // Query for analysis
   const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
@@ -240,6 +274,7 @@ export function HandAnalyzer() {
         drawnTile: drawnTile ?? undefined,
         exposedMelds,
       },
+      cardYearId: selectedYearId,
       maxResults: 10,
     },
     {
@@ -285,9 +320,26 @@ export function HandAnalyzer() {
             <h1 className={classes.title}>Mah Jongg Buddy</h1>
             <p className={classes.subtitle}>Enter your tiles to find the best hands</p>
           </div>
-          <button className={classes.resetButton} onClick={handleReset}>
-            Reset All
-          </button>
+          <div className={classes.headerControls}>
+            <div className={classes.yearSelector}>
+              <span className={classes.yearLabel}>Card:</span>
+              <select
+                className={classes.yearSelect}
+                value={selectedYearId ?? ''}
+                onChange={(e) => setSelectedYearId(e.target.value ? Number(e.target.value) : undefined)}
+              >
+                <option value="">Active Year</option>
+                {cardYears?.map((year) => (
+                  <option key={year.id} value={year.id}>
+                    {year.year} {year.isActive ? '(Active)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button className={classes.resetButton} onClick={handleReset}>
+              Reset All
+            </button>
+          </div>
         </div>
 
         <TileRack
@@ -373,7 +425,7 @@ export function HandAnalyzer() {
             )}
           </div>
         ) : (
-          <CallAdvisor />
+          <CallAdvisor cardYearId={selectedYearId} />
         )}
       </div>
     </div>

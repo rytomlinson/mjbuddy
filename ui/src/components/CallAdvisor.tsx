@@ -159,7 +159,11 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
 }));
 
-export function CallAdvisor() {
+interface CallAdvisorProps {
+  cardYearId?: number;
+}
+
+export function CallAdvisor({ cardYearId }: CallAdvisorProps) {
   const classes = useStyles();
   const [discardedTile, setDiscardedTile] = useState<TileCode | null>(null);
 
@@ -176,6 +180,7 @@ export function CallAdvisor() {
         drawnTile: drawnTile ?? undefined,
         exposedMelds,
       },
+      cardYearId,
     },
     {
       enabled: discardedTile !== null && tiles.length >= 3,

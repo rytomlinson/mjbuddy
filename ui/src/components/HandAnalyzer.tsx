@@ -22,7 +22,7 @@ import { theme, type Theme } from '../theme';
 const useStyles = createUseStyles((theme: Theme) => ({
   analyzer: {
     display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
+    gridTemplateColumns: 'auto 1fr',
     gap: theme.spacing.lg,
     padding: theme.spacing.lg,
     maxWidth: '1200px',
@@ -32,6 +32,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.lg,
+    alignItems: 'flex-start',
   },
   rightPanel: {
     display: 'flex',
@@ -65,33 +66,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   sectionIcon: {
     color: theme.colors.primary,
-  },
-  modeToggle: {
-    display: 'flex',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.md,
-  },
-  modeButton: {
-    flex: 1,
-    padding: theme.spacing.sm,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    cursor: 'pointer',
-    fontSize: theme.fontSizes.md,
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: theme.colors.surfaceHover,
-    },
-  },
-  modeButtonActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-    color: theme.colors.text,
-    '&:hover': {
-      backgroundColor: theme.colors.primaryHover,
-    },
   },
   placeholder: {
     textAlign: 'center',
@@ -248,10 +222,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
     section: {
       padding: theme.spacing.sm,
-    },
-    modeButton: {
-      padding: theme.spacing.xs,
-      fontSize: theme.fontSizes.sm,
     },
     callableSection: {
       padding: theme.spacing.sm,
@@ -448,23 +418,12 @@ export function HandAnalyzer() {
           onClear={handleClear}
         />
 
-        <div>
-          <div className={classes.modeToggle}>
-            <button
-              className={`${classes.modeButton} ${inputMode === 'hand' ? classes.modeButtonActive : ''}`}
-              onClick={() => setInputMode('hand')}
-            >
-              Add to Hand
-            </button>
-            <button
-              className={`${classes.modeButton} ${inputMode === 'drawn' ? classes.modeButtonActive : ''}`}
-              onClick={() => setInputMode('drawn')}
-            >
-              Set Drawn Tile
-            </button>
-          </div>
-          <TilePicker onTileSelect={handleTileSelect} disabledTiles={disabledTiles} />
-        </div>
+        <TilePicker
+          onTileSelect={handleTileSelect}
+          disabledTiles={disabledTiles}
+          inputMode={inputMode}
+          onModeChange={setInputMode}
+        />
 
         <div className={`${classes.tip} ${classes.hideOnMobile}`}>
           <strong>Tip:</strong> Click tiles in your hand to remove them. The analysis updates automatically as you add tiles.

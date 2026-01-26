@@ -22,7 +22,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     gap: theme.spacing.xs,
   },
   tiles: {
-    display: 'flex',
+    display: 'inline-flex',
     flexDirection: 'column',
     gap: theme.spacing.xs,
     minHeight: '60px',
@@ -36,39 +36,55 @@ const useStyles = createUseStyles((theme: Theme) => ({
     gap: theme.spacing.xs,
     flexWrap: 'wrap',
   },
-  tilesWithDrawn: {
-    display: 'flex',
-    gap: theme.spacing.xs,
-    alignItems: 'center',
-  },
   mainTiles: {
     display: 'flex',
     gap: theme.spacing.xs,
     flexWrap: 'wrap',
+    // 7 tiles per row: 7 * 40px + 6 * 4px gaps = 304px
+    maxWidth: '304px',
+    // Fixed height for 2 rows: 2 * 52px + 4px gap + 16px for drawn badge = 124px
+    minHeight: '124px',
+    alignContent: 'flex-start',
+    paddingBottom: '16px',
   },
-  drawnSeparator: {
-    width: '2px',
-    height: '50px',
-    backgroundColor: theme.colors.primary,
-    marginLeft: theme.spacing.sm,
-    marginRight: theme.spacing.sm,
-  },
-  drawnTile: {
+  drawnPlaceholder: {
+    width: '40px',
+    height: '52px',
+    border: `2px dashed ${theme.colors.primary}`,
+    borderRadius: theme.borderRadius.sm,
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
-    gap: theme.spacing.xs,
-  },
-  drawnLabel: {
-    fontSize: theme.fontSizes.sm,
+    justifyContent: 'center',
     color: theme.colors.primary,
+    fontSize: '8px',
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    backgroundColor: 'rgba(184, 74, 74, 0.05)',
+  },
+  drawnTileWrapper: {
+    position: 'relative',
+  },
+  drawnBadge: {
+    position: 'absolute',
+    bottom: '-14px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontSize: '9px',
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    whiteSpace: 'nowrap',
   },
   empty: {
     color: theme.colors.textMuted,
     fontSize: theme.fontSizes.md,
     padding: theme.spacing.md,
     textAlign: 'center',
-    width: '100%',
+    width: '304px',
+    minHeight: '124px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   clearButton: {
     backgroundColor: 'transparent',
@@ -91,19 +107,22 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
     mainTiles: {
       gap: '2px',
+      // 7 tiles per row on mobile: 7 * 32px + 6 * 2px = 236px
+      maxWidth: '236px',
+      // 2 rows on mobile: 2 * 42px + 2px gap + 14px for badge = 100px
+      minHeight: '100px',
+      paddingBottom: '14px',
     },
-    tilesWithDrawn: {
-      gap: '2px',
-      flexWrap: 'wrap',
-    },
-    drawnSeparator: {
-      height: '40px',
-      marginLeft: theme.spacing.xs,
-      marginRight: theme.spacing.xs,
+    drawnPlaceholder: {
+      width: '32px',
+      height: '42px',
+      fontSize: '6px',
     },
     empty: {
       fontSize: theme.fontSizes.sm,
       padding: theme.spacing.sm,
+      width: '236px',
+      minHeight: '100px',
     },
   },
 }));
@@ -148,27 +167,27 @@ export function TileRack({
         {displayTiles.length === 0 && !drawnTile ? (
           <div className={classes.empty}>Click tiles below to add to your hand</div>
         ) : (
-          <div className={classes.tilesWithDrawn}>
-            <div className={classes.mainTiles}>
-              {displayTiles.map((tile, index) => (
-                <Tile
-                  key={`${tile}-${index}`}
-                  code={tile}
-                  onClick={onTileClick ? () => onTileClick(tile, index) : undefined}
-                />
-              ))}
-            </div>
+          <div className={classes.mainTiles}>
+            {displayTiles.map((tile, index) => (
+              <Tile
+                key={`${tile}-${index}`}
+                code={tile}
+                onClick={onTileClick ? () => onTileClick(tile, index) : undefined}
+              />
+            ))}
+            {/* Show drawn tile placeholder when hand is full but no drawn tile */}
+            {tiles.length >= maxTiles && drawnTile === undefined && (
+              <div className={classes.drawnPlaceholder}>Drawn</div>
+            )}
+            {/* Show drawn tile when present */}
             {drawnTile !== undefined && (
-              <>
-                <div className={classes.drawnSeparator} />
-                <div className={classes.drawnTile}>
-                  <Tile
-                    code={drawnTile}
-                    onClick={onTileClick ? () => onTileClick(drawnTile, -1) : undefined}
-                  />
-                  <span className={classes.drawnLabel}>Drawn</span>
-                </div>
-              </>
+              <div className={classes.drawnTileWrapper}>
+                <Tile
+                  code={drawnTile}
+                  onClick={onTileClick ? () => onTileClick(drawnTile, -1) : undefined}
+                />
+                <span className={classes.drawnBadge}>Drawn</span>
+              </div>
             )}
           </div>
         )}

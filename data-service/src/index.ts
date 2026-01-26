@@ -3,7 +3,7 @@ import { resolve } from 'path';
 import express from 'express';
 import cors from 'cors';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { initDb } from 'common';
+import { initDb } from '../../common/src/db.js';
 import { appRouter } from './trpcRouters/index.js';
 import type { Context } from './trpc.js';
 

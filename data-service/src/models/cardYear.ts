@@ -1,4 +1,4 @@
-import { get, getOne, query } from 'common';
+import { get, getOne, query } from '../../../common/src/db.js';
 import type { CardYear, CreateCardYear, UpdateCardYear } from 'common';
 
 interface CardYearRow {

@@ -120,6 +120,33 @@ const useStyles = createUseStyles((theme: Theme) => ({
     maxHeight: '600px',
     overflowY: 'auto',
   },
+  adviceBox: {
+    backgroundColor: 'rgba(255, 107, 0, 0.1)',
+    borderRadius: theme.borderRadius.sm,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    borderLeft: `3px solid ${theme.colors.primary}`,
+  },
+  adviceLabel: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.primary,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.xs,
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+  },
+  adviceText: {
+    fontSize: theme.fontSizes.md,
+    color: theme.colors.text,
+    lineHeight: 1.5,
+    margin: 0,
+  },
+  adviceLoading: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textMuted,
+    fontStyle: 'italic',
+  },
   loading: {
     textAlign: 'center',
     padding: theme.spacing.lg,
@@ -283,6 +310,23 @@ export function HandAnalyzer() {
     }
   );
 
+  // Query for strategic advice
+  const { data: adviceData, isLoading: adviceLoading } = trpc.analysis.getAdvice.useQuery(
+    {
+      playerState: {
+        tiles,
+        drawnTile: drawnTile ?? undefined,
+        exposedMelds,
+      },
+      cardYearId: selectedYearId,
+    },
+    {
+      enabled: tiles.length >= 3,
+      refetchOnWindowFocus: false,
+      staleTime: 30000, // Don't refetch advice too frequently
+    }
+  );
+
   const handleTileSelect = (tile: TileCode) => {
     if (inputMode === 'hand') {
       if (!isHandFull) {
@@ -399,6 +443,19 @@ export function HandAnalyzer() {
                 </span>
               )}
             </h2>
+
+            {tiles.length >= 3 && (
+              <div className={classes.adviceBox}>
+                <div className={classes.adviceLabel}>
+                  <span>&#128161;</span> Strategy
+                </div>
+                {adviceLoading ? (
+                  <p className={classes.adviceLoading}>Analyzing your hand...</p>
+                ) : (
+                  <p className={classes.adviceText}>{adviceData?.advice}</p>
+                )}
+              </div>
+            )}
 
             {tiles.length < 3 ? (
               <div className={classes.placeholder}>

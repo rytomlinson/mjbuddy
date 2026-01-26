@@ -6,11 +6,10 @@ import {
   analyzeAllHands,
   analyzeCall,
   PlayerHandState,
-  HandAnalysisResult,
-  CallAdvice,
 } from 'common';
 import { getHandsByCardYear } from '../models/cardHand.js';
 import { getActiveCardYear } from '../models/cardYear.js';
+import { generateStrategyAdvice } from '../llm.js';
 
 const ExposedMeldSchema = z.object({
   type: z.enum(['pung', 'kong', 'quint', 'sextet']),
@@ -140,5 +139,53 @@ export const analysisRouter = router({
           points: c.hand.points,
         })),
       };
+    }),
+
+  /**
+   * Get strategic advice from LLM based on current hand analysis
+   */
+  getAdvice: authedProcedure
+    .input(
+      z.object({
+        playerState: PlayerHandStateSchema,
+        cardYearId: z.number().optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      // Get card year
+      let cardYearId = input.cardYearId;
+      if (!cardYearId) {
+        const activeYear = await getActiveCardYear();
+        if (!activeYear) {
+          return { advice: "Select a card year to get advice." };
+        }
+        cardYearId = activeYear.id;
+      }
+
+      // Get hands and analyze
+      const hands = await getHandsByCardYear(cardYearId);
+      const playerState: PlayerHandState = {
+        tiles: input.playerState.tiles,
+        drawnTile: input.playerState.drawnTile,
+        exposedMelds: input.playerState.exposedMelds,
+      };
+
+      const results = analyzeAllHands(hands, playerState, 10);
+
+      // Generate advice
+      const advice = await generateStrategyAdvice({
+        tileCount: input.playerState.tiles.length,
+        hasDrawnTile: !!input.playerState.drawnTile,
+        hasExposedMelds: input.playerState.exposedMelds.length > 0,
+        topHands: results.map((r) => ({
+          handName: r.hand.displayName,
+          distance: r.distance,
+          points: r.hand.points,
+          isConcealed: r.hand.isConcealed,
+          neededTilesCount: r.neededTiles.length,
+        })),
+      });
+
+      return { advice };
     }),
 });

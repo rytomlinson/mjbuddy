@@ -75,6 +75,37 @@ const useStyles = createUseStyles((theme: Theme) => ({
     color: theme.colors.primary,
     fontWeight: 'bold',
   },
+  viability: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    marginTop: theme.spacing.xs,
+  },
+  viabilityLabel: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textMuted,
+  },
+  viabilityBar: {
+    width: '60px',
+    height: '6px',
+    backgroundColor: theme.colors.surfaceHover,
+    borderRadius: '3px',
+    overflow: 'hidden',
+  },
+  viabilityFill: {
+    height: '100%',
+    borderRadius: '3px',
+    transition: 'width 0.3s',
+  },
+  viabilityHigh: {
+    backgroundColor: '#4CAF50',
+  },
+  viabilityMedium: {
+    backgroundColor: '#FFC107',
+  },
+  viabilityLow: {
+    backgroundColor: '#FF5252',
+  },
   tags: {
     display: 'flex',
     gap: theme.spacing.xs,
@@ -117,6 +148,8 @@ export interface ViableHandData {
   isConcealed: boolean;
   neededTiles: TileCode[];
   jokersUsable: number;
+  probability: number;
+  viabilityScore: number;
 }
 
 interface ViableHandCardProps {
@@ -131,6 +164,12 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
     if (data.distance <= 2) return classes.distanceGood;
     if (data.distance <= 4) return classes.distanceMedium;
     return classes.distanceFar;
+  };
+
+  const getViabilityClass = () => {
+    if (data.viabilityScore >= 50) return classes.viabilityHigh;
+    if (data.viabilityScore >= 20) return classes.viabilityMedium;
+    return classes.viabilityLow;
   };
 
   return (
@@ -150,6 +189,15 @@ export function ViableHandCard({ data, rank }: ViableHandCardProps) {
             </span>
           </div>
           <span className={classes.points}>{data.points} pts</span>
+          <div className={classes.viability}>
+            <span className={classes.viabilityLabel}>viability</span>
+            <div className={classes.viabilityBar}>
+              <div
+                className={`${classes.viabilityFill} ${getViabilityClass()}`}
+                style={{ width: `${Math.round(data.viabilityScore)}%` }}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

@@ -280,3 +280,192 @@ export function generateFullTileSet(): TileCode[] {
 
   return tiles; // 152 tiles total
 }
+
+/**
+ * American Mah Jongg tile counts
+ * Total: 152 tiles
+ */
+export const TILE_COUNTS = {
+  // Suits: 4 copies of each number (1-9) per suit
+  SUIT_COPIES: 4,
+  SUIT_VALUES: 9,
+  SUITS_TOTAL: 108, // 3 suits * 9 values * 4 copies
+
+  // Winds: 4 copies of each wind
+  WIND_COPIES: 4,
+  WINDS_TOTAL: 16, // 4 winds * 4 copies
+
+  // Dragons: 4 copies of each dragon
+  DRAGON_COPIES: 4,
+  DRAGONS_TOTAL: 12, // 3 dragons * 4 copies
+
+  // Flowers: 8 total (all interchangeable)
+  FLOWERS_TOTAL: 8,
+
+  // Jokers: 8 total (all interchangeable)
+  JOKERS_TOTAL: 8,
+
+  // Grand total
+  TOTAL: 152,
+} as const;
+
+/**
+ * Get the maximum count of a specific tile that exists in the game
+ */
+export function getMaxTileCount(code: TileCode): number {
+  const type = getTileType(code);
+
+  switch (type) {
+    case TileType.DOT:
+    case TileType.BAM:
+    case TileType.CRAK:
+      return TILE_COUNTS.SUIT_COPIES; // 4
+    case TileType.WIND:
+      return TILE_COUNTS.WIND_COPIES; // 4
+    case TileType.DRAGON:
+      return TILE_COUNTS.DRAGON_COPIES; // 4
+    case TileType.FLOWER:
+      return TILE_COUNTS.FLOWERS_TOTAL; // 8 (all equivalent)
+    case TileType.JOKER:
+      return TILE_COUNTS.JOKERS_TOTAL; // 8 (all equivalent)
+    default:
+      return 0;
+  }
+}
+
+/**
+ * Normalize a tile for counting purposes
+ * All flowers are equivalent, all jokers are equivalent
+ */
+export function normalizeTileForCounting(code: TileCode): TileCode {
+  if (isFlower(code)) {
+    return encodeTile(TileType.FLOWER, 1);
+  }
+  if (isJoker(code)) {
+    return encodeTile(TileType.JOKER, 1);
+  }
+  return code;
+}
+
+/**
+ * Calculate remaining tiles of a specific type given seen tiles
+ */
+export function getRemainingCount(
+  targetTile: TileCode,
+  seenTiles: TileCode[]
+): number {
+  const normalizedTarget = normalizeTileForCounting(targetTile);
+  const maxCount = getMaxTileCount(targetTile);
+
+  // Count how many of the target tile have been seen
+  let seenCount = 0;
+  for (const seen of seenTiles) {
+    const normalizedSeen = normalizeTileForCounting(seen);
+    if (normalizedSeen === normalizedTarget) {
+      seenCount++;
+    }
+  }
+
+  return Math.max(0, maxCount - seenCount);
+}
+
+/**
+ * Calculate probability of drawing at least one of the needed tiles
+ * Uses hypergeometric distribution approximation
+ *
+ * @param neededTiles - Tiles needed (with duplicates for multiple copies needed)
+ * @param seenTiles - All tiles that have been seen (in hand, discarded, exposed)
+ * @param remainingDraws - Number of draws remaining (estimated wall size)
+ * @returns Probability between 0 and 1
+ */
+export function calculateDrawProbability(
+  neededTiles: TileCode[],
+  seenTiles: TileCode[],
+  remainingDraws: number = 50
+): number {
+  if (neededTiles.length === 0) {
+    return 1; // Already complete
+  }
+
+  // Group needed tiles by normalized code
+  const neededCounts = new Map<TileCode, number>();
+  for (const tile of neededTiles) {
+    const normalized = normalizeTileForCounting(tile);
+    neededCounts.set(normalized, (neededCounts.get(normalized) ?? 0) + 1);
+  }
+
+  // Calculate remaining in wall for each needed tile
+  const remainingInWall = new Map<TileCode, number>();
+  for (const [tile] of neededCounts) {
+    remainingInWall.set(tile, getRemainingCount(tile, seenTiles));
+  }
+
+  // Total unseen tiles (wall + other players' hands)
+  const totalSeen = seenTiles.length;
+  const totalUnseen = Math.max(1, TILE_COUNTS.TOTAL - totalSeen);
+
+  // Calculate combined probability using independence assumption
+  // P(getting all needed) = product of P(getting each type)
+  let probability = 1;
+
+  for (const [tile, countNeeded] of neededCounts) {
+    const available = remainingInWall.get(tile) ?? 0;
+
+    if (available < countNeeded) {
+      // Not enough tiles exist - impossible
+      return 0;
+    }
+
+    // Simplified probability: chance of drawing at least countNeeded copies
+    // from available copies in totalUnseen cards over remainingDraws
+    // Using rough approximation: 1 - (1 - available/totalUnseen)^remainingDraws for each needed
+
+    // For multiple copies needed, multiply probabilities
+    for (let i = 0; i < countNeeded; i++) {
+      const adjustedAvailable = Math.max(0, available - i);
+      const adjustedUnseen = Math.max(1, totalUnseen - i);
+
+      // Probability of NOT drawing this tile in all remaining draws
+      const pNotDraw = Math.pow(
+        1 - adjustedAvailable / adjustedUnseen,
+        remainingDraws / (countNeeded - i)
+      );
+      probability *= 1 - pNotDraw;
+    }
+  }
+
+  return Math.min(1, Math.max(0, probability));
+}
+
+/**
+ * Calculate a "viability score" combining distance and probability
+ * Higher score = more achievable hand
+ *
+ * @param distance - Tiles away from completion
+ * @param probability - Probability of completion (0-1)
+ * @param points - Point value of hand
+ * @returns Score between 0-100
+ */
+export function calculateViabilityScore(
+  distance: number,
+  probability: number,
+  points: number
+): number {
+  if (distance === 0) {
+    return 100; // Already complete
+  }
+
+  // Distance factor: closer hands score higher (exponential decay)
+  const distanceFactor = Math.exp(-distance * 0.3);
+
+  // Probability factor: higher probability scores higher
+  const probabilityFactor = probability;
+
+  // Points factor: higher point hands get slight bonus (logarithmic)
+  const pointsFactor = 1 + Math.log10(Math.max(25, points)) / 10;
+
+  // Combined score (0-100 scale)
+  const score = distanceFactor * probabilityFactor * pointsFactor * 100;
+
+  return Math.min(100, Math.max(0, score));
+}

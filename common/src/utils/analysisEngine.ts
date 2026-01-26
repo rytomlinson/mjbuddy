@@ -16,7 +16,10 @@ import {
   expandPatternGroups,
   getGroupCount,
 } from './patternUtils.js';
-import { countTiles, sortTiles } from './tileUtils.js';
+import {
+  calculateDrawProbability,
+  calculateViabilityScore,
+} from './tileUtils.js';
 
 /**
  * Result of analyzing a single hand against player's tiles
@@ -29,6 +32,8 @@ export interface HandAnalysisResult {
   neededTiles: TileCode[];
   jokersUsable: number; // How many jokers could help
   isViable: boolean;
+  probability: number; // Probability of completing (0-1)
+  viabilityScore: number; // Combined score (0-100)
 }
 
 export interface MatchedGroup {
@@ -233,6 +238,8 @@ export function analyzeHand(
       neededTiles: [],
       jokersUsable: 0,
       isViable: false,
+      probability: 0,
+      viabilityScore: 0,
     };
   }
 
@@ -248,6 +255,8 @@ export function analyzeHand(
       neededTiles: [],
       jokersUsable: 0,
       isViable: false,
+      probability: 0,
+      viabilityScore: 0,
     };
   }
 
@@ -286,10 +295,20 @@ export function analyzeHand(
       neededTiles: [],
       jokersUsable: 0,
       isViable: false,
+      probability: 0,
+      viabilityScore: 0,
     };
   }
 
   const neededTiles = getNeededTiles(bestResult.variation, bestResult.matchedGroups);
+
+  // Calculate probability and viability score
+  const probability = calculateDrawProbability(neededTiles, allTiles);
+  const viabilityScore = calculateViabilityScore(
+    bestResult.distance,
+    probability,
+    hand.points
+  );
 
   return {
     hand,
@@ -299,6 +318,8 @@ export function analyzeHand(
     neededTiles,
     jokersUsable: bestResult.jokersUsable,
     isViable: bestResult.distance <= 6, // Consider viable if within 6 tiles
+    probability,
+    viabilityScore,
   };
 }
 

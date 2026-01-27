@@ -1,11 +1,8 @@
 import {
   TileCode,
   TileType,
-  PatternGroup,
-  GroupType,
   CardHand,
   getTileType,
-  getTileValue,
   isJoker,
   isFlower,
   encodeTile,
@@ -14,7 +11,6 @@ import {
   ConcretePattern,
   ConcreteGroup,
   expandPatternGroups,
-  getGroupCount,
 } from './patternUtils.js';
 import {
   calculateDrawProbability,
@@ -134,7 +130,7 @@ function calculateGroupDistance(
 function calculatePatternDistance(
   pattern: ConcretePattern,
   playerTiles: TileCode[],
-  exposedMelds: ExposedMeld[]
+  _exposedMelds: ExposedMeld[]
 ): { distance: number; matchedGroups: MatchedGroup[]; jokersUsable: number } {
   // Count available tiles (excluding those in exposed melds)
   const tileCounts = countNormalizedTiles(playerTiles);
@@ -401,6 +397,22 @@ export function analyzeCall(
         if (normalizeTile(group.tile) === normalizedDiscard && matched.tilesMatched < matched.tilesNeeded) {
           // Can potentially call for this group
           const groupSize = group.count;
+
+          // Can only call for melds of 3+ tiles (pung, kong, quint, sextet)
+          if (groupSize < 3) {
+            continue;
+          }
+
+          // Check if player has enough tiles (matching + jokers) to complete the call
+          // Need (groupSize - 1) tiles from hand to expose with the called tile
+          const tilesNeededFromHand = groupSize - 1;
+          const matchingInHand = playerState.tiles.filter(t => normalizeTile(t) === normalizedDiscard).length;
+          const jokersInHand = playerState.tiles.filter(t => getTileType(t) === TileType.JOKER).length;
+
+          if (matchingInHand + jokersInHand < tilesNeededFromHand) {
+            continue; // Not enough tiles to complete the call
+          }
+
           let callType: 'pung' | 'kong' | 'quint' | 'win' | null = null;
 
           if (result.distance === 1) {
@@ -411,6 +423,8 @@ export function analyzeCall(
             callType = 'kong';
           } else if (groupSize === 5) {
             callType = 'quint';
+          } else if (groupSize === 6) {
+            callType = 'quint'; // sextet uses quint call type
           }
 
           if (callType) {

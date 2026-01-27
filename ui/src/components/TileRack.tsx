@@ -3,6 +3,7 @@ import { createUseStyles } from 'react-jss';
 import { TileCode, sortTiles } from 'common';
 import { Tile } from './Tile';
 import type { Theme } from '../theme';
+import type { ExposedMeld } from '../slices/handSlice';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   rackHeader: {
@@ -162,6 +163,17 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
+  slotDisabled: {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderColor: theme.colors.border,
+    cursor: 'not-allowed',
+  },
+  slotDisabledX: {
+    color: theme.colors.textMuted,
+    fontSize: '24px',
+    fontWeight: 'bold',
+    userSelect: 'none',
+  },
   clearButton: {
     width: '100%',
     height: '100%',
@@ -188,6 +200,32 @@ const useStyles = createUseStyles((theme: Theme) => ({
     marginTop: '2px',
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  sectionLabel: {
+    fontSize: '11px',
+    fontWeight: 600,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.xs,
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+  exposedSection: {
+    marginBottom: theme.spacing.sm,
+    paddingBottom: theme.spacing.sm,
+    borderBottom: `1px solid ${theme.colors.border}`,
+  },
+  exposedMelds: {
+    display: 'flex',
+    gap: theme.spacing.sm,
+    flexWrap: 'wrap',
+  },
+  meld: {
+    display: 'flex',
+    gap: '2px',
+    padding: '4px',
+    backgroundColor: 'transparent',
+    borderRadius: theme.borderRadius.sm,
+    border: `1px solid ${theme.colors.border}`,
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -230,6 +268,7 @@ type InputMode = 'hand' | 'charleston' | 'drawn';
 interface TileRackProps {
   tiles: TileCode[];
   drawnTile?: TileCode;
+  exposedMelds?: ExposedMeld[];
   label?: string;
   onTileClick?: (tile: TileCode, index: number) => void;
   onClear?: () => void;
@@ -245,11 +284,13 @@ interface TileRackProps {
   sorted?: boolean;
   maxTiles?: number;
   mode?: InputMode;
+  pendingDiscard?: boolean;
 }
 
 export function TileRack({
   tiles,
   drawnTile,
+  exposedMelds = [],
   label = 'Your Hand',
   onTileClick,
   onClear,
@@ -265,6 +306,7 @@ export function TileRack({
   sorted = true,
   maxTiles = 13,
   mode = 'hand',
+  pendingDiscard = false,
 }: TileRackProps) {
   const classes = useStyles();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
@@ -371,7 +413,7 @@ export function TileRack({
       <div className={classes.rackHeader}>
         <div className={classes.rackLabel}>
           <span>{label}</span>
-          <span className={classes.tileCount}>({tiles.length}/{maxTiles})</span>
+          <span className={classes.tileCount}>({tiles.length + exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0)}/{maxTiles})</span>
         </div>
         {onModeChange && (
           <div className={classes.modeToggle}>
@@ -400,65 +442,105 @@ export function TileRack({
           </div>
         )}
       </div>
+
+      {/* Exposed Section - only shown when there are exposed melds */}
+      {exposedMelds.length > 0 && (
+        <div className={classes.exposedSection}>
+          <div className={classes.sectionLabel}>Exposed</div>
+          <div className={classes.exposedMelds}>
+            {exposedMelds.map((meld, meldIndex) => (
+              <div key={meldIndex} className={classes.meld}>
+                {meld.tiles.map((tile, tileIndex) => (
+                  <Tile key={tileIndex} code={tile} size="small" />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Concealed Section Label - only shown when there are exposed melds */}
+      {exposedMelds.length > 0 && (
+        <div className={classes.sectionLabel}>Concealed</div>
+      )}
+
       <div className={classes.tilesContent}>
         <div className={classes.mainTiles}>
-          {/* Render all 13 hand slots */}
-          {Array.from({ length: maxTiles }).map((_, slotIndex) => {
-            const tile = displayTiles[slotIndex];
-            const isDragging = draggedIndex === slotIndex;
-            const isDropTarget = dropTargetIndex === slotIndex;
-            const isSelected = mode === 'charleston' && charlestonSelected?.has(slotIndex);
-            const canDrag = onReorder && tile !== undefined;
+          {/* Calculate available concealed slots (13 - exposed tiles) */}
+          {(() => {
+            const exposedTileCount = exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+            const availableSlots = maxTiles - exposedTileCount;
 
-            return (
-              <div
-                key={`slot-${slotIndex}`}
-                className={`${classes.slot} ${isDragging ? classes.slotDragging : ''} ${isDropTarget ? classes.slotDropTarget : ''} ${isSelected ? classes.slotSelected : ''}`}
-                onDragOver={onReorder ? handleDragOver(slotIndex) : undefined}
-                onDragLeave={onReorder ? handleDragLeave : undefined}
-                onDrop={onReorder ? handleDrop(slotIndex) : undefined}
-              >
-                {tile !== undefined && (
+            return Array.from({ length: maxTiles }).map((_, slotIndex) => {
+              const isDisabledSlot = slotIndex >= availableSlots;
+              const tile = displayTiles[slotIndex];
+              const isDragging = draggedIndex === slotIndex;
+              const isDropTarget = dropTargetIndex === slotIndex;
+              const isSelected = mode === 'charleston' && charlestonSelected?.has(slotIndex);
+              const canDrag = onReorder && tile !== undefined && !isDisabledSlot;
+
+              // Disabled slots show X and cannot be interacted with
+              if (isDisabledSlot) {
+                return (
                   <div
-                    className={canDrag ? classes.draggableTile : undefined}
-                    draggable={canDrag}
-                    onDragStart={canDrag ? handleDragStart(slotIndex) : undefined}
-                    onDragEnd={canDrag ? handleDragEnd(slotIndex) : undefined}
+                    key={`slot-${slotIndex}`}
+                    className={`${classes.slot} ${classes.slotDisabled}`}
                   >
-                    <Tile
-                      code={tile}
-                      onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
-                    />
-                    {mode === 'charleston' ? (
-                      // Charleston mode: show pass order (1, 2, 3)
-                      charlestonPassOrder && charlestonPassOrder[slotIndex] !== undefined && (
-                        <div className={classes.tileBadge} style={{ backgroundColor: '#FF9800' }}>
-                          {charlestonPassOrder[slotIndex]}
-                        </div>
-                      )
-                    ) : mode === 'drawn' ? (
-                      // Gameplay mode: show usage stats
-                      tileUsageStats && tileUsageStats[slotIndex]?.count > 0 && (() => {
-                        const stats = tileUsageStats[slotIndex];
-                        // Color based on how close the nearest hand is: red = very close (valuable), green = far (less valuable)
-                        let bgColor = '#4CAF50'; // green - far/less valuable
-                        if (stats.minDistance <= 2) {
-                          bgColor = '#C62828'; // red - very close/most valuable
-                        } else if (stats.minDistance <= 4) {
-                          bgColor = '#F9A825'; // yellow/orange - medium
-                        }
-                        return (
-                          <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
-                            {stats.count}
-                          </div>
-                        );
-                      })()
-                    ) : null /* Set Hand mode: no badges */}
+                    <span className={classes.slotDisabledX}>✕</span>
                   </div>
-                )}
-              </div>
-            );
-          })}
+                );
+              }
+
+              return (
+                <div
+                  key={`slot-${slotIndex}`}
+                  className={`${classes.slot} ${isDragging ? classes.slotDragging : ''} ${isDropTarget ? classes.slotDropTarget : ''} ${isSelected ? classes.slotSelected : ''}`}
+                  onDragOver={onReorder ? handleDragOver(slotIndex) : undefined}
+                  onDragLeave={onReorder ? handleDragLeave : undefined}
+                  onDrop={onReorder ? handleDrop(slotIndex) : undefined}
+                >
+                  {tile !== undefined && (
+                    <div
+                      className={canDrag ? classes.draggableTile : undefined}
+                      draggable={canDrag}
+                      onDragStart={canDrag ? handleDragStart(slotIndex) : undefined}
+                      onDragEnd={canDrag ? handleDragEnd(slotIndex) : undefined}
+                    >
+                      <Tile
+                        code={tile}
+                        onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
+                      />
+                      {mode === 'charleston' ? (
+                        // Charleston mode: show pass order (1, 2, 3)
+                        charlestonPassOrder && charlestonPassOrder[slotIndex] !== undefined && (
+                          <div className={classes.tileBadge} style={{ backgroundColor: '#FF9800' }}>
+                            {charlestonPassOrder[slotIndex]}
+                          </div>
+                        )
+                      ) : mode === 'drawn' ? (
+                        // Gameplay mode: show usage stats
+                        tileUsageStats && tileUsageStats[slotIndex]?.count > 0 && (() => {
+                          const stats = tileUsageStats[slotIndex];
+                          // Color based on how close the nearest hand is: red = very close (valuable), green = far (less valuable)
+                          let bgColor = '#4CAF50'; // green - far/less valuable
+                          if (stats.minDistance <= 2) {
+                            bgColor = '#C62828'; // red - very close/most valuable
+                          } else if (stats.minDistance <= 4) {
+                            bgColor = '#F9A825'; // yellow/orange - medium
+                          }
+                          return (
+                            <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
+                              {stats.count}
+                            </div>
+                          );
+                        })()
+                      ) : null /* Set Hand mode: no badges */}
+                    </div>
+                  )}
+                </div>
+              );
+            });
+          })()}
           {/* 14th slot: Clear/Pass button in Set Hand/Charleston mode, Drawn slot in Gameplay mode */}
           {mode === 'hand' ? (
             // Show Clear button in Set Hand mode when there are tiles
@@ -508,7 +590,9 @@ export function TileRack({
         </div>
       </div>
       <div className={classes.prompt}>
-        {mode === 'hand'
+        {pendingDiscard
+          ? 'Click a tile to discard.'
+          : mode === 'hand'
           ? 'Set your starting hand using the tiles below.'
           : mode === 'charleston'
           ? (isHandFull

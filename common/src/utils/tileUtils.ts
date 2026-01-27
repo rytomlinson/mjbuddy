@@ -6,7 +6,6 @@ import {
   getTileType,
   getTileValue,
   encodeTile,
-  isSuit,
   isJoker,
   isFlower,
 } from '../schemas/tile.js';

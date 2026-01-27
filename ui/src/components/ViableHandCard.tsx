@@ -20,6 +20,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
     borderColor: theme.colors.primary,
     backgroundColor: 'rgba(184, 74, 74, 0.1)',
     boxShadow: '0 0 12px rgba(184, 74, 74, 0.3)',
+    cursor: 'pointer',
+  },
+  cardSelected: {
+    borderColor: '#2E7D32',
+    backgroundColor: 'rgba(46, 125, 50, 0.15)',
+    boxShadow: '0 0 12px rgba(46, 125, 50, 0.4)',
   },
   cardTop: {
     display: 'flex',
@@ -334,13 +340,22 @@ interface ViableHandCardProps {
   data: ViableHandData;
   rank: number;
   callHighlight?: CallHighlight;
+  isExposureSelected?: boolean;
   onOrganize?: (fullHandTiles: TileCode[]) => void;
+  onSelectExposure?: (handId: number, exposedTiles: TileCode[]) => void;
 }
 
-export function ViableHandCard({ data, rank, callHighlight, onOrganize }: ViableHandCardProps) {
+export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, onOrganize, onSelectExposure }: ViableHandCardProps) {
   const classes = useStyles();
 
   const isHighlighted = callHighlight?.handId === data.handId;
+  const isClickable = isHighlighted && onSelectExposure;
+
+  const handleCardClick = () => {
+    if (isClickable && callHighlight) {
+      onSelectExposure(data.handId, callHighlight.exposedTiles);
+    }
+  };
 
   const getDistanceClass = () => {
     if (data.distance <= 2) return classes.distanceGood;
@@ -349,7 +364,10 @@ export function ViableHandCard({ data, rank, callHighlight, onOrganize }: Viable
   };
 
   return (
-    <div className={`${classes.card} ${isHighlighted ? classes.cardHighlighted : ''}`}>
+    <div
+      className={`${classes.card} ${isHighlighted ? classes.cardHighlighted : ''} ${isExposureSelected ? classes.cardSelected : ''}`}
+      onClick={handleCardClick}
+    >
       <div className={classes.cardTop}>
         <div className={classes.handInfo}>
           <h3 className={classes.handName}>

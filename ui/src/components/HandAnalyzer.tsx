@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createUseStyles } from 'react-jss';
 import { TileCode, getMaxTileCount, normalizeTileForCounting, isJoker } from 'common';
 import { useAppDispatch, useAppSelector } from '../hooks';
@@ -10,17 +10,20 @@ import {
   addTile,
   insertTileAt,
   removeTile,
+  removeTileByCode,
   clearTiles,
   setDrawnTile,
   setTiles,
   reorderTile,
+  addExposedMeld,
+  ExposedMeld,
 } from '../slices/handSlice';
 import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
 import { TileRack } from './TileRack';
 import { ViableHandCard, ViableHandData, CallHighlight } from './ViableHandCard';
 import { Tile } from './Tile';
-import { theme, type Theme } from '../theme';
+import type { Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   analyzer: {
@@ -197,6 +200,86 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontWeight: 'bold',
     marginLeft: theme.spacing.xs,
   },
+  callConfirmation: {
+    marginTop: theme.spacing.sm,
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(184, 74, 74, 0.1)',
+    borderRadius: theme.borderRadius.sm,
+    border: `2px solid ${theme.colors.primary}`,
+  },
+  callConfirmLabel: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.text,
+    fontWeight: 'bold',
+    marginBottom: theme.spacing.xs,
+  },
+  callConfirmTiles: {
+    display: 'flex',
+    gap: '4px',
+    marginBottom: theme.spacing.sm,
+    flexWrap: 'wrap',
+  },
+  exposureOptions: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xs,
+    marginBottom: theme.spacing.sm,
+  },
+  exposureOption: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    padding: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+    border: `1px solid ${theme.colors.border}`,
+    cursor: 'pointer',
+    backgroundColor: 'transparent',
+    transition: 'all 0.2s',
+    '&:hover': {
+      borderColor: theme.colors.primary,
+      backgroundColor: 'rgba(184, 74, 74, 0.05)',
+    },
+  },
+  exposureOptionSelected: {
+    borderColor: theme.colors.primary,
+    backgroundColor: 'rgba(184, 74, 74, 0.15)',
+    boxShadow: '0 0 4px rgba(184, 74, 74, 0.3)',
+  },
+  optionLabel: {
+    fontSize: '11px',
+    color: theme.colors.textSecondary,
+    marginRight: theme.spacing.xs,
+    minWidth: '70px',
+  },
+  callConfirmButtons: {
+    display: 'flex',
+    gap: theme.spacing.sm,
+  },
+  confirmButton: {
+    padding: `${theme.spacing.xs} ${theme.spacing.md}`,
+    backgroundColor: theme.colors.primary,
+    color: 'white',
+    border: 'none',
+    borderRadius: theme.borderRadius.sm,
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: theme.colors.primaryHover,
+    },
+  },
+  drawButton: {
+    padding: `${theme.spacing.xs} ${theme.spacing.md}`,
+    backgroundColor: 'transparent',
+    color: theme.colors.textSecondary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.borderRadius.sm,
+    fontSize: theme.fontSizes.sm,
+    cursor: 'pointer',
+    '&:hover': {
+      backgroundColor: theme.colors.surfaceHover,
+    },
+  },
   // Hide on mobile
   hideOnMobile: {
     display: 'block',
@@ -250,8 +333,15 @@ export function HandAnalyzer() {
 
   const [inputMode, setInputMode] = useState<InputMode>('hand');
   const [selectedCallableTile, setSelectedCallableTile] = useState<number | null>(null);
+  const [selectedExposure, setSelectedExposure] = useState<{
+    handId: number;
+    options: TileCode[][];  // Multiple possible combinations
+    selectedOptionIndex: number;
+  } | null>(null);
   const [strategyCollapsed, setStrategyCollapsed] = useState(false);
   const [charlestonSelected, setCharlestonSelected] = useState<Set<number>>(new Set());
+  const [pendingDiscard, setPendingDiscard] = useState(false);
+  const callConfirmRef = useRef<HTMLDivElement>(null);
 
   // Query for analysis
   const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
@@ -320,6 +410,13 @@ export function HandAnalyzer() {
     if (index === -1) {
       // Discarding the drawn tile
       dispatch(setDrawnTile(null));
+      if (pendingDiscard) {
+        setPendingDiscard(false);
+      }
+    } else if (pendingDiscard) {
+      // Pending discard after a call: discard the clicked tile
+      dispatch(removeTile(index));
+      setPendingDiscard(false);
     } else if (inputMode === 'charleston') {
       // Charleston mode: toggle tile selection (max 3), but only when hand is full
       if (!isHandFull) return; // Can't select tiles when refilling
@@ -523,6 +620,97 @@ export function HandAnalyzer() {
   // Handle callable tile click
   const handleCallableTileClick = (tile: number) => {
     setSelectedCallableTile(prev => prev === tile ? null : tile);
+    setSelectedExposure(null); // Clear exposure selection when changing callable tile
+  };
+
+  const handleSelectExposure = (handId: number, exposedTiles: TileCode[]) => {
+    if (!selectedCallableTile) return;
+
+    // Get the call info to determine meld size
+    const callableEntry = callableTiles.find(ct => ct.tile === selectedCallableTile);
+    const callForHand = callableEntry?.calls.find(c => c.handId === handId);
+    if (!callForHand) return;
+
+    // Determine how many tiles needed from hand (meld size - 1 for called tile)
+    const meldSizes: Record<string, number> = { pung: 3, kong: 4, quint: 5, sextet: 6 };
+    const tilesNeeded = (meldSizes[callForHand.callType] || 3) - 1;
+
+    // Find the target tile type (non-joker tile from exposedTiles, or use the called tile)
+    const targetTile = exposedTiles.find(t => !isJoker(t)) ?? selectedCallableTile;
+
+    // Count matching tiles and jokers in hand
+    const matchingTiles = tiles.filter(t => t === targetTile);
+    const jokerTiles = tiles.filter(t => isJoker(t));
+
+    // Generate all valid combinations
+    const options: TileCode[][] = [];
+    for (let numMatching = Math.min(matchingTiles.length, tilesNeeded); numMatching >= 0; numMatching--) {
+      const numJokers = tilesNeeded - numMatching;
+      if (numJokers <= jokerTiles.length) {
+        const combo: TileCode[] = [
+          ...matchingTiles.slice(0, numMatching),
+          ...jokerTiles.slice(0, numJokers),
+        ];
+        options.push(combo);
+      }
+    }
+
+    // If no valid options, fall back to the original exposedTiles
+    if (options.length === 0) {
+      options.push(exposedTiles);
+    }
+
+    setSelectedExposure({ handId, options, selectedOptionIndex: 0 });
+    // Scroll to confirmation section after state update
+    setTimeout(() => {
+      callConfirmRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+  };
+
+  const handleCancelCall = () => {
+    setSelectedCallableTile(null);
+    setSelectedExposure(null);
+  };
+
+  const handleConfirmCall = () => {
+    if (!selectedCallableTile || !selectedExposure) return;
+
+    const exposedTiles = selectedExposure.options[selectedExposure.selectedOptionIndex];
+
+    // Determine meld type based on total tiles (called tile + exposed tiles)
+    const totalTiles = 1 + exposedTiles.length;
+    let meldType: ExposedMeld['type'];
+    if (totalTiles === 3) meldType = 'pung';
+    else if (totalTiles === 4) meldType = 'kong';
+    else if (totalTiles === 5) meldType = 'quint';
+    else meldType = 'sextet';
+
+    // Count jokers in the exposed tiles
+    const jokerCount = exposedTiles.filter(t => isJoker(t)).length;
+
+    // Remove exposed tiles from hand
+    for (const tile of exposedTiles) {
+      dispatch(removeTileByCode(tile));
+    }
+
+    // Create the exposed meld (called tile + tiles from hand)
+    const meldTiles = [selectedCallableTile, ...exposedTiles];
+    dispatch(addExposedMeld({
+      type: meldType,
+      tiles: meldTiles,
+      jokerCount,
+    }));
+
+    // Clear selections and enter pending discard state
+    setSelectedCallableTile(null);
+    setSelectedExposure(null);
+    setPendingDiscard(true);
+  };
+
+  const handleSelectExposureOption = (index: number) => {
+    if (selectedExposure) {
+      setSelectedExposure({ ...selectedExposure, selectedOptionIndex: index });
+    }
   };
 
   // Compute disabled tiles (tiles that have reached their max count)
@@ -580,10 +768,49 @@ export function HandAnalyzer() {
           ))}
         </div>
       )}
-      {selectedCallableTile && (
+      {selectedCallableTile && !selectedExposure && (
         <p className={classes.callableLabel} style={{ marginTop: '8px' }}>
-          Highlighted hands below show which tiles you would expose when making this call.
+          Highlighted hands below show which tiles you would expose when making this call. To complete the call you must select which set of tiles you will use the call to reveal which will also limit your options.
         </p>
+      )}
+      {selectedCallableTile && selectedExposure && (
+        <div ref={callConfirmRef} className={classes.callConfirmation}>
+          <div className={classes.callConfirmLabel}>
+            {selectedExposure.options.length > 1 ? 'Select tiles to expose:' : 'Tiles to expose with call:'}
+          </div>
+          <div className={classes.exposureOptions}>
+            {selectedExposure.options.map((option, optionIndex) => {
+              const jokerCount = option.filter(t => isJoker(t)).length;
+              const nonJokerCount = option.length - jokerCount;
+              const label = jokerCount === 0
+                ? `${nonJokerCount + 1} tiles`
+                : `${nonJokerCount + 1} + ${jokerCount} joker${jokerCount > 1 ? 's' : ''}`;
+
+              return (
+                <div
+                  key={optionIndex}
+                  className={`${classes.exposureOption} ${selectedExposure.selectedOptionIndex === optionIndex ? classes.exposureOptionSelected : ''}`}
+                  onClick={() => handleSelectExposureOption(optionIndex)}
+                >
+                  <span className={classes.optionLabel}>{label}:</span>
+                  <Tile code={selectedCallableTile} size="small" />
+                  <span style={{ alignSelf: 'center', color: '#666', margin: '0 2px' }}>+</span>
+                  {option.map((tile, i) => (
+                    <Tile key={i} code={tile} size="small" />
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+          <div className={classes.callConfirmButtons}>
+            <button className={classes.confirmButton} onClick={handleConfirmCall}>
+              Confirm Call
+            </button>
+            <button className={classes.drawButton} onClick={handleCancelCall}>
+              Draw Instead
+            </button>
+          </div>
+        </div>
       )}
     </>
   );
@@ -625,6 +852,7 @@ export function HandAnalyzer() {
         <TileRack
           tiles={tiles}
           drawnTile={drawnTile ?? undefined}
+          exposedMelds={exposedMelds}
           onTileClick={handleTileClick}
           onClear={handleClear}
           onReorder={handleReorder}
@@ -637,6 +865,7 @@ export function HandAnalyzer() {
           isHandFull={isHandFull}
           mode={inputMode}
           onModeChange={handleModeChange}
+          pendingDiscard={pendingDiscard}
         />
 
         <TilePicker
@@ -678,7 +907,9 @@ export function HandAnalyzer() {
                   data={result}
                   rank={index + 1}
                   callHighlight={getCallHighlight(result.handId)}
+                  isExposureSelected={selectedExposure?.handId === result.handId}
                   onOrganize={handleOrganizeTiles}
+                  onSelectExposure={selectedCallableTile ? handleSelectExposure : undefined}
                 />
               ))}
             </div>

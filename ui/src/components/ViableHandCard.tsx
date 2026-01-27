@@ -11,6 +11,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     border: `1px solid ${theme.colors.border}`,
     marginBottom: theme.spacing.sm,
     transition: 'all 0.2s',
+    width: 'fit-content',
     '&:hover': {
       borderColor: theme.colors.primary,
     },
@@ -53,21 +54,29 @@ const useStyles = createUseStyles((theme: Theme) => ({
     color: theme.colors.textSecondary,
     fontFamily: 'monospace',
     margin: 0,
-  },
-  stats: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'flex-end',
-    gap: theme.spacing.xs,
-  },
-  distance: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xs,
   },
-  distanceLabel: {
-    fontSize: theme.fontSizes.sm,
-    color: theme.colors.textMuted,
+  notesIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    backgroundColor: theme.colors.textMuted,
+    color: 'white',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    cursor: 'help',
+    fontFamily: 'serif',
+    fontStyle: 'italic',
+  },
+  stats: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
   },
   distanceValue: {
     fontSize: theme.fontSizes.lg,
@@ -92,21 +101,26 @@ const useStyles = createUseStyles((theme: Theme) => ({
     color: theme.colors.primary,
     fontWeight: 'bold',
   },
-  tags: {
-    display: 'flex',
-    gap: theme.spacing.xs,
-    marginBottom: theme.spacing.sm,
+  tagConcealed: {
+    fontSize: theme.fontSizes.sm,
+    padding: `2px ${theme.spacing.xs}`,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: 'rgba(142, 36, 170, 0.2)',
+    color: '#CE93D8',
   },
-  tag: {
+  tagRevealed: {
     fontSize: theme.fontSizes.sm,
     padding: `2px ${theme.spacing.xs}`,
     borderRadius: theme.borderRadius.sm,
     backgroundColor: theme.colors.surfaceHover,
     color: theme.colors.textSecondary,
   },
-  tagConcealed: {
-    backgroundColor: 'rgba(142, 36, 170, 0.2)',
-    color: '#CE93D8',
+  handMeta: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    margin: 0,
+    marginTop: theme.spacing.xs,
   },
   tilesSection: {
     marginTop: theme.spacing.sm,
@@ -217,19 +231,23 @@ const useStyles = createUseStyles((theme: Theme) => ({
     marginLeft: theme.spacing.sm,
     textTransform: 'uppercase',
   },
-  organizeButton: {
-    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    fontSize: theme.fontSizes.sm,
+  organizeIcon: {
+    width: '32px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
     cursor: 'pointer',
+    opacity: 0.6,
     transition: 'all 0.2s',
+    '& img': {
+      width: '24px',
+      height: '24px',
+    },
     '&:hover': {
-      backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.primary,
-      color: 'white',
+      opacity: 1,
+      transform: 'scale(1.1)',
     },
   },
   '@keyframes pulse': {
@@ -296,6 +314,7 @@ export interface ViableHandData {
   jokersUsable: number;
   probability: number;
   viabilityScore: number;
+  notes?: string | null;
 }
 
 export interface CallHighlight {
@@ -335,56 +354,38 @@ export function ViableHandCard({ data, rank, callHighlight, onOrganize }: Viable
               </span>
             )}
           </h3>
-          <p className={classes.pattern}>{data.displayPattern}</p>
+          <p className={classes.handMeta}>
+            <span className={classes.points}>{data.points} pts</span>
+            <span className={data.isConcealed ? classes.tagConcealed : classes.tagRevealed}>
+              {data.isConcealed ? 'Concealed' : 'Exposed'}
+            </span>
+          </p>
         </div>
         <div className={classes.stats}>
-          <div className={classes.distance}>
-            <span className={classes.distanceLabel}>tiles away</span>
-            <span className={`${classes.distanceValue} ${getDistanceClass()}`}>
-              {data.distance}
-            </span>
-          </div>
-          <span className={classes.points}>{data.points} pts</span>
+          <span className={`${classes.distanceValue} ${getDistanceClass()}`}>
+            {data.distance}
+          </span>
           {onOrganize && (
-            <button
-              className={classes.organizeButton}
+            <div
+              className={classes.organizeIcon}
               onClick={() => onOrganize(data.fullHandTiles)}
+              title="Organize hand to match"
             >
-              Organize
-            </button>
+              <img src="/hand.svg" alt="Organize" />
+            </div>
           )}
         </div>
-      </div>
-
-      <div className={classes.tags}>
-        {data.isConcealed && (
-          <span className={`${classes.tag} ${classes.tagConcealed}`}>Concealed</span>
-        )}
-        {data.jokersUsable > 0 && (
-          <span className={classes.tag}>{data.jokersUsable} joker{data.jokersUsable > 1 ? 's' : ''} help</span>
-        )}
       </div>
 
       {data.fullHandTiles.length > 0 && (
         <div className={classes.tilesSection}>
           <div className={classes.tilesHeader}>
-            <span className={classes.tilesLabel}>Complete hand:</span>
-            <div className={classes.legend}>
-              <div className={classes.legendItem}>
-                <div className={classes.legendDotHave} />
-                <span className={classes.legendText}>Have</span>
-              </div>
-              <div className={classes.legendItem}>
-                <div className={classes.legendDotNeed} />
-                <span className={classes.legendText}>Need</span>
-              </div>
-              {isHighlighted && (
-                <div className={classes.legendItem}>
-                  <div className={classes.legendDotExpose} />
-                  <span className={classes.legendText}>Expose</span>
-                </div>
+            <span className={classes.pattern}>
+              {data.displayPattern}
+              {data.notes && (
+                <span className={classes.notesIcon} title={data.notes}>&#8505;</span>
               )}
-            </div>
+            </span>
           </div>
           <div className={classes.allTiles}>
             {(() => {

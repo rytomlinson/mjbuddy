@@ -85,6 +85,7 @@ export const analysisRouter = router({
             matchedGroups: r.matchedGroups,
             probability: r.probability,
             viabilityScore: r.viabilityScore,
+            notes: r.hand.notes,
           };
         }),
         cardYearId,

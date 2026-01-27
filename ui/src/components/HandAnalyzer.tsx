@@ -57,14 +57,20 @@ const useStyles = createUseStyles((theme: Theme) => ({
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     border: `1px solid ${theme.colors.border}`,
+    width: 'fit-content',
   },
   sectionTitle: {
-    fontSize: theme.fontSizes.lg,
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 600,
     color: theme.colors.text,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.sm,
+  },
+  sectionCount: {
+    fontWeight: 'normal',
+    color: theme.colors.textSecondary,
   },
   sectionIcon: {
     color: theme.colors.primary,
@@ -95,6 +101,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     padding: theme.spacing.md,
     marginBottom: theme.spacing.md,
     borderLeft: `3px solid ${theme.colors.primary}`,
+    maxWidth: '242px',
   },
   adviceLabel: {
     fontSize: theme.fontSizes.sm,
@@ -104,6 +111,21 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xs,
+    cursor: 'pointer',
+    userSelect: 'none',
+    '&:hover': {
+      opacity: 0.8,
+    },
+  },
+  adviceLabelCollapsed: {
+    marginBottom: 0,
+  },
+  collapseIcon: {
+    fontSize: '10px',
+    transition: 'transform 0.2s',
+  },
+  collapseIconRotated: {
+    transform: 'rotate(-90deg)',
   },
   adviceText: {
     fontSize: theme.fontSizes.md,
@@ -131,11 +153,13 @@ const useStyles = createUseStyles((theme: Theme) => ({
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     border: `1px solid ${theme.colors.border}`,
-    marginBottom: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    width: '332px',
+    boxSizing: 'content-box',
   },
   callableTiles: {
     display: 'flex',
-    gap: theme.spacing.sm,
+    gap: '1px',
     flexWrap: 'wrap',
     marginTop: theme.spacing.sm,
   },
@@ -143,12 +167,10 @@ const useStyles = createUseStyles((theme: Theme) => ({
     position: 'relative',
     cursor: 'pointer',
     borderRadius: theme.borderRadius.sm,
-    padding: '2px',
     border: '2px solid transparent',
     transition: 'all 0.2s',
     '&:hover': {
       borderColor: theme.colors.primary,
-      transform: 'scale(1.05)',
     },
   },
   callableTileSelected: {
@@ -244,6 +266,7 @@ export function HandAnalyzer() {
 
   const [inputMode, setInputMode] = useState<InputMode>('hand');
   const [selectedCallableTile, setSelectedCallableTile] = useState<number | null>(null);
+  const [strategyCollapsed, setStrategyCollapsed] = useState(false);
 
   // Query for analysis
   const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
@@ -306,10 +329,14 @@ export function HandAnalyzer() {
     if (index === -1) {
       // Discarding the drawn tile
       dispatch(setDrawnTile(null));
-    } else {
-      // Discarding from hand - also clear the drawn tile (completes the turn)
+    } else if (inputMode === 'drawn' && drawnTile !== null) {
+      // Gameplay mode: discard from hand and insert drawn tile at that position
       dispatch(removeTile(index));
+      dispatch(insertTileAt({ tile: drawnTile, index }));
       dispatch(setDrawnTile(null));
+    } else {
+      // Set Hand mode: just remove the tile
+      dispatch(removeTile(index));
     }
   };
 
@@ -361,20 +388,25 @@ export function HandAnalyzer() {
   const results: ViableHandData[] = analysisData?.results ?? [];
   const callableTiles = callableData?.callableTiles ?? [];
 
-  // Compute how many recommended hands use each tile position in the player's hand
-  const tileUsageCounts: number[] = tiles.map((tile, index) => {
+  // Compute usage stats for each tile position in the player's hand
+  // Returns { count: number of hands using this tile, minDistance: closest hand distance }
+  const tileUsageStats: { count: number; minDistance: number }[] = tiles.map((tile, index) => {
     // Count how many times this tile appears before this index (to handle duplicates)
     const occurrenceBefore = tiles.slice(0, index).filter(t => t === tile).length;
 
-    // Count hands that have more than occurrenceBefore of this tile
+    // Find hands that use this tile and track count + minimum distance
     let count = 0;
+    let minDistance = Infinity;
     for (const result of results) {
       const countInHand = result.fullHandTiles.filter(t => t === tile).length;
       if (countInHand > occurrenceBefore) {
         count++;
+        if (result.distance < minDistance) {
+          minDistance = result.distance;
+        }
       }
     }
-    return count;
+    return { count, minDistance: minDistance === Infinity ? 0 : minDistance };
   });
 
   // Compute call highlights for each hand based on selected callable tile
@@ -431,9 +463,10 @@ export function HandAnalyzer() {
   // Callable tiles content (rendered in two places for mobile/desktop layout)
   const renderCallableTiles = () => (
     <>
-      <h2 className={classes.sectionTitle}>
-        Tiles Callable When Discarded ({callableTiles.length})
-      </h2>
+      <div className={classes.sectionTitle}>
+        <span>Callable Discard Tiles</span>
+        <span className={classes.sectionCount}>({callableTiles.length})</span>
+      </div>
       {callableTiles.length === 0 ? (
         <p className={classes.callableEmpty}>
           No tiles can be called right now. You need more matching tiles in your hand to make a call.
@@ -469,6 +502,13 @@ export function HandAnalyzer() {
           <img src="/mjb_logo.png" alt="Mah Jongg Buddy" className={classes.logo} />
         </div>
 
+        {/* Callable Tiles Section */}
+        {tiles.length >= 3 && (
+          <div className={classes.callableSection}>
+            {renderCallableTiles()}
+          </div>
+        )}
+
         <TileRack
           tiles={tiles}
           drawnTile={drawnTile ?? undefined}
@@ -477,7 +517,7 @@ export function HandAnalyzer() {
           onReorder={handleReorder}
           onAddTile={handleAddTileAtPosition}
           onRemoveTile={handleRemoveTileByIndex}
-          tileUsageCounts={tileUsageCounts}
+          tileUsageStats={tileUsageStats}
           mode={inputMode}
           onModeChange={setInputMode}
         />
@@ -493,28 +533,28 @@ export function HandAnalyzer() {
       </div>
 
       <div className={classes.rightPanel}>
-        {/* Callable Tiles Section */}
-        {tiles.length >= 3 && (
-          <div className={classes.callableSection}>
-            {renderCallableTiles()}
-          </div>
-        )}
-
         {/* Recommended Hands Section */}
         <div className={classes.section}>
-          <h2 className={classes.sectionTitle}>
-            Recommended Hands ({results.length} viable)
-          </h2>
+          <div className={classes.sectionTitle}>
+            <span>Recommended Hands</span>
+            <span className={classes.sectionCount}>({results.length} viable)</span>
+          </div>
 
           {tiles.length >= 3 && (
             <div className={classes.adviceBox}>
-              <div className={classes.adviceLabel}>
+              <div
+                className={`${classes.adviceLabel} ${strategyCollapsed ? classes.adviceLabelCollapsed : ''}`}
+                onClick={() => setStrategyCollapsed(!strategyCollapsed)}
+              >
+                <span className={`${classes.collapseIcon} ${strategyCollapsed ? classes.collapseIconRotated : ''}`}>&#9660;</span>
                 <span>&#128161;</span> Strategy
               </div>
-              {adviceLoading ? (
-                <p className={classes.adviceLoading}>Analyzing your hand...</p>
-              ) : (
-                <p className={classes.adviceText}>{adviceData?.advice}</p>
+              {!strategyCollapsed && (
+                adviceLoading ? (
+                  <p className={classes.adviceLoading}>Analyzing your hand...</p>
+                ) : (
+                  <p className={classes.adviceText}>{adviceData?.advice}</p>
+                )
               )}
             </div>
           )}

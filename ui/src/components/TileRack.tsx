@@ -129,7 +129,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     position: 'absolute',
     top: '-6px',
     right: '-6px',
-    backgroundColor: '#4CAF50',
     color: 'white',
     borderRadius: '50%',
     minWidth: '18px',
@@ -227,7 +226,7 @@ interface TileRackProps {
   onReorder?: (fromIndex: number, toIndex: number) => void;
   onAddTile?: (tile: TileCode, atIndex?: number) => void;
   onRemoveTile?: (index: number) => void;
-  tileUsageCounts?: number[];
+  tileUsageStats?: { count: number; minDistance: number }[];
   sorted?: boolean;
   maxTiles?: number;
   mode?: InputMode;
@@ -243,7 +242,7 @@ export function TileRack({
   onReorder,
   onAddTile,
   onRemoveTile,
-  tileUsageCounts,
+  tileUsageStats,
   sorted = true,
   maxTiles = 13,
   mode = 'hand',
@@ -402,11 +401,21 @@ export function TileRack({
                       code={tile}
                       onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
                     />
-                    {tileUsageCounts && tileUsageCounts[slotIndex] > 0 && (
-                      <div className={classes.tileBadge}>
-                        {tileUsageCounts[slotIndex]}
-                      </div>
-                    )}
+                    {tileUsageStats && tileUsageStats[slotIndex]?.count > 0 && (() => {
+                      const stats = tileUsageStats[slotIndex];
+                      // Color based on how close the nearest hand is: red = very close (valuable), green = far (less valuable)
+                      let bgColor = '#4CAF50'; // green - far/less valuable
+                      if (stats.minDistance <= 2) {
+                        bgColor = '#C62828'; // red - very close/most valuable
+                      } else if (stats.minDistance <= 4) {
+                        bgColor = '#F9A825'; // yellow/orange - medium
+                      }
+                      return (
+                        <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
+                          {stats.count}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
               </div>

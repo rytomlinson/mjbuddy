@@ -96,16 +96,16 @@ const useStyles = createUseStyles((theme: Theme) => ({
     overflowY: 'auto',
   },
   adviceBox: {
-    backgroundColor: 'rgba(184, 74, 74, 0.1)',
+    backgroundColor: 'rgba(76, 133, 87, 0.85)',
     borderRadius: theme.borderRadius.sm,
     padding: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    borderLeft: `3px solid ${theme.colors.primary}`,
-    maxWidth: '242px',
+    borderLeft: `3px solid #2E7D32`,
+    width: '332px',
+    boxSizing: 'content-box',
   },
   adviceLabel: {
     fontSize: theme.fontSizes.sm,
-    color: theme.colors.primary,
+    color: '#E8F5E9',
     fontWeight: 'bold',
     marginBottom: theme.spacing.xs,
     display: 'flex',
@@ -129,13 +129,13 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   adviceText: {
     fontSize: theme.fontSizes.md,
-    color: theme.colors.text,
+    color: '#FFFFFF',
     lineHeight: 1.5,
     margin: 0,
   },
   adviceLoading: {
     fontSize: theme.fontSizes.sm,
-    color: theme.colors.textMuted,
+    color: '#C8E6C9',
     fontStyle: 'italic',
   },
   loading: {
@@ -253,7 +253,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
 }));
 
-type InputMode = 'hand' | 'drawn';
+type InputMode = 'hand' | 'charleston' | 'drawn';
 
 export function HandAnalyzer() {
   const classes = useStyles();
@@ -502,6 +502,26 @@ export function HandAnalyzer() {
           <img src="/mjb_logo.png" alt="Mah Jongg Buddy" className={classes.logo} />
         </div>
 
+        {/* Strategy Tip Section */}
+        {tiles.length >= 3 && (
+          <div className={classes.adviceBox}>
+            <div
+              className={`${classes.adviceLabel} ${strategyCollapsed ? classes.adviceLabelCollapsed : ''}`}
+              onClick={() => setStrategyCollapsed(!strategyCollapsed)}
+            >
+              <span className={`${classes.collapseIcon} ${strategyCollapsed ? classes.collapseIconRotated : ''}`}>&#9660;</span>
+              <span>&#128161;</span> Strategy
+            </div>
+            {!strategyCollapsed && (
+              adviceLoading ? (
+                <p className={classes.adviceLoading}>Analyzing your hand...</p>
+              ) : (
+                <p className={classes.adviceText}>{adviceData?.advice}</p>
+              )
+            )}
+          </div>
+        )}
+
         {/* Callable Tiles Section */}
         {tiles.length >= 3 && (
           <div className={classes.callableSection}>
@@ -539,25 +559,6 @@ export function HandAnalyzer() {
             <span>Recommended Hands</span>
             <span className={classes.sectionCount}>({results.length} viable)</span>
           </div>
-
-          {tiles.length >= 3 && (
-            <div className={classes.adviceBox}>
-              <div
-                className={`${classes.adviceLabel} ${strategyCollapsed ? classes.adviceLabelCollapsed : ''}`}
-                onClick={() => setStrategyCollapsed(!strategyCollapsed)}
-              >
-                <span className={`${classes.collapseIcon} ${strategyCollapsed ? classes.collapseIconRotated : ''}`}>&#9660;</span>
-                <span>&#128161;</span> Strategy
-              </div>
-              {!strategyCollapsed && (
-                adviceLoading ? (
-                  <p className={classes.adviceLoading}>Analyzing your hand...</p>
-                ) : (
-                  <p className={classes.adviceText}>{adviceData?.advice}</p>
-                )
-              )}
-            </div>
-          )}
 
           {tiles.length < 3 ? (
             <div className={classes.placeholder}>

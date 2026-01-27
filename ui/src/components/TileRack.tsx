@@ -214,7 +214,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
 }));
 
-type InputMode = 'hand' | 'drawn';
+type InputMode = 'hand' | 'charleston' | 'drawn';
 
 interface TileRackProps {
   tiles: TileCode[];
@@ -363,6 +363,14 @@ export function TileRack({
               Set Hand
             </button>
             <button
+              className={`${classes.modeOption} ${mode === 'charleston' ? classes.modeOptionActive : ''}`}
+              onClick={() => onModeChange('charleston')}
+              disabled={tiles.length < maxTiles}
+              title={tiles.length < maxTiles ? `Need ${maxTiles} tiles to start charleston` : undefined}
+            >
+              Charleston
+            </button>
+            <button
               className={`${classes.modeOption} ${mode === 'drawn' ? classes.modeOptionActive : ''}`}
               onClick={() => onModeChange('drawn')}
               disabled={tiles.length < maxTiles}
@@ -421,7 +429,7 @@ export function TileRack({
               </div>
             );
           })}
-          {/* 14th slot: Clear button in Set Hand mode, Drawn slot in Gameplay mode */}
+          {/* 14th slot: Clear/Pass button in Set Hand/Charleston mode, Drawn slot in Gameplay mode */}
           {mode === 'hand' ? (
             // Show Clear button in Set Hand mode when there are tiles
             onClear && tiles.length > 0 ? (
@@ -431,6 +439,13 @@ export function TileRack({
                 </button>
               </div>
             ) : null
+          ) : mode === 'charleston' ? (
+            // Show Pass button in Charleston mode
+            <div className={classes.slot}>
+              <button className={classes.clearButton} onClick={onClear}>
+                Pass
+              </button>
+            </div>
           ) : (
             // Gameplay mode: always show the 14th slot
             <div
@@ -457,6 +472,8 @@ export function TileRack({
       <div className={classes.prompt}>
         {mode === 'hand'
           ? 'Set your starting hand using the tiles below.'
+          : mode === 'charleston'
+          ? 'Select up to 3 using suggestions, then "Pass", then replace.'
           : 'Draw an inventory tile by click, then discard any tile.'}
       </div>
     </div>

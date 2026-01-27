@@ -159,7 +159,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     position: 'absolute',
     top: '-6px',
     right: '-6px',
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#4CAF50',
     color: 'white',
     borderRadius: '50%',
     minWidth: '18px',
@@ -361,6 +361,22 @@ export function HandAnalyzer() {
   const results: ViableHandData[] = analysisData?.results ?? [];
   const callableTiles = callableData?.callableTiles ?? [];
 
+  // Compute how many recommended hands use each tile position in the player's hand
+  const tileUsageCounts: number[] = tiles.map((tile, index) => {
+    // Count how many times this tile appears before this index (to handle duplicates)
+    const occurrenceBefore = tiles.slice(0, index).filter(t => t === tile).length;
+
+    // Count hands that have more than occurrenceBefore of this tile
+    let count = 0;
+    for (const result of results) {
+      const countInHand = result.fullHandTiles.filter(t => t === tile).length;
+      if (countInHand > occurrenceBefore) {
+        count++;
+      }
+    }
+    return count;
+  });
+
   // Compute call highlights for each hand based on selected callable tile
   const getCallHighlight = (handId: number): CallHighlight | undefined => {
     if (!selectedCallableTile) return undefined;
@@ -461,6 +477,7 @@ export function HandAnalyzer() {
           onReorder={handleReorder}
           onAddTile={handleAddTileAtPosition}
           onRemoveTile={handleRemoveTileByIndex}
+          tileUsageCounts={tileUsageCounts}
           mode={inputMode}
           onModeChange={setInputMode}
         />

@@ -120,9 +120,27 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   draggableTile: {
     cursor: 'grab',
+    position: 'relative',
     '&:active': {
       cursor: 'grabbing',
     },
+  },
+  tileBadge: {
+    position: 'absolute',
+    top: '-6px',
+    right: '-6px',
+    backgroundColor: '#4CAF50',
+    color: 'white',
+    borderRadius: '50%',
+    minWidth: '18px',
+    height: '18px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '11px',
+    fontWeight: 'bold',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+    zIndex: 1,
   },
   drawSlot: {
     borderColor: theme.colors.primary,
@@ -209,6 +227,7 @@ interface TileRackProps {
   onReorder?: (fromIndex: number, toIndex: number) => void;
   onAddTile?: (tile: TileCode, atIndex?: number) => void;
   onRemoveTile?: (index: number) => void;
+  tileUsageCounts?: number[];
   sorted?: boolean;
   maxTiles?: number;
   mode?: InputMode;
@@ -224,6 +243,7 @@ export function TileRack({
   onReorder,
   onAddTile,
   onRemoveTile,
+  tileUsageCounts,
   sorted = true,
   maxTiles = 13,
   mode = 'hand',
@@ -382,6 +402,11 @@ export function TileRack({
                       code={tile}
                       onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
                     />
+                    {tileUsageCounts && tileUsageCounts[slotIndex] > 0 && (
+                      <div className={classes.tileBadge}>
+                        {tileUsageCounts[slotIndex]}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -113,6 +113,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
   slotDragging: {
     opacity: 0.5,
   },
+  slotSelected: {
+    borderColor: '#FF9800',
+    borderWidth: '3px',
+    backgroundColor: 'rgba(255, 152, 0, 0.15)',
+    boxShadow: '0 0 8px rgba(255, 152, 0, 0.5)',
+  },
   slotDropTarget: {
     borderColor: theme.colors.primary,
     borderWidth: '2px',
@@ -227,6 +233,10 @@ interface TileRackProps {
   onAddTile?: (tile: TileCode, atIndex?: number) => void;
   onRemoveTile?: (index: number) => void;
   tileUsageStats?: { count: number; minDistance: number }[];
+  charlestonPassOrder?: (number | undefined)[];
+  charlestonSelected?: Set<number>;
+  onCharlestonPass?: () => void;
+  isHandFull?: boolean;
   sorted?: boolean;
   maxTiles?: number;
   mode?: InputMode;
@@ -243,6 +253,10 @@ export function TileRack({
   onAddTile,
   onRemoveTile,
   tileUsageStats,
+  charlestonPassOrder,
+  charlestonSelected,
+  onCharlestonPass,
+  isHandFull = true,
   sorted = true,
   maxTiles = 13,
   mode = 'hand',
@@ -282,8 +296,8 @@ export function TileRack({
       if (slotIndex !== draggedIndex && slotIndex < tiles.length) {
         setDropTargetIndex(slotIndex);
       }
-    } else if (mode === 'hand') {
-      // For external drops (from inventory) in Set Hand mode, allow drop on any slot if hand not full
+    } else if (mode === 'hand' || (mode === 'charleston' && !isHandFull)) {
+      // For external drops (from inventory) in Set Hand mode or Charleston refill, allow drop on any slot if hand not full
       e.dataTransfer.dropEffect = 'copy';
       if (tiles.length < maxTiles) {
         setDropTargetIndex(slotIndex);
@@ -332,8 +346,8 @@ export function TileRack({
         onReorder(fromIndex, toIndex);
       }
       setDropSuccessful(true);
-    } else if (source === 'inventory' && mode === 'hand') {
-      // Drop from inventory - only in Set Hand mode
+    } else if (source === 'inventory' && (mode === 'hand' || (mode === 'charleston' && !isHandFull))) {
+      // Drop from inventory - in Set Hand mode or Charleston refill
       const tileCode = parseInt(e.dataTransfer.getData('application/x-tile-code'), 10);
       if (!isNaN(tileCode) && onAddTile && tiles.length < maxTiles) {
         // If dropping on an existing tile, insert at that position
@@ -388,12 +402,13 @@ export function TileRack({
             const tile = displayTiles[slotIndex];
             const isDragging = draggedIndex === slotIndex;
             const isDropTarget = dropTargetIndex === slotIndex;
+            const isSelected = mode === 'charleston' && charlestonSelected?.has(slotIndex);
             const canDrag = onReorder && tile !== undefined;
 
             return (
               <div
                 key={`slot-${slotIndex}`}
-                className={`${classes.slot} ${isDragging ? classes.slotDragging : ''} ${isDropTarget ? classes.slotDropTarget : ''}`}
+                className={`${classes.slot} ${isDragging ? classes.slotDragging : ''} ${isDropTarget ? classes.slotDropTarget : ''} ${isSelected ? classes.slotSelected : ''}`}
                 onDragOver={onReorder ? handleDragOver(slotIndex) : undefined}
                 onDragLeave={onReorder ? handleDragLeave : undefined}
                 onDrop={onReorder ? handleDrop(slotIndex) : undefined}
@@ -409,21 +424,31 @@ export function TileRack({
                       code={tile}
                       onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
                     />
-                    {tileUsageStats && tileUsageStats[slotIndex]?.count > 0 && (() => {
-                      const stats = tileUsageStats[slotIndex];
-                      // Color based on how close the nearest hand is: red = very close (valuable), green = far (less valuable)
-                      let bgColor = '#4CAF50'; // green - far/less valuable
-                      if (stats.minDistance <= 2) {
-                        bgColor = '#C62828'; // red - very close/most valuable
-                      } else if (stats.minDistance <= 4) {
-                        bgColor = '#F9A825'; // yellow/orange - medium
-                      }
-                      return (
-                        <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
-                          {stats.count}
+                    {mode === 'charleston' ? (
+                      // Charleston mode: show pass order (1, 2, 3)
+                      charlestonPassOrder && charlestonPassOrder[slotIndex] !== undefined && (
+                        <div className={classes.tileBadge} style={{ backgroundColor: '#FF9800' }}>
+                          {charlestonPassOrder[slotIndex]}
                         </div>
-                      );
-                    })()}
+                      )
+                    ) : mode === 'drawn' ? (
+                      // Gameplay mode: show usage stats
+                      tileUsageStats && tileUsageStats[slotIndex]?.count > 0 && (() => {
+                        const stats = tileUsageStats[slotIndex];
+                        // Color based on how close the nearest hand is: red = very close (valuable), green = far (less valuable)
+                        let bgColor = '#4CAF50'; // green - far/less valuable
+                        if (stats.minDistance <= 2) {
+                          bgColor = '#C62828'; // red - very close/most valuable
+                        } else if (stats.minDistance <= 4) {
+                          bgColor = '#F9A825'; // yellow/orange - medium
+                        }
+                        return (
+                          <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
+                            {stats.count}
+                          </div>
+                        );
+                      })()
+                    ) : null /* Set Hand mode: no badges */}
                   </div>
                 )}
               </div>
@@ -440,10 +465,18 @@ export function TileRack({
               </div>
             ) : null
           ) : mode === 'charleston' ? (
-            // Show Pass button in Charleston mode
+            // Show Pass button in Charleston mode (disabled unless 1-3 tiles selected)
             <div className={classes.slot}>
-              <button className={classes.clearButton} onClick={onClear}>
-                Pass
+              <button
+                className={classes.clearButton}
+                onClick={onCharlestonPass}
+                disabled={!charlestonSelected || charlestonSelected.size === 0 || charlestonSelected.size > 3}
+                style={{
+                  opacity: (!charlestonSelected || charlestonSelected.size === 0) ? 0.4 : 1,
+                  cursor: (!charlestonSelected || charlestonSelected.size === 0) ? 'not-allowed' : 'pointer',
+                }}
+              >
+                Pass {charlestonSelected && charlestonSelected.size > 0 ? `(${charlestonSelected.size})` : ''}
               </button>
             </div>
           ) : (
@@ -473,7 +506,9 @@ export function TileRack({
         {mode === 'hand'
           ? 'Set your starting hand using the tiles below.'
           : mode === 'charleston'
-          ? 'Select up to 3 using suggestions, then "Pass", then replace.'
+          ? (isHandFull
+              ? 'Select up to 3 using suggestions, then "Pass", then replace.'
+              : 'Refill your hand from the inventory.')
           : 'Draw an inventory tile by click, then discard any tile.'}
       </div>
     </div>

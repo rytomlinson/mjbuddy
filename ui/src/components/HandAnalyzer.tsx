@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { TileCode, getMaxTileCount, normalizeTileForCounting } from 'common';
+import { TileCode, getMaxTileCount, normalizeTileForCounting, isJoker } from 'common';
 import { useAppDispatch, useAppSelector } from '../hooks';
 import {
   selectHandTiles,
@@ -40,18 +40,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     flexDirection: 'column',
     gap: theme.spacing.sm,
   },
-  header: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.md,
-    maxWidth: '332px',
-  },
-  logo: {
-    height: '100px',
-    maxWidth: '100%',
-    objectFit: 'contain',
-  },
   section: {
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
@@ -80,16 +68,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     padding: theme.spacing.md,
     color: theme.colors.textMuted,
     fontSize: theme.fontSizes.sm,
-  },
-  tip: {
-    backgroundColor: 'rgba(184, 74, 74, 0.1)',
-    borderRadius: theme.borderRadius.sm,
-    padding: theme.spacing.md,
-    marginTop: theme.spacing.md,
-    fontSize: theme.fontSizes.sm,
-    color: theme.colors.textSecondary,
-    borderLeft: `3px solid ${theme.colors.primary}`,
-    maxWidth: '332px',
   },
   resultsList: {
     maxHeight: '600px',
@@ -229,10 +207,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
       padding: theme.spacing.md,
       gap: theme.spacing.md,
     },
-    logo: {
-      height: '80px',
-    },
-    // Hide header on mobile
     hideOnMobile: {
       display: 'none',
     },
@@ -267,6 +241,7 @@ export function HandAnalyzer() {
   const [inputMode, setInputMode] = useState<InputMode>('hand');
   const [selectedCallableTile, setSelectedCallableTile] = useState<number | null>(null);
   const [strategyCollapsed, setStrategyCollapsed] = useState(false);
+  const [charlestonSelected, setCharlestonSelected] = useState<Set<number>>(new Set());
 
   // Query for analysis
   const { data: analysisData, isLoading, error } = trpc.analysis.analyzeHand.useQuery(
@@ -320,7 +295,13 @@ export function HandAnalyzer() {
       if (!isHandFull) {
         dispatch(addTile(tile));
       }
+    } else if (inputMode === 'charleston') {
+      // Charleston mode: add tiles when refilling (hand not full)
+      if (!isHandFull) {
+        dispatch(addTile(tile));
+      }
     } else {
+      // Gameplay mode: set as drawn tile
       dispatch(setDrawnTile(tile));
     }
   };
@@ -329,6 +310,18 @@ export function HandAnalyzer() {
     if (index === -1) {
       // Discarding the drawn tile
       dispatch(setDrawnTile(null));
+    } else if (inputMode === 'charleston') {
+      // Charleston mode: toggle tile selection (max 3), but only when hand is full
+      if (!isHandFull) return; // Can't select tiles when refilling
+      setCharlestonSelected(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(index)) {
+          newSet.delete(index);
+        } else if (newSet.size < 3) {
+          newSet.add(index);
+        }
+        return newSet;
+      });
     } else if (inputMode === 'drawn' && drawnTile !== null) {
       // Gameplay mode: discard from hand and insert drawn tile at that position
       dispatch(removeTile(index));
@@ -343,6 +336,21 @@ export function HandAnalyzer() {
   const handleClear = () => {
     dispatch(clearTiles());
     dispatch(setDrawnTile(null));
+    setCharlestonSelected(new Set());
+  };
+
+  const handleModeChange = (newMode: InputMode) => {
+    setInputMode(newMode);
+    setCharlestonSelected(new Set()); // Clear selection when changing modes
+  };
+
+  const handleCharlestonPass = () => {
+    // Remove the selected tiles from hand (in reverse order to maintain indices)
+    const selectedIndices = Array.from(charlestonSelected).sort((a, b) => b - a);
+    for (const index of selectedIndices) {
+      dispatch(removeTile(index));
+    }
+    setCharlestonSelected(new Set());
   };
 
   const handleReorder = (fromIndex: number, toIndex: number) => {
@@ -408,6 +416,82 @@ export function HandAnalyzer() {
     }
     return { count, minDistance: minDistance === Infinity ? 0 : minDistance };
   });
+
+  // Compute Charleston pass order - which tiles to pass (1, 2, 3) based on least value to keep
+  const charlestonPassData = (() => {
+    if (inputMode !== 'charleston' || results.length === 0) {
+      return { passOrder: tiles.map(() => undefined as number | undefined), strategyText: '' };
+    }
+
+    // Calculate a "keep score" for each tile - higher = more valuable to keep
+    // Skip Jokers - never recommend passing them
+    const keepScores = tileUsageStats
+      .map((stats, index) => ({
+        index,
+        tile: tiles[index],
+        count: stats.count,
+        minDistance: stats.minDistance,
+        // Keep score: prioritize tiles used by more hands, then by closer hands
+        // count * 100 gives strong weight to number of hands
+        // (10 - minDistance) rewards tiles with closer hands (minDistance typically 0-10)
+        keepScore: stats.count * 100 + (stats.count > 0 ? (10 - Math.min(stats.minDistance, 10)) : 0),
+        isJoker: isJoker(tiles[index]),
+      }))
+      .filter(item => !item.isJoker); // Never recommend passing Jokers
+
+    // Sort by keep score ascending (lowest = best to pass)
+    const sorted = [...keepScores].sort((a, b) => a.keepScore - b.keepScore);
+
+    // Check if there are any non-Joker tiles to consider
+    if (sorted.length === 0) {
+      return {
+        passOrder: tiles.map(() => undefined as number | undefined),
+        strategyText: 'Keep your Jokers! Pass any non-Joker tiles you prefer.',
+      };
+    }
+
+    // Check if there's meaningful difference
+    const minScore = sorted[0]?.keepScore ?? 0;
+    const maxScore = sorted[sorted.length - 1]?.keepScore ?? 0;
+
+    if (minScore === maxScore) {
+      return {
+        passOrder: tiles.map(() => undefined as number | undefined),
+        strategyText: 'All non-Joker tiles have equal value for your recommended hands. Pass any you prefer (but keep Jokers!).',
+      };
+    }
+
+    // Assign pass order to tiles that are clearly less valuable
+    const passOrder: (number | undefined)[] = new Array(tiles.length).fill(undefined);
+    const passReasons: string[] = [];
+    let currentOrder = 1;
+
+    for (const item of sorted) {
+      if (currentOrder > 3) break;
+
+      // Only mark if this tile is less valuable than the best tiles
+      if (item.keepScore >= maxScore * 0.8) break; // Stop if within 80% of max value
+
+      passOrder[item.index] = currentOrder;
+
+      // Generate reason text
+      if (item.count === 0) {
+        passReasons.push(`#${currentOrder}: Not used by any recommended hand`);
+      } else if (item.minDistance >= 5) {
+        passReasons.push(`#${currentOrder}: Only helps distant hands (${item.minDistance} away)`);
+      } else {
+        passReasons.push(`#${currentOrder}: Used by fewer hands (${item.count})`);
+      }
+
+      currentOrder++;
+    }
+
+    const strategyText = passReasons.length > 0
+      ? `Pass suggestions:\n${passReasons.join('\n')}`
+      : 'All tiles contribute to your recommended hands. Consider which hands you want to pursue.';
+
+    return { passOrder, strategyText };
+  })();
 
   // Compute call highlights for each hand based on selected callable tile
   const getCallHighlight = (handId: number): CallHighlight | undefined => {
@@ -497,23 +581,22 @@ export function HandAnalyzer() {
   return (
     <div className={classes.analyzer}>
       <div className={classes.leftPanel}>
-        {/* Header - hidden on mobile */}
-        <div className={`${classes.header} ${classes.hideOnMobile}`}>
-          <img src="/mjb_logo.png" alt="Mah Jongg Buddy" className={classes.logo} />
-        </div>
-
-        {/* Strategy Tip Section */}
-        {tiles.length >= 3 && (
+        {/* Strategy Tip Section - only in Charleston and Gameplay modes */}
+        {(inputMode === 'charleston' || inputMode === 'drawn') && tiles.length >= 3 && (
           <div className={classes.adviceBox}>
             <div
               className={`${classes.adviceLabel} ${strategyCollapsed ? classes.adviceLabelCollapsed : ''}`}
               onClick={() => setStrategyCollapsed(!strategyCollapsed)}
             >
               <span className={`${classes.collapseIcon} ${strategyCollapsed ? classes.collapseIconRotated : ''}`}>&#9660;</span>
-              <span>&#128161;</span> Strategy
+              <span>&#128161;</span> {inputMode === 'charleston' ? 'Charleston' : 'Strategy'}
             </div>
             {!strategyCollapsed && (
-              adviceLoading ? (
+              inputMode === 'charleston' ? (
+                <p className={classes.adviceText} style={{ whiteSpace: 'pre-line' }}>
+                  {charlestonPassData.strategyText || 'Add tiles to see pass suggestions.'}
+                </p>
+              ) : adviceLoading ? (
                 <p className={classes.adviceLoading}>Analyzing your hand...</p>
               ) : (
                 <p className={classes.adviceText}>{adviceData?.advice}</p>
@@ -522,8 +605,8 @@ export function HandAnalyzer() {
           </div>
         )}
 
-        {/* Callable Tiles Section */}
-        {tiles.length >= 3 && (
+        {/* Callable Tiles Section - only in Gameplay mode */}
+        {inputMode === 'drawn' && tiles.length >= 3 && (
           <div className={classes.callableSection}>
             {renderCallableTiles()}
           </div>
@@ -538,8 +621,12 @@ export function HandAnalyzer() {
           onAddTile={handleAddTileAtPosition}
           onRemoveTile={handleRemoveTileByIndex}
           tileUsageStats={tileUsageStats}
+          charlestonPassOrder={charlestonPassData.passOrder}
+          charlestonSelected={charlestonSelected}
+          onCharlestonPass={handleCharlestonPass}
+          isHandFull={isHandFull}
           mode={inputMode}
-          onModeChange={setInputMode}
+          onModeChange={handleModeChange}
         />
 
         <TilePicker
@@ -547,14 +634,12 @@ export function HandAnalyzer() {
           disabledTiles={disabledTiles}
         />
 
-        <div className={`${classes.tip} ${classes.hideOnMobile}`}>
-          <strong>Tip:</strong> Click tiles in your hand to remove them. The analysis updates automatically as you add tiles.
-        </div>
       </div>
 
-      <div className={classes.rightPanel}>
-        {/* Recommended Hands Section */}
-        <div className={classes.section}>
+      {/* Recommended Hands Section - only in Charleston and Gameplay modes */}
+      {(inputMode === 'charleston' || inputMode === 'drawn') && (
+        <div className={classes.rightPanel}>
+          <div className={classes.section}>
           <div className={classes.sectionTitle}>
             <span>Recommended Hands</span>
             <span className={classes.sectionCount}>({results.length} viable)</span>
@@ -588,8 +673,9 @@ export function HandAnalyzer() {
               ))}
             </div>
           )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

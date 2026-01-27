@@ -24,6 +24,15 @@ export const theme = {
       blush: '#C4A4A4',
       slate: '#7A8B9A',
     },
+    // Colors for exposed melds (distinguishable but cohesive)
+    meldColors: [
+      '#6B8E7A', // sage green
+      '#7A8B9A', // slate blue
+      '#C9A55C', // gold
+      '#9A7A9A', // plum
+      '#5A9A8A', // teal
+      '#C4A4A4', // blush
+    ],
   },
   spacing: {
     xs: '4px',

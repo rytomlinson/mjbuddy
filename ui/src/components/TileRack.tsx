@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
-import { TileCode, sortTiles } from 'common';
+import { TileCode, sortTiles, isJoker } from 'common';
 import { Tile } from './Tile';
-import type { Theme } from '../theme';
+import { theme, type Theme } from '../theme';
 import type { ExposedMeld } from '../slices/handSlice';
+
+// Export meld colors for use in other components
+export const getMeldColor = (meldIndex: number): string => {
+  return theme.colors.meldColors[meldIndex % theme.colors.meldColors.length];
+};
 
 const useStyles = createUseStyles((theme: Theme) => ({
   rackHeader: {
@@ -227,6 +232,19 @@ const useStyles = createUseStyles((theme: Theme) => ({
     borderRadius: theme.borderRadius.sm,
     border: `1px solid ${theme.colors.border}`,
   },
+  meldTileWrapper: {
+    position: 'relative',
+  },
+  swappableJoker: {
+    cursor: 'pointer',
+    borderRadius: theme.borderRadius.sm,
+    boxShadow: '0 0 0 2px #4CAF50',
+    transition: 'all 0.2s',
+    '&:hover': {
+      boxShadow: '0 0 8px 2px rgba(76, 175, 80, 0.6)',
+      transform: 'scale(1.05)',
+    },
+  },
   // Mobile responsive
   '@media (max-width: 480px)': {
     tiles: {
@@ -280,6 +298,7 @@ interface TileRackProps {
   charlestonPassOrder?: (number | undefined)[];
   charlestonSelected?: Set<number>;
   onCharlestonPass?: () => void;
+  onJokerSwap?: (meldIndex: number, tileIndex: number) => void;
   isHandFull?: boolean;
   sorted?: boolean;
   maxTiles?: number;
@@ -302,6 +321,7 @@ export function TileRack({
   charlestonPassOrder,
   charlestonSelected,
   onCharlestonPass,
+  onJokerSwap,
   isHandFull = true,
   sorted = true,
   maxTiles = 13,
@@ -448,13 +468,40 @@ export function TileRack({
         <div className={classes.exposedSection}>
           <div className={classes.sectionLabel}>Exposed</div>
           <div className={classes.exposedMelds}>
-            {exposedMelds.map((meld, meldIndex) => (
-              <div key={meldIndex} className={classes.meld}>
-                {meld.tiles.map((tile, tileIndex) => (
-                  <Tile key={tileIndex} code={tile} size="small" />
-                ))}
-              </div>
-            ))}
+            {exposedMelds.map((meld, meldIndex) => {
+              // Find the natural (non-joker) tile in this meld
+              const naturalTile = meld.tiles.find(t => !isJoker(t));
+              // Check if player has a matching tile in concealed hand or drawn slot
+              const hasMatchingTile = naturalTile !== undefined && (
+                tiles.includes(naturalTile) || drawnTile === naturalTile
+              );
+
+              const meldColor = getMeldColor(meldIndex);
+
+              return (
+                <div
+                  key={meldIndex}
+                  className={classes.meld}
+                  style={{ borderColor: meldColor }}
+                >
+                  {meld.tiles.map((tile, tileIndex) => {
+                    const tileIsJoker = isJoker(tile);
+                    const isSwappable = tileIsJoker && hasMatchingTile && onJokerSwap;
+
+                    return (
+                      <div
+                        key={tileIndex}
+                        className={`${classes.meldTileWrapper} ${isSwappable ? classes.swappableJoker : ''}`}
+                        onClick={isSwappable ? () => onJokerSwap(meldIndex, tileIndex) : undefined}
+                        title={isSwappable ? 'Click to swap with matching tile from your hand' : undefined}
+                      >
+                        <Tile code={tile} size="small" />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
@@ -508,7 +555,15 @@ export function TileRack({
                     >
                       <Tile
                         code={tile}
-                        onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
+                        onClick={(() => {
+                          // In Gameplay mode, only allow clicking when there are 14 tiles
+                          // (drawnTile present or pendingDiscard after a call)
+                          if (mode === 'drawn') {
+                            const has14Tiles = drawnTile !== undefined || pendingDiscard;
+                            if (!has14Tiles) return undefined;
+                          }
+                          return onTileClick ? () => onTileClick(tile, slotIndex) : undefined;
+                        })()}
                       />
                       {mode === 'charleston' ? (
                         // Charleston mode: show pass order (1, 2, 3)
@@ -598,7 +653,9 @@ export function TileRack({
           ? (isHandFull
               ? 'Select up to 3 using suggestions, then "Pass", then replace.'
               : 'Refill your hand from the inventory.')
-          : 'Draw an inventory tile by click, then discard any tile.'}
+          : drawnTile !== undefined
+          ? 'Click any tile to discard it.'
+          : 'Draw a tile or call a discard to continue.'}
       </div>
     </div>
   );

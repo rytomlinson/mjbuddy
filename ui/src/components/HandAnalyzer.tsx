@@ -16,11 +16,12 @@ import {
   setTiles,
   reorderTile,
   addExposedMeld,
+  swapJokerInMeld,
   ExposedMeld,
 } from '../slices/handSlice';
 import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
-import { TileRack } from './TileRack';
+import { TileRack, getMeldColor } from './TileRack';
 import { ViableHandCard, ViableHandData, CallHighlight } from './ViableHandCard';
 import { Tile } from './Tile';
 import type { Theme } from '../theme';
@@ -500,11 +501,20 @@ export function HandAnalyzer() {
     dispatch(setTiles(organized));
   };
 
-  const results: ViableHandData[] = analysisData?.results ?? [];
+  const allResults: ViableHandData[] = analysisData?.results ?? [];
   const callableTiles = callableData?.callableTiles ?? [];
+
+  // Filter results when a callable tile is selected
+  const results = selectedCallableTile
+    ? allResults.filter(result => {
+        const callableEntry = callableTiles.find(ct => ct.tile === selectedCallableTile);
+        return callableEntry?.calls.some(c => c.handId === result.handId);
+      })
+    : allResults;
 
   // Compute usage stats for each tile position in the player's hand
   // Returns { count: number of hands using this tile, minDistance: closest hand distance }
+  // Use allResults so stats don't change when filtering by callable tile
   const tileUsageStats: { count: number; minDistance: number }[] = tiles.map((tile, index) => {
     // Count how many times this tile appears before this index (to handle duplicates)
     const occurrenceBefore = tiles.slice(0, index).filter(t => t === tile).length;
@@ -512,7 +522,7 @@ export function HandAnalyzer() {
     // Find hands that use this tile and track count + minimum distance
     let count = 0;
     let minDistance = Infinity;
-    for (const result of results) {
+    for (const result of allResults) {
       const countInHand = result.fullHandTiles.filter(t => t === tile).length;
       if (countInHand > occurrenceBefore) {
         count++;
@@ -713,6 +723,33 @@ export function HandAnalyzer() {
     }
   };
 
+  const handleJokerSwap = (meldIndex: number, tileIndex: number) => {
+    const meld = exposedMelds[meldIndex];
+    if (!meld) return;
+
+    // Find the natural (non-joker) tile in this meld
+    const naturalTile = meld.tiles.find(t => !isJoker(t));
+    if (naturalTile === undefined) return;
+
+    // Check if we have a matching tile in concealed hand
+    const concealedIndex = tiles.indexOf(naturalTile);
+    if (concealedIndex !== -1) {
+      // Remove natural tile from concealed hand
+      dispatch(removeTile(concealedIndex));
+      // Add joker to concealed hand
+      dispatch(addTile(meld.tiles[tileIndex]));
+      // Update the meld to replace joker with natural tile
+      dispatch(swapJokerInMeld({ meldIndex, tileIndex, naturalTile }));
+    } else if (drawnTile === naturalTile) {
+      // Swap with drawn tile
+      const jokerTile = meld.tiles[tileIndex];
+      // Set drawn tile to the joker
+      dispatch(setDrawnTile(jokerTile));
+      // Update the meld to replace joker with natural tile
+      dispatch(swapJokerInMeld({ meldIndex, tileIndex, naturalTile }));
+    }
+  };
+
   // Compute disabled tiles (tiles that have reached their max count)
   const disabledTiles = (() => {
     // Collect all tiles in use
@@ -862,6 +899,7 @@ export function HandAnalyzer() {
           charlestonPassOrder={charlestonPassData.passOrder}
           charlestonSelected={charlestonSelected}
           onCharlestonPass={handleCharlestonPass}
+          onJokerSwap={handleJokerSwap}
           isHandFull={isHandFull}
           mode={inputMode}
           onModeChange={handleModeChange}
@@ -881,7 +919,11 @@ export function HandAnalyzer() {
           <div className={classes.section}>
           <div className={classes.sectionTitle}>
             <span>Recommended Hands</span>
-            <span className={classes.sectionCount}>({results.length} viable)</span>
+            <span className={classes.sectionCount}>
+              {selectedCallableTile
+                ? `(${results.length} of ${allResults.length} can call)`
+                : `(${results.length} viable)`}
+            </span>
           </div>
 
           {tiles.length < 3 ? (
@@ -901,17 +943,24 @@ export function HandAnalyzer() {
             </div>
           ) : (
             <div className={classes.resultsList}>
-              {results.map((result, index) => (
-                <ViableHandCard
-                  key={result.handId}
-                  data={result}
-                  rank={index + 1}
-                  callHighlight={getCallHighlight(result.handId)}
-                  isExposureSelected={selectedExposure?.handId === result.handId}
-                  onOrganize={handleOrganizeTiles}
-                  onSelectExposure={selectedCallableTile ? handleSelectExposure : undefined}
-                />
-              ))}
+              {results.map((result, index) => {
+                // Generate meld colors array for this result
+                const meldColors = exposedMelds.map((_, meldIndex) => getMeldColor(meldIndex));
+                // Get call info for this hand if a callable tile is selected
+                const callInfo = selectedCallableTile ? getCallHighlight(result.handId) : undefined;
+                return (
+                  <ViableHandCard
+                    key={result.handId}
+                    data={result}
+                    rank={index + 1}
+                    callInfo={callInfo}
+                    isExposureSelected={selectedExposure?.handId === result.handId}
+                    meldColors={meldColors}
+                    onOrganize={handleOrganizeTiles}
+                    onSelectExposure={selectedCallableTile ? handleSelectExposure : undefined}
+                  />
+                );
+              })}
             </div>
           )}
           </div>

@@ -97,6 +97,20 @@ const handSlice = createSlice({
         state.tiles.splice(toIndex, 0, tile);
       }
     },
+    swapJokerInMeld: (state, action: PayloadAction<{ meldIndex: number; tileIndex: number; naturalTile: TileCode }>) => {
+      const { meldIndex, tileIndex, naturalTile } = action.payload;
+      if (meldIndex >= 0 && meldIndex < state.exposedMelds.length) {
+        const meld = state.exposedMelds[meldIndex];
+        if (tileIndex >= 0 && tileIndex < meld.tiles.length) {
+          // Replace joker with natural tile in meld
+          meld.tiles[tileIndex] = naturalTile;
+          // Decrement joker count
+          if (meld.jokerCount > 0) {
+            meld.jokerCount--;
+          }
+        }
+      }
+    },
   },
 });
 
@@ -116,6 +130,7 @@ export const {
   clearExposedMelds,
   resetHand,
   reorderTile,
+  swapJokerInMeld,
 } = handSlice.actions;
 
 // Selectors

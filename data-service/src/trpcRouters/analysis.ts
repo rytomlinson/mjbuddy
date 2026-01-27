@@ -62,13 +62,22 @@ export const analysisRouter = router({
       return {
         results: results.map((r) => {
           // Build full hand tiles from best variation
+          // Also track where each group's tiles start in the array
           const fullHandTiles: number[] = [];
+          const groupStartIndices: number[] = [];
           if (r.bestVariation) {
             for (const group of r.bestVariation.groups) {
+              groupStartIndices.push(fullHandTiles.length);
               for (let i = 0; i < group.count; i++) {
                 fullHandTiles.push(group.tile);
               }
             }
+          }
+
+          // Convert meldToGroupMap (Map) to array of [meldIndex, groupIndex] pairs for JSON
+          const meldToGroupMap: [number, number][] = [];
+          for (const [meldIndex, groupIndex] of r.meldToGroupMap.entries()) {
+            meldToGroupMap.push([meldIndex, groupIndex]);
           }
 
           return {
@@ -81,6 +90,8 @@ export const analysisRouter = router({
             isConcealed: r.hand.isConcealed,
             neededTiles: r.neededTiles,
             fullHandTiles,
+            groupStartIndices,
+            meldToGroupMap,
             jokersUsable: r.jokersUsable,
             matchedGroups: r.matchedGroups,
             probability: r.probability,

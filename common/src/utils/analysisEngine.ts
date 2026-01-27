@@ -30,6 +30,7 @@ export interface HandAnalysisResult {
   isViable: boolean;
   probability: number; // Probability of completing (0-1)
   viabilityScore: number; // Combined score (0-100)
+  meldToGroupMap: Map<number, number>; // Maps meld index to group index in pattern
 }
 
 export interface MatchedGroup {
@@ -125,23 +126,89 @@ function calculateGroupDistance(
 }
 
 /**
+ * Check if exposed melds are compatible with a pattern
+ * Returns a map of meld index to group index, or null if incompatible
+ */
+function checkExposedMeldCompatibility(
+  pattern: ConcretePattern,
+  exposedMelds: ExposedMeld[]
+): { satisfiedGroups: number[]; meldToGroupMap: Map<number, number> } | null {
+  if (exposedMelds.length === 0) {
+    return { satisfiedGroups: [], meldToGroupMap: new Map() };
+  }
+
+  const usedGroupIndices: number[] = [];
+  const meldToGroupMap = new Map<number, number>();
+
+  for (let meldIndex = 0; meldIndex < exposedMelds.length; meldIndex++) {
+    const meld = exposedMelds[meldIndex];
+    // Find the natural (non-joker) tile in the meld to determine what it represents
+    const naturalTile = meld.tiles.find(t => !isJoker(t));
+    if (naturalTile === undefined) {
+      // Meld is all jokers - this shouldn't happen in practice
+      continue;
+    }
+
+    const normalizedMeldTile = normalizeTile(naturalTile);
+    const meldSize = meld.tiles.length;
+
+    // Find a matching group in the pattern that hasn't been used yet
+    let foundMatch = false;
+    for (let i = 0; i < pattern.groups.length; i++) {
+      if (usedGroupIndices.includes(i)) {
+        continue; // Already matched to another meld
+      }
+
+      const group = pattern.groups[i];
+      const normalizedGroupTile = normalizeTile(group.tile);
+
+      // Check if this group matches the meld
+      if (normalizedGroupTile === normalizedMeldTile && group.count === meldSize) {
+        usedGroupIndices.push(i);
+        meldToGroupMap.set(meldIndex, i);
+        foundMatch = true;
+        break;
+      }
+    }
+
+    if (!foundMatch) {
+      // This meld doesn't match any group in the pattern
+      return null;
+    }
+  }
+
+  return { satisfiedGroups: usedGroupIndices, meldToGroupMap };
+}
+
+/**
  * Calculate distance from player's hand to a concrete pattern
  */
 function calculatePatternDistance(
   pattern: ConcretePattern,
   playerTiles: TileCode[],
-  _exposedMelds: ExposedMeld[]
-): { distance: number; matchedGroups: MatchedGroup[]; jokersUsable: number } {
+  exposedMelds: ExposedMeld[]
+): { distance: number; matchedGroups: MatchedGroup[]; jokersUsable: number; isCompatible: boolean; meldToGroupMap: Map<number, number> } {
+  // First check if exposed melds are compatible with this pattern
+  const compatResult = checkExposedMeldCompatibility(pattern, exposedMelds);
+  if (compatResult === null) {
+    // Incompatible - return high distance
+    return {
+      distance: Infinity,
+      matchedGroups: [],
+      jokersUsable: 0,
+      isCompatible: false,
+      meldToGroupMap: new Map(),
+    };
+  }
+
+  const { satisfiedGroups, meldToGroupMap } = compatResult;
+
   // Count available tiles (excluding those in exposed melds)
   const tileCounts = countNormalizedTiles(playerTiles);
   const jokerCount = tileCounts.get(encodeTile(TileType.JOKER, 1)) ?? 0;
 
   // Remove jokers from tile counts (we track them separately)
   tileCounts.delete(encodeTile(TileType.JOKER, 1));
-
-  // Check if exposed melds are compatible with pattern
-  // For now, simplified: just check if we can fit the melds somewhere
-  // TODO: More sophisticated meld matching
 
   let totalDistance = 0;
   let totalJokersUsable = 0;
@@ -153,9 +220,22 @@ function calculatePatternDistance(
 
   for (let i = 0; i < pattern.groups.length; i++) {
     const group = pattern.groups[i];
+    const needed = group.count;
+
+    // Check if this group is already satisfied by an exposed meld
+    if (satisfiedGroups.includes(i)) {
+      // Group is fully satisfied by exposed meld - no distance, fully matched
+      matchedGroups.push({
+        groupIndex: i,
+        tilesMatched: needed,
+        tilesNeeded: needed,
+        canUseJoker: group.count >= 3,
+      });
+      continue;
+    }
+
     const normalizedTile = normalizeTile(group.tile);
     const available = workingCounts.get(normalizedTile) ?? 0;
-    const needed = group.count;
 
     const result = calculateGroupDistance(group, workingCounts, remainingJokers);
 
@@ -186,6 +266,8 @@ function calculatePatternDistance(
     distance: totalDistance,
     matchedGroups,
     jokersUsable: Math.min(totalJokersUsable, jokerCount),
+    isCompatible: true,
+    meldToGroupMap,
   };
 }
 
@@ -236,6 +318,7 @@ export function analyzeHand(
       isViable: false,
       probability: 0,
       viabilityScore: 0,
+      meldToGroupMap: new Map(),
     };
   }
 
@@ -253,6 +336,7 @@ export function analyzeHand(
       isViable: false,
       probability: 0,
       viabilityScore: 0,
+      meldToGroupMap: new Map(),
     };
   }
 
@@ -262,10 +346,16 @@ export function analyzeHand(
     variation: ConcretePattern;
     matchedGroups: MatchedGroup[];
     jokersUsable: number;
+    meldToGroupMap: Map<number, number>;
   } | null = null;
 
   for (const variation of variations) {
     const result = calculatePatternDistance(variation, allTiles, playerState.exposedMelds);
+
+    // Skip incompatible variations (exposed melds don't match pattern)
+    if (!result.isCompatible) {
+      continue;
+    }
 
     if (bestResult === null || result.distance < bestResult.distance) {
       bestResult = {
@@ -273,6 +363,7 @@ export function analyzeHand(
         variation,
         matchedGroups: result.matchedGroups,
         jokersUsable: result.jokersUsable,
+        meldToGroupMap: result.meldToGroupMap,
       };
     }
 
@@ -293,6 +384,7 @@ export function analyzeHand(
       isViable: false,
       probability: 0,
       viabilityScore: 0,
+      meldToGroupMap: new Map(),
     };
   }
 
@@ -316,6 +408,7 @@ export function analyzeHand(
     isViable: bestResult.distance <= 6, // Consider viable if within 6 tiles
     probability,
     viabilityScore,
+    meldToGroupMap: bestResult.meldToGroupMap,
   };
 }
 

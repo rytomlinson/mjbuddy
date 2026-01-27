@@ -16,10 +16,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
       borderColor: theme.colors.primary,
     },
   },
-  cardHighlighted: {
-    borderColor: theme.colors.primary,
-    backgroundColor: 'rgba(184, 74, 74, 0.1)',
-    boxShadow: '0 0 12px rgba(184, 74, 74, 0.3)',
+  cardClickable: {
     cursor: 'pointer',
   },
   cardSelected: {
@@ -324,6 +321,8 @@ export interface ViableHandData {
   isConcealed: boolean;
   neededTiles: TileCode[];
   fullHandTiles: TileCode[];
+  groupStartIndices: number[];
+  meldToGroupMap: [number, number][]; // Array of [meldIndex, groupIndex] pairs
   jokersUsable: number;
   probability: number;
   viabilityScore: number;
@@ -339,21 +338,42 @@ export interface CallHighlight {
 interface ViableHandCardProps {
   data: ViableHandData;
   rank: number;
-  callHighlight?: CallHighlight;
+  callInfo?: CallHighlight;
   isExposureSelected?: boolean;
+  meldColors?: string[]; // Colors for each exposed meld (indexed by meld index)
   onOrganize?: (fullHandTiles: TileCode[]) => void;
   onSelectExposure?: (handId: number, exposedTiles: TileCode[]) => void;
 }
 
-export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, onOrganize, onSelectExposure }: ViableHandCardProps) {
+export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldColors, onOrganize, onSelectExposure }: ViableHandCardProps) {
   const classes = useStyles();
 
-  const isHighlighted = callHighlight?.handId === data.handId;
-  const isClickable = isHighlighted && onSelectExposure;
+  // Card is clickable when there's call info and a handler to select exposure
+  const isClickable = callInfo && onSelectExposure;
+
+  // Build a map of tile indices to meld colors
+  // For each meld, find which group it maps to and color those tiles
+  const tileIndexToMeldColor: Map<number, string> = new Map();
+  if (meldColors && meldColors.length > 0 && data.meldToGroupMap && data.groupStartIndices) {
+    for (const [meldIndex, groupIndex] of data.meldToGroupMap) {
+      const color = meldColors[meldIndex];
+      if (color && groupIndex < data.groupStartIndices.length) {
+        const startIndex = data.groupStartIndices[groupIndex];
+        // Find the end of this group (start of next group or end of array)
+        const endIndex = groupIndex + 1 < data.groupStartIndices.length
+          ? data.groupStartIndices[groupIndex + 1]
+          : data.fullHandTiles.length;
+        // Mark all tiles in this group with the meld color
+        for (let i = startIndex; i < endIndex; i++) {
+          tileIndexToMeldColor.set(i, color);
+        }
+      }
+    }
+  }
 
   const handleCardClick = () => {
-    if (isClickable && callHighlight) {
-      onSelectExposure(data.handId, callHighlight.exposedTiles);
+    if (isClickable && callInfo) {
+      onSelectExposure(data.handId, callInfo.exposedTiles);
     }
   };
 
@@ -365,7 +385,7 @@ export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, 
 
   return (
     <div
-      className={`${classes.card} ${isHighlighted ? classes.cardHighlighted : ''} ${isExposureSelected ? classes.cardSelected : ''}`}
+      className={`${classes.card} ${isClickable ? classes.cardClickable : ''} ${isExposureSelected ? classes.cardSelected : ''}`}
       onClick={handleCardClick}
     >
       <div className={classes.cardTop}>
@@ -373,9 +393,9 @@ export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, 
           <h3 className={classes.handName}>
             <span className={classes.rankBadge}>{rank}</span>
             {data.handName}
-            {isHighlighted && callHighlight && (
+            {callInfo && (
               <span className={classes.callBadge}>
-                {callHighlight.callType}
+                {callInfo.callType}
               </span>
             )}
           </h3>
@@ -417,7 +437,7 @@ export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, 
               // Create a copy of needed tiles to track which are still needed
               const neededCopy = [...data.neededTiles];
               // Create a copy of exposed tiles to track which ones to highlight
-              const exposedCopy = isHighlighted && callHighlight ? [...callHighlight.exposedTiles] : [];
+              const exposedCopy = callInfo ? [...callInfo.exposedTiles] : [];
 
               return data.fullHandTiles.map((tile, i) => {
                 // Check if this tile is in the needed list
@@ -436,6 +456,9 @@ export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, 
                   exposedCopy.splice(exposedIndex, 1);
                 }
 
+                // Check if this tile belongs to an exposed meld
+                const meldColor = tileIndexToMeldColor.get(i);
+
                 // Determine the tile class
                 let tileClass = isNeeded ? classes.tileNeed : classes.tileHave;
                 let indicatorClass = isNeeded ? classes.indicatorNeed : classes.indicatorHave;
@@ -447,14 +470,21 @@ export function ViableHandCard({ data, rank, callHighlight, isExposureSelected, 
                   indicatorText = '\u2191'; // Up arrow for "expose"
                 }
 
+                // Apply meld color as border if this tile belongs to an exposed meld
+                const tileStyle = meldColor
+                  ? { boxShadow: `0 0 0 3px ${meldColor}`, borderRadius: '4px' }
+                  : undefined;
+
                 return (
                   <div key={i} className={classes.tileWrapper}>
-                    <div className={tileClass}>
+                    <div className={meldColor ? '' : tileClass} style={tileStyle}>
                       <Tile code={tile} size="small" />
                     </div>
-                    <div className={`${classes.tileIndicator} ${indicatorClass}`}>
-                      {indicatorText}
-                    </div>
+                    {!meldColor && (
+                      <div className={`${classes.tileIndicator} ${indicatorClass}`}>
+                        {indicatorText}
+                      </div>
+                    )}
                   </div>
                 );
               });

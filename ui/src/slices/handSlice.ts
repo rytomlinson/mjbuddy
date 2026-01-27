@@ -21,19 +21,32 @@ const initialState: HandState = {
 };
 
 const MAX_HAND_SIZE = 13;
+const MAX_TOTAL_TILES = 14; // Max including drawn tile
+
+// Helper to calculate total tiles
+function getTotalTiles(state: HandState): number {
+  const handCount = state.tiles.length;
+  const drawnCount = state.drawnTile !== null ? 1 : 0;
+  const meldCount = state.exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+  return handCount + drawnCount + meldCount;
+}
 
 const handSlice = createSlice({
   name: 'hand',
   initialState,
   reducers: {
     addTile: (state, action: PayloadAction<TileCode>) => {
-      if (state.tiles.length < MAX_HAND_SIZE) {
+      const exposedCount = state.exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+      const maxConcealed = MAX_HAND_SIZE - exposedCount;
+      if (state.tiles.length < maxConcealed && getTotalTiles(state) < MAX_TOTAL_TILES) {
         state.tiles.push(action.payload);
       }
     },
     insertTileAt: (state, action: PayloadAction<{ tile: TileCode; index: number }>) => {
       const { tile, index } = action.payload;
-      if (state.tiles.length < MAX_HAND_SIZE && index >= 0 && index <= state.tiles.length) {
+      const exposedCount = state.exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+      const maxConcealed = MAX_HAND_SIZE - exposedCount;
+      if (state.tiles.length < maxConcealed && getTotalTiles(state) < MAX_TOTAL_TILES && index >= 0 && index <= state.tiles.length) {
         state.tiles.splice(index, 0, tile);
       }
     },
@@ -49,16 +62,23 @@ const handSlice = createSlice({
       }
     },
     setTiles: (state, action: PayloadAction<TileCode[]>) => {
-      state.tiles = action.payload.slice(0, MAX_HAND_SIZE);
+      const exposedCount = state.exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+      const maxConcealed = MAX_HAND_SIZE - exposedCount;
+      state.tiles = action.payload.slice(0, maxConcealed);
     },
     clearTiles: (state) => {
       state.tiles = [];
     },
     setDrawnTile: (state, action: PayloadAction<TileCode | null>) => {
-      state.drawnTile = action.payload;
+      // Only set drawn tile if we won't exceed max (or if clearing it)
+      if (action.payload === null || getTotalTiles(state) < MAX_TOTAL_TILES) {
+        state.drawnTile = action.payload;
+      }
     },
     addDrawnToHand: (state) => {
-      if (state.drawnTile !== null && state.tiles.length < MAX_HAND_SIZE) {
+      const exposedCount = state.exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+      const maxConcealed = MAX_HAND_SIZE - exposedCount;
+      if (state.drawnTile !== null && state.tiles.length < maxConcealed) {
         state.tiles.push(state.drawnTile);
         state.drawnTile = null;
       }

@@ -534,6 +534,26 @@ export function HandAnalyzer() {
     return { count, minDistance: minDistance === Infinity ? 0 : minDistance };
   });
 
+  // Compute stats for the drawn tile
+  const drawnTileStats = drawnTile !== null ? (() => {
+    // Count how many times this tile appears in hand (for duplicate handling)
+    const occurrenceInHand = tiles.filter(t => t === drawnTile).length;
+
+    let count = 0;
+    let minDistance = Infinity;
+    for (const result of allResults) {
+      const countInHand = result.fullHandTiles.filter(t => t === drawnTile).length;
+      // The drawn tile can be used if the hand needs more of this tile than what's in the concealed hand
+      if (countInHand > occurrenceInHand) {
+        count++;
+        if (result.distance < minDistance) {
+          minDistance = result.distance;
+        }
+      }
+    }
+    return { count, minDistance: minDistance === Infinity ? 0 : minDistance };
+  })() : undefined;
+
   // Compute Charleston pass order - which tiles to pass (1, 2, 3) based on least value to keep
   const charlestonPassData = (() => {
     if (inputMode !== 'charleston' || results.length === 0) {
@@ -896,6 +916,7 @@ export function HandAnalyzer() {
           onAddTile={handleAddTileAtPosition}
           onRemoveTile={handleRemoveTileByIndex}
           tileUsageStats={tileUsageStats}
+          drawnTileStats={drawnTileStats}
           charlestonPassOrder={charlestonPassData.passOrder}
           charlestonSelected={charlestonSelected}
           onCharlestonPass={handleCharlestonPass}

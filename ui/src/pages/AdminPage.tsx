@@ -296,6 +296,35 @@ const useStyles = createUseStyles((theme: Theme) => ({
     padding: theme.spacing.md,
     textAlign: 'center',
   },
+  dropZone: {
+    border: `2px dashed ${theme.colors.border}`,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.xl,
+    textAlign: 'center',
+    color: theme.colors.textMuted,
+    backgroundColor: 'transparent',
+    transition: 'all 0.2s',
+    cursor: 'pointer',
+  },
+  dropZoneActive: {
+    borderColor: theme.colors.primary,
+    backgroundColor: 'rgba(184, 74, 74, 0.05)',
+    color: theme.colors.primary,
+  },
+  dropZoneIcon: {
+    fontSize: '48px',
+    marginBottom: theme.spacing.sm,
+    opacity: 0.5,
+  },
+  dropZoneText: {
+    fontSize: theme.fontSizes.md,
+    fontWeight: 500,
+    marginBottom: theme.spacing.xs,
+  },
+  dropZoneHint: {
+    fontSize: theme.fontSizes.sm,
+    opacity: 0.7,
+  },
 }));
 
 interface EditFormData {
@@ -315,6 +344,7 @@ export function AdminPage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [editingHandId, setEditingHandId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<EditFormData | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Fetch card years
   const { data: years, isLoading: yearsLoading } = trpc.cardYear.list.useQuery();
@@ -331,7 +361,19 @@ export function AdminPage() {
     { enabled: selectedCategoryId !== null }
   );
 
+  // Fetch card years with refetch capability
+  const { refetch: refetchYears } = trpc.cardYear.list.useQuery(undefined, {
+    enabled: false, // We already have the query above
+  });
+
   // Mutations
+  const setActiveYear = trpc.cardYear.setActive.useMutation({
+    onSuccess: () => {
+      // Refetch years to update active status
+      window.location.reload(); // Simple reload to refresh all data
+    },
+  });
+
   const updateHand = trpc.cardHand.update.useMutation({
     onSuccess: () => {
       refetchHands();
@@ -425,23 +467,61 @@ export function AdminPage() {
         </Link>
       </div>
 
+      {/* Card Image Upload */}
+      <div className={classes.section}>
+        <h2 className={classes.sectionTitle}>Import Card</h2>
+        <div
+          className={`${classes.dropZone} ${isDragOver ? classes.dropZoneActive : ''}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragOver(true);
+          }}
+          onDragLeave={() => setIsDragOver(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragOver(false);
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+              // TODO: Process the card image
+              alert(`Card image "${file.name}" received. Processing not yet implemented.`);
+            }
+          }}
+        >
+          <div className={classes.dropZoneIcon}>🀄</div>
+          <div className={classes.dropZoneText}>Drag card image here to upload rules</div>
+          <div className={classes.dropZoneHint}>Supports JPEG, PNG images of NMJL cards</div>
+        </div>
+      </div>
+
       {/* Year Selection */}
       <div className={classes.section}>
         <h2 className={classes.sectionTitle}>Card Year</h2>
         {yearsLoading ? (
           <div className={classes.loading}>Loading years...</div>
         ) : years && years.length > 0 ? (
-          <div className={classes.yearSelector}>
-            {years.map((year) => (
+          <>
+            <div className={classes.yearSelector}>
+              {years.map((year) => (
+                <button
+                  key={year.id}
+                  className={`${classes.yearButton} ${selectedYearId === year.id ? classes.yearButtonActive : ''}`}
+                  onClick={() => handleYearChange(year.id)}
+                >
+                  {year.name || year.year} {year.isActive && '(Active)'}
+                </button>
+              ))}
+            </div>
+            {selectedYearId && years.find(y => y.id === selectedYearId) && !years.find(y => y.id === selectedYearId)?.isActive && (
               <button
-                key={year.id}
-                className={`${classes.yearButton} ${selectedYearId === year.id ? classes.yearButtonActive : ''}`}
-                onClick={() => handleYearChange(year.id)}
+                className={classes.saveButton}
+                onClick={() => setActiveYear.mutate({ id: selectedYearId })}
+                disabled={setActiveYear.isPending}
+                style={{ marginTop: '12px' }}
               >
-                {year.year} {year.isActive && '(Active)'}
+                {setActiveYear.isPending ? 'Setting...' : `Set "${years.find(y => y.id === selectedYearId)?.name}" as Active`}
               </button>
-            ))}
-          </div>
+            )}
+          </>
         ) : (
           <div className={classes.empty}>No card years found</div>
         )}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import { TileCode, sortTiles, isJoker } from 'common';
 import { Tile } from './Tile';
@@ -295,6 +295,7 @@ interface TileRackProps {
   onAddTile?: (tile: TileCode, atIndex?: number) => void;
   onRemoveTile?: (index: number) => void;
   tileUsageStats?: { count: number; minDistance: number }[];
+  drawnTileStats?: { count: number; minDistance: number };
   charlestonPassOrder?: (number | undefined)[];
   charlestonSelected?: Set<number>;
   onCharlestonPass?: () => void;
@@ -318,6 +319,7 @@ export function TileRack({
   onAddTile,
   onRemoveTile,
   tileUsageStats,
+  drawnTileStats,
   charlestonPassOrder,
   charlestonSelected,
   onCharlestonPass,
@@ -332,6 +334,14 @@ export function TileRack({
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
   const [dropSuccessful, setDropSuccessful] = useState(false);
+
+  // Compute total tile count - memoized to ensure accurate recalculation
+  const totalTileCount = useMemo(() => {
+    const concealedCount = tiles.length;
+    const exposedCount = exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+    const drawnCount = drawnTile !== undefined ? 1 : 0;
+    return concealedCount + exposedCount + drawnCount;
+  }, [tiles.length, exposedMelds, drawnTile]);
 
   // Don't sort if reordering is enabled (user controls order)
   const displayTiles = sorted && !onReorder ? sortTiles(tiles) : tiles;
@@ -433,7 +443,7 @@ export function TileRack({
       <div className={classes.rackHeader}>
         <div className={classes.rackLabel}>
           <span>{label}</span>
-          <span className={classes.tileCount}>({tiles.length + exposedMelds.reduce((sum, meld) => sum + meld.tiles.length, 0)}/{maxTiles})</span>
+          <span className={classes.tileCount}>({totalTileCount}/{maxTiles})</span>
         </div>
         {onModeChange && (
           <div className={classes.modeToggle}>
@@ -631,10 +641,26 @@ export function TileRack({
             >
               {drawnTile !== undefined ? (
                 <div className={classes.drawnTileWrapper}>
-                  <Tile
-                    code={drawnTile}
-                    onClick={onTileClick ? () => onTileClick(drawnTile, -1) : undefined}
-                  />
+                  <div className={classes.draggableTile}>
+                    <Tile
+                      code={drawnTile}
+                      onClick={onTileClick ? () => onTileClick(drawnTile, -1) : undefined}
+                    />
+                    {drawnTileStats && drawnTileStats.count > 0 && (() => {
+                      // Color based on how close the nearest hand is
+                      let bgColor = '#4CAF50'; // green - far/less valuable
+                      if (drawnTileStats.minDistance <= 2) {
+                        bgColor = '#C62828'; // red - very close/most valuable
+                      } else if (drawnTileStats.minDistance <= 4) {
+                        bgColor = '#F9A825'; // yellow/orange - medium
+                      }
+                      return (
+                        <div className={classes.tileBadge} style={{ backgroundColor: bgColor }}>
+                          {drawnTileStats.count}
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <span className={classes.drawnBadge}>Drawn</span>
                 </div>
               ) : (

@@ -8,9 +8,12 @@ import {
   selectExposedMelds,
   selectIsHandFull,
   addTile,
+  insertTileAt,
   removeTile,
   clearTiles,
   setDrawnTile,
+  setTiles,
+  reorderTile,
 } from '../slices/handSlice';
 import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
@@ -21,33 +24,32 @@ import { theme, type Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   analyzer: {
-    display: 'grid',
-    gridTemplateColumns: 'auto 1fr',
-    gap: theme.spacing.lg,
+    display: 'flex',
+    gap: theme.spacing.md,
     padding: theme.spacing.lg,
-    maxWidth: '1200px',
-    margin: '0 auto',
+    alignItems: 'flex-start',
   },
   leftPanel: {
-    display: 'flex',
+    display: 'inline-flex',
     flexDirection: 'column',
-    gap: theme.spacing.lg,
+    gap: theme.spacing.sm,
     alignItems: 'flex-start',
   },
   rightPanel: {
-    display: 'flex',
+    display: 'inline-flex',
     flexDirection: 'column',
-    gap: theme.spacing.lg,
+    gap: theme.spacing.sm,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.md,
     marginBottom: theme.spacing.md,
+    maxWidth: '332px',
   },
   logo: {
     height: '100px',
-    width: 'auto',
+    maxWidth: '100%',
     objectFit: 'contain',
   },
   section: {
@@ -69,13 +71,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   placeholder: {
     textAlign: 'center',
-    padding: theme.spacing.xl,
+    padding: theme.spacing.md,
     color: theme.colors.textMuted,
-  },
-  placeholderIcon: {
-    fontSize: '48px',
-    marginBottom: theme.spacing.md,
-    opacity: 0.5,
+    fontSize: theme.fontSizes.sm,
   },
   tip: {
     backgroundColor: 'rgba(184, 74, 74, 0.1)',
@@ -85,6 +83,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontSize: theme.fontSizes.sm,
     color: theme.colors.textSecondary,
     borderLeft: `3px solid ${theme.colors.primary}`,
+    maxWidth: '332px',
   },
   resultsList: {
     maxHeight: '600px',
@@ -204,7 +203,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   '@media (max-width: 900px)': {
     analyzer: {
-      gridTemplateColumns: '1fr',
+      flexDirection: 'column',
       padding: theme.spacing.md,
       gap: theme.spacing.md,
     },
@@ -319,6 +318,46 @@ export function HandAnalyzer() {
     dispatch(setDrawnTile(null));
   };
 
+  const handleReorder = (fromIndex: number, toIndex: number) => {
+    dispatch(reorderTile({ fromIndex, toIndex }));
+  };
+
+  const handleAddTileAtPosition = (tile: number, atIndex?: number) => {
+    if (atIndex === -1) {
+      // Special case: drop on draw slot in Gameplay mode
+      dispatch(setDrawnTile(tile));
+    } else if (atIndex !== undefined) {
+      dispatch(insertTileAt({ tile, index: atIndex }));
+    } else {
+      dispatch(addTile(tile));
+    }
+  };
+
+  const handleRemoveTileByIndex = (index: number) => {
+    dispatch(removeTile(index));
+  };
+
+  const handleOrganizeTiles = (fullHandTiles: number[]) => {
+    // Reorder the player's tiles to match the order in fullHandTiles
+    // Create a copy of player's tiles to work with
+    const remaining = [...tiles];
+    const organized: number[] = [];
+
+    // Go through fullHandTiles and pick matching tiles from remaining
+    for (const targetTile of fullHandTiles) {
+      const idx = remaining.indexOf(targetTile);
+      if (idx !== -1) {
+        organized.push(remaining[idx]);
+        remaining.splice(idx, 1);
+      }
+    }
+
+    // Add any remaining tiles that weren't in fullHandTiles (shouldn't happen normally)
+    organized.push(...remaining);
+
+    dispatch(setTiles(organized));
+  };
+
   const results: ViableHandData[] = analysisData?.results ?? [];
   const callableTiles = callableData?.callableTiles ?? [];
 
@@ -419,6 +458,9 @@ export function HandAnalyzer() {
           drawnTile={drawnTile ?? undefined}
           onTileClick={handleTileClick}
           onClear={handleClear}
+          onReorder={handleReorder}
+          onAddTile={handleAddTileAtPosition}
+          onRemoveTile={handleRemoveTileByIndex}
           mode={inputMode}
           onModeChange={setInputMode}
         />
@@ -462,8 +504,7 @@ export function HandAnalyzer() {
 
           {tiles.length < 3 ? (
             <div className={classes.placeholder}>
-              <div className={classes.placeholderIcon}>&#127000;</div>
-              <p>Add at least 3 tiles to see recommendations</p>
+              No recommendations available
             </div>
           ) : isLoading ? (
             <div className={classes.loading}>Analyzing hands...</div>
@@ -484,6 +525,7 @@ export function HandAnalyzer() {
                   data={result}
                   rank={index + 1}
                   callHighlight={getCallHighlight(result.handId)}
+                  onOrganize={handleOrganizeTiles}
                 />
               ))}
             </div>

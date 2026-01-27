@@ -158,6 +158,8 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     gap: '3px',
     flexWrap: 'wrap',
+    // 7 tiles per row: 7 * 32px + 6 * 3px gaps = 242px
+    maxWidth: '242px',
   },
   tileWrapper: {
     position: 'relative',
@@ -215,6 +217,21 @@ const useStyles = createUseStyles((theme: Theme) => ({
     marginLeft: theme.spacing.sm,
     textTransform: 'uppercase',
   },
+  organizeButton: {
+    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
+    backgroundColor: 'transparent',
+    color: theme.colors.textSecondary,
+    border: `1px solid ${theme.colors.border}`,
+    borderRadius: theme.borderRadius.sm,
+    fontSize: theme.fontSizes.sm,
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    '&:hover': {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.primary,
+      color: 'white',
+    },
+  },
   '@keyframes pulse': {
     '0%, 100%': {
       boxShadow: '0 0 0 3px #B84A4A',
@@ -250,6 +267,8 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
     allTiles: {
       gap: '2px',
+      // 7 tiles per row on mobile: 7 * 26px + 6 * 2px = 194px
+      maxWidth: '194px',
     },
     legend: {
       gap: theme.spacing.sm,
@@ -289,9 +308,10 @@ interface ViableHandCardProps {
   data: ViableHandData;
   rank: number;
   callHighlight?: CallHighlight;
+  onOrganize?: (fullHandTiles: TileCode[]) => void;
 }
 
-export function ViableHandCard({ data, rank, callHighlight }: ViableHandCardProps) {
+export function ViableHandCard({ data, rank, callHighlight, onOrganize }: ViableHandCardProps) {
   const classes = useStyles();
 
   const isHighlighted = callHighlight?.handId === data.handId;
@@ -325,6 +345,14 @@ export function ViableHandCard({ data, rank, callHighlight }: ViableHandCardProp
             </span>
           </div>
           <span className={classes.points}>{data.points} pts</span>
+          {onOrganize && (
+            <button
+              className={classes.organizeButton}
+              onClick={() => onOrganize(data.fullHandTiles)}
+            >
+              Organize
+            </button>
+          )}
         </div>
       </div>
 

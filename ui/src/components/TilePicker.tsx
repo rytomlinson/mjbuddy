@@ -5,35 +5,31 @@ import type { Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   picker: {
-    display: 'inline-block',
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     border: `1px solid ${theme.colors.border}`,
-  },
-  section: {
-    marginBottom: theme.spacing.md,
-    '&:last-child': {
-      marginBottom: 0,
-    },
-  },
-  sectionTitle: {
-    color: theme.colors.textSecondary,
-    fontSize: theme.fontSizes.sm,
-    marginBottom: theme.spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+    // Match TileRack width: 332px
+    width: '332px',
+    boxSizing: 'content-box',
   },
   tileRow: {
     display: 'flex',
-    gap: theme.spacing.xs,
-    flexWrap: 'wrap',
-    marginBottom: theme.spacing.xs,
+    justifyContent: 'space-between',
+    marginBottom: '4px',
   },
   honorRow: {
     display: 'flex',
-    gap: theme.spacing.xs,
-    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  tileWrapper: {
+    cursor: 'grab',
+    '&:active': {
+      cursor: 'grabbing',
+    },
+  },
+  tileWrapperDisabled: {
+    cursor: 'default',
   },
   header: {
     color: theme.colors.text,
@@ -44,21 +40,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
   // Mobile responsive
   '@media (max-width: 480px)': {
     picker: {
-      padding: theme.spacing.sm,
-    },
-    section: {
-      marginBottom: theme.spacing.sm,
-    },
-    sectionTitle: {
-      fontSize: '10px',
-      marginBottom: theme.spacing.xs,
-    },
-    tileRow: {
-      gap: '2px',
-      marginBottom: '2px',
-    },
-    honorRow: {
-      gap: '2px',
+      padding: theme.spacing.xs,
+      // Match TileRack mobile width: 264px
+      width: '264px',
     },
   },
 }));
@@ -67,7 +51,6 @@ interface TilePickerProps {
   onTileSelect: (tile: TileCode) => void;
   disabledTiles?: Set<TileCode>;
   selectedTiles?: TileCode[];
-  onModeChange?: (mode: InputMode) => void;
 }
 
 export function TilePicker({
@@ -79,27 +62,41 @@ export function TilePicker({
 
   const selectedSet = new Set(selectedTiles);
 
-  const renderSuitRow = (suitType: TileType, label: string) => {
+  const handleDragStart = (tile: TileCode) => (e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'copy';
+    e.dataTransfer.setData('application/x-tile-code', String(tile));
+    e.dataTransfer.setData('application/x-tile-source', 'inventory');
+  };
+
+  const renderTile = (tile: TileCode) => {
+    const isDisabled = disabledTiles?.has(tile);
+    return (
+      <div
+        key={tile}
+        className={`${classes.tileWrapper} ${isDisabled ? classes.tileWrapperDisabled : ''}`}
+        draggable={!isDisabled}
+        onDragStart={!isDisabled ? handleDragStart(tile) : undefined}
+      >
+        <Tile
+          code={tile}
+          size="small"
+          selected={selectedSet.has(tile)}
+          disabled={isDisabled}
+          onClick={() => onTileSelect(tile)}
+        />
+      </div>
+    );
+  };
+
+  const renderSuitRow = (suitType: TileType) => {
     const tiles: TileCode[] = [];
     for (let i = 1; i <= 9; i++) {
       tiles.push(encodeTile(suitType, i));
     }
 
     return (
-      <div className={classes.section}>
-        <div className={classes.sectionTitle}>{label}</div>
-        <div className={classes.tileRow}>
-          {tiles.map((tile) => (
-            <Tile
-              key={tile}
-              code={tile}
-              size="small"
-              selected={selectedSet.has(tile)}
-              disabled={disabledTiles?.has(tile)}
-              onClick={() => onTileSelect(tile)}
-            />
-          ))}
-        </div>
+      <div className={classes.tileRow}>
+        {tiles.map((tile) => renderTile(tile))}
       </div>
     );
   };
@@ -123,48 +120,15 @@ export function TilePicker({
   return (
     <div className={classes.picker}>
       <div className={classes.header}>Inventory</div>
-      {renderSuitRow(TileType.DOT, 'Dots')}
-      {renderSuitRow(TileType.BAM, 'Bams')}
-      {renderSuitRow(TileType.CRAK, 'Craks')}
+      {renderSuitRow(TileType.DOT)}
+      {renderSuitRow(TileType.BAM)}
+      {renderSuitRow(TileType.CRAK)}
 
-      <div className={classes.section}>
-        <div className={classes.sectionTitle}>Winds, Dragons & Special</div>
-        <div className={classes.honorRow}>
-          {windTiles.map((tile) => (
-            <Tile
-              key={tile}
-              code={tile}
-              size="small"
-              selected={selectedSet.has(tile)}
-              disabled={disabledTiles?.has(tile)}
-              onClick={() => onTileSelect(tile)}
-            />
-          ))}
-          {dragonTiles.map((tile) => (
-            <Tile
-              key={tile}
-              code={tile}
-              size="small"
-              selected={selectedSet.has(tile)}
-              disabled={disabledTiles?.has(tile)}
-              onClick={() => onTileSelect(tile)}
-            />
-          ))}
-          <Tile
-            code={flowerTile}
-            size="small"
-            selected={selectedSet.has(flowerTile)}
-            disabled={disabledTiles?.has(flowerTile)}
-            onClick={() => onTileSelect(flowerTile)}
-          />
-          <Tile
-            code={jokerTile}
-            size="small"
-            selected={selectedSet.has(jokerTile)}
-            disabled={disabledTiles?.has(jokerTile)}
-            onClick={() => onTileSelect(jokerTile)}
-          />
-        </div>
+      <div className={classes.honorRow}>
+        {windTiles.map((tile) => renderTile(tile))}
+        {dragonTiles.map((tile) => renderTile(tile))}
+        {renderTile(flowerTile)}
+        {renderTile(jokerTile)}
       </div>
     </div>
   );

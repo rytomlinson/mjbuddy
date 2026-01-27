@@ -31,6 +31,12 @@ const handSlice = createSlice({
         state.tiles.push(action.payload);
       }
     },
+    insertTileAt: (state, action: PayloadAction<{ tile: TileCode; index: number }>) => {
+      const { tile, index } = action.payload;
+      if (state.tiles.length < MAX_HAND_SIZE && index >= 0 && index <= state.tiles.length) {
+        state.tiles.splice(index, 0, tile);
+      }
+    },
     removeTile: (state, action: PayloadAction<number>) => {
       if (action.payload >= 0 && action.payload < state.tiles.length) {
         state.tiles.splice(action.payload, 1);
@@ -76,12 +82,28 @@ const handSlice = createSlice({
       state.drawnTile = null;
       state.exposedMelds = [];
     },
+    reorderTile: (state, action: PayloadAction<{ fromIndex: number; toIndex: number }>) => {
+      const { fromIndex, toIndex } = action.payload;
+      if (
+        fromIndex >= 0 &&
+        fromIndex < state.tiles.length &&
+        toIndex >= 0 &&
+        toIndex < state.tiles.length &&
+        fromIndex !== toIndex
+      ) {
+        // Remove tile from original position
+        const [tile] = state.tiles.splice(fromIndex, 1);
+        // Insert at new position
+        state.tiles.splice(toIndex, 0, tile);
+      }
+    },
   },
 });
 
 // Actions
 export const {
   addTile,
+  insertTileAt,
   removeTile,
   removeTileByCode,
   setTiles,
@@ -93,6 +115,7 @@ export const {
   removeExposedMeld,
   clearExposedMelds,
   resetHand,
+  reorderTile,
 } = handSlice.actions;
 
 // Selectors

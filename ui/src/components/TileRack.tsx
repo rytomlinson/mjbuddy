@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { TileCode, sortTiles } from 'common';
 import { Tile } from './Tile';
@@ -43,8 +44,12 @@ const useStyles = createUseStyles((theme: Theme) => ({
     '&:last-child': {
       borderRight: 'none',
     },
-    '&:hover': {
+    '&:hover:not(:disabled)': {
       backgroundColor: theme.colors.surfaceHover,
+    },
+    '&:disabled': {
+      opacity: 0.4,
+      cursor: 'not-allowed',
     },
   },
   modeOptionActive: {
@@ -103,6 +108,21 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    transition: 'border-color 0.15s, background-color 0.15s',
+  },
+  slotDragging: {
+    opacity: 0.5,
+  },
+  slotDropTarget: {
+    borderColor: theme.colors.primary,
+    borderWidth: '2px',
+    backgroundColor: 'rgba(184, 74, 74, 0.1)',
+  },
+  draggableTile: {
+    cursor: 'grab',
+    '&:active': {
+      cursor: 'grabbing',
+    },
   },
   drawSlot: {
     borderColor: theme.colors.primary,
@@ -139,8 +159,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
   prompt: {
     fontSize: theme.fontSizes.sm,
     color: theme.colors.textMuted,
-    marginTop: theme.spacing.xs,
+    marginTop: '2px',
     fontStyle: 'italic',
+    textAlign: 'center',
   },
   // Mobile responsive
   '@media (max-width: 480px)': {
@@ -185,6 +206,9 @@ interface TileRackProps {
   onTileClick?: (tile: TileCode, index: number) => void;
   onClear?: () => void;
   onModeChange?: (mode: InputMode) => void;
+  onReorder?: (fromIndex: number, toIndex: number) => void;
+  onAddTile?: (tile: TileCode, atIndex?: number) => void;
+  onRemoveTile?: (index: number) => void;
   sorted?: boolean;
   maxTiles?: number;
   mode?: InputMode;
@@ -197,13 +221,112 @@ export function TileRack({
   onTileClick,
   onClear,
   onModeChange,
+  onReorder,
+  onAddTile,
+  onRemoveTile,
   sorted = true,
   maxTiles = 13,
   mode = 'hand',
 }: TileRackProps) {
   const classes = useStyles();
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const [dropSuccessful, setDropSuccessful] = useState(false);
 
-  const displayTiles = sorted ? sortTiles(tiles) : tiles;
+  // Don't sort if reordering is enabled (user controls order)
+  const displayTiles = sorted && !onReorder ? sortTiles(tiles) : tiles;
+
+  const handleDragStart = (index: number) => (e: React.DragEvent) => {
+    setDraggedIndex(index);
+    setDropSuccessful(false);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('application/x-tile-source', 'hand');
+    e.dataTransfer.setData('application/x-tile-index', String(index));
+  };
+
+  const handleDragEnd = (index: number) => () => {
+    // If drop wasn't successful (dragged outside), remove the tile
+    if (!dropSuccessful && onRemoveTile) {
+      onRemoveTile(index);
+    }
+    setDraggedIndex(null);
+    setDropTargetIndex(null);
+    setDropSuccessful(false);
+  };
+
+  const handleDragOver = (slotIndex: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+
+    // For internal reorder, only show drop target on filled slots
+    if (draggedIndex !== null) {
+      e.dataTransfer.dropEffect = 'move';
+      if (slotIndex !== draggedIndex && slotIndex < tiles.length) {
+        setDropTargetIndex(slotIndex);
+      }
+    } else if (mode === 'hand') {
+      // For external drops (from inventory) in Set Hand mode, allow drop on any slot if hand not full
+      e.dataTransfer.dropEffect = 'copy';
+      if (tiles.length < maxTiles) {
+        setDropTargetIndex(slotIndex);
+      }
+    }
+    // In Gameplay mode, inventory drops on hand slots are not allowed (must use Draw slot)
+  };
+
+  const handleDrawSlotDragOver = (e: React.DragEvent) => {
+    // Only allow inventory drops when Draw slot is empty
+    if (mode === 'drawn' && drawnTile === undefined) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      setDropTargetIndex(-1); // Use -1 to indicate draw slot
+    }
+  };
+
+  const handleDrawSlotDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    const source = e.dataTransfer.getData('application/x-tile-source');
+
+    if (source === 'inventory' && mode === 'drawn' && drawnTile === undefined) {
+      const tileCode = parseInt(e.dataTransfer.getData('application/x-tile-code'), 10);
+      if (!isNaN(tileCode) && onAddTile) {
+        // In Gameplay mode, adding to draw slot is handled by setting drawn tile
+        // Use special index -1 to indicate draw slot
+        onAddTile(tileCode as TileCode, -1);
+      }
+    }
+    setDropTargetIndex(null);
+  };
+
+  const handleDragLeave = () => {
+    setDropTargetIndex(null);
+  };
+
+  const handleDrop = (toIndex: number) => (e: React.DragEvent) => {
+    e.preventDefault();
+
+    const source = e.dataTransfer.getData('application/x-tile-source');
+
+    if (source === 'hand') {
+      // Internal reorder
+      const fromIndex = draggedIndex;
+      if (fromIndex !== null && fromIndex !== toIndex && onReorder) {
+        onReorder(fromIndex, toIndex);
+      }
+      setDropSuccessful(true);
+    } else if (source === 'inventory' && mode === 'hand') {
+      // Drop from inventory - only in Set Hand mode
+      const tileCode = parseInt(e.dataTransfer.getData('application/x-tile-code'), 10);
+      if (!isNaN(tileCode) && onAddTile && tiles.length < maxTiles) {
+        // If dropping on an existing tile, insert at that position
+        // Otherwise add at the end
+        const insertIndex = toIndex < tiles.length ? toIndex : undefined;
+        onAddTile(tileCode as TileCode, insertIndex);
+      }
+    }
+
+    setDraggedIndex(null);
+    setDropTargetIndex(null);
+  };
 
   return (
     <div className={classes.tiles}>
@@ -223,6 +346,8 @@ export function TileRack({
             <button
               className={`${classes.modeOption} ${mode === 'drawn' ? classes.modeOptionActive : ''}`}
               onClick={() => onModeChange('drawn')}
+              disabled={tiles.length < maxTiles}
+              title={tiles.length < maxTiles ? `Need ${maxTiles} tiles to start gameplay` : undefined}
             >
               Gameplay
             </button>
@@ -234,13 +359,30 @@ export function TileRack({
           {/* Render all 13 hand slots */}
           {Array.from({ length: maxTiles }).map((_, slotIndex) => {
             const tile = displayTiles[slotIndex];
+            const isDragging = draggedIndex === slotIndex;
+            const isDropTarget = dropTargetIndex === slotIndex;
+            const canDrag = onReorder && tile !== undefined;
+
             return (
-              <div key={`slot-${slotIndex}`} className={classes.slot}>
+              <div
+                key={`slot-${slotIndex}`}
+                className={`${classes.slot} ${isDragging ? classes.slotDragging : ''} ${isDropTarget ? classes.slotDropTarget : ''}`}
+                onDragOver={onReorder ? handleDragOver(slotIndex) : undefined}
+                onDragLeave={onReorder ? handleDragLeave : undefined}
+                onDrop={onReorder ? handleDrop(slotIndex) : undefined}
+              >
                 {tile !== undefined && (
-                  <Tile
-                    code={tile}
-                    onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
-                  />
+                  <div
+                    className={canDrag ? classes.draggableTile : undefined}
+                    draggable={canDrag}
+                    onDragStart={canDrag ? handleDragStart(slotIndex) : undefined}
+                    onDragEnd={canDrag ? handleDragEnd(slotIndex) : undefined}
+                  >
+                    <Tile
+                      code={tile}
+                      onClick={onTileClick ? () => onTileClick(tile, slotIndex) : undefined}
+                    />
+                  </div>
                 )}
               </div>
             );
@@ -257,7 +399,12 @@ export function TileRack({
             ) : null
           ) : (
             // Gameplay mode: always show the 14th slot
-            <div className={`${classes.slot} ${classes.drawSlot}`}>
+            <div
+              className={`${classes.slot} ${classes.drawSlot} ${dropTargetIndex === -1 ? classes.slotDropTarget : ''}`}
+              onDragOver={handleDrawSlotDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrawSlotDrop}
+            >
               {drawnTile !== undefined ? (
                 <div className={classes.drawnTileWrapper}>
                   <Tile
@@ -275,7 +422,7 @@ export function TileRack({
       </div>
       <div className={classes.prompt}>
         {mode === 'hand'
-          ? 'Click hand tiles above to −, inventory tiles to +.'
+          ? 'Set your starting hand using the tiles below.'
           : 'Draw an inventory tile by click, then discard any tile.'}
       </div>
     </div>

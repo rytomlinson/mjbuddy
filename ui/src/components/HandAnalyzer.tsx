@@ -207,6 +207,11 @@ const useStyles = createUseStyles((theme: Theme) => ({
       padding: theme.spacing.md,
       gap: theme.spacing.md,
     },
+    section: {
+      // Match left panel widths (TileRack, TilePicker, etc.)
+      width: '332px',
+      boxSizing: 'content-box',
+    },
     hideOnMobile: {
       display: 'none',
     },
@@ -215,11 +220,16 @@ const useStyles = createUseStyles((theme: Theme) => ({
     analyzer: {
       padding: theme.spacing.sm,
     },
+    adviceBox: {
+      width: '264px',
+    },
     section: {
       padding: theme.spacing.sm,
+      width: '264px',
     },
     callableSection: {
       padding: theme.spacing.sm,
+      width: '264px',
     },
     callableTiles: {
       gap: theme.spacing.xs,

@@ -258,6 +258,13 @@ const useStyles = createUseStyles((theme: Theme) => ({
       boxShadow: '0 0 0 5px rgba(184, 74, 74, 0.5)',
     },
   },
+  // Stacked layout - fill container width
+  '@media (max-width: 900px)': {
+    card: {
+      width: '100%',
+      boxSizing: 'border-box',
+    },
+  },
   // Mobile responsive
   '@media (max-width: 480px)': {
     card: {

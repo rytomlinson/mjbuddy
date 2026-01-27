@@ -68,6 +68,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
     backgroundColor: theme.colors.surface,
     borderRadius: theme.borderRadius.md,
     border: `1px solid ${theme.colors.border}`,
+    // Match other sections width
+    width: '332px',
+    boxSizing: 'content-box',
   },
   tilesContent: {
     display: 'flex',
@@ -191,6 +194,8 @@ const useStyles = createUseStyles((theme: Theme) => ({
     tiles: {
       minHeight: '50px',
       padding: theme.spacing.xs,
+      // Match TilePicker mobile width
+      width: '264px',
     },
     mainTiles: {
       gap: '2px',

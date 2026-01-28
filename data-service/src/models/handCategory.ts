@@ -58,3 +58,13 @@ export async function deleteHandCategory(id: number): Promise<boolean> {
   const result = await query(`DELETE FROM hand_categories WHERE id = :id`, { id });
   return result.rowCount > 0;
 }
+
+export async function reorderCategories(categoryIds: number[]): Promise<void> {
+  // Update display_order for each category based on its position in the array
+  for (let i = 0; i < categoryIds.length; i++) {
+    await query(
+      `UPDATE hand_categories SET display_order = :displayOrder WHERE id = :id`,
+      { id: categoryIds[i], displayOrder: i + 1 }
+    );
+  }
+}

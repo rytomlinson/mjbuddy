@@ -125,3 +125,13 @@ export async function deleteCardHand(id: number): Promise<boolean> {
   const result = await query(`DELETE FROM card_hands WHERE id = :id`, { id });
   return result.rowCount > 0;
 }
+
+export async function reorderHands(handIds: number[]): Promise<void> {
+  // Update display_order for each hand based on its position in the array
+  for (let i = 0; i < handIds.length; i++) {
+    await query(
+      `UPDATE card_hands SET display_order = :displayOrder WHERE id = :id`,
+      { id: handIds[i], displayOrder: i + 1 }
+    );
+  }
+}

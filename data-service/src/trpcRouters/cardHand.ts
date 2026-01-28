@@ -8,12 +8,14 @@ import {
   createCardHand,
   updateCardHand,
   deleteCardHand,
+  reorderHands,
 } from '../models/cardHand.js';
 import {
   getCategoriesByCardYear,
   getHandCategoryById,
   createHandCategory,
   deleteHandCategory,
+  reorderCategories,
 } from '../models/handCategory.js';
 
 export const cardHandRouter = router({
@@ -40,6 +42,13 @@ export const cardHandRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return deleteHandCategory(input.id);
+    }),
+
+  reorderCategories: authedProcedure
+    .input(z.object({ categoryIds: z.array(z.number()) }))
+    .mutation(async ({ input }) => {
+      await reorderCategories(input.categoryIds);
+      return { success: true };
     }),
 
   // Hand operations
@@ -77,5 +86,12 @@ export const cardHandRouter = router({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       return deleteCardHand(input.id);
+    }),
+
+  reorder: authedProcedure
+    .input(z.object({ handIds: z.array(z.number()) }))
+    .mutation(async ({ input }) => {
+      await reorderHands(input.handIds);
+      return { success: true };
     }),
 });

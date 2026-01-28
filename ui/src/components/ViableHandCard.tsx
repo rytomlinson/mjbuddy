@@ -1,5 +1,6 @@
 import { createUseStyles } from 'react-jss';
 import { TileCode } from 'common';
+import type { DisplaySegment } from 'common';
 import { Tile } from './Tile';
 import type { Theme } from '../theme';
 
@@ -61,6 +62,15 @@ const useStyles = createUseStyles((theme: Theme) => ({
     alignItems: 'center',
     gap: theme.spacing.xs,
   },
+  // Segment colors for display pattern
+  segmentDot: { color: '#2196F3' },      // Blue for dots
+  segmentBam: { color: '#4CAF50' },      // Green for bams
+  segmentCrak: { color: '#F44336' },     // Red for craks
+  segmentWind: { color: '#9C27B0' },     // Purple for winds
+  segmentDragon: { color: '#FF9800' },   // Orange for dragons
+  segmentFlower: { color: '#E91E63' },   // Pink for flowers
+  segmentJoker: { color: '#00BCD4' },    // Cyan for jokers
+  segmentNeutral: { color: theme.colors.textSecondary },
   notesIcon: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -315,7 +325,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 export interface ViableHandData {
   handId: number;
   handName: string;
-  displayPattern: string;
+  displayPattern: string | DisplaySegment[];
   distance: number;
   points: number;
   isConcealed: boolean;
@@ -343,6 +353,36 @@ interface ViableHandCardProps {
   meldColors?: string[]; // Colors for each exposed meld (indexed by meld index)
   onOrganize?: (fullHandTiles: TileCode[]) => void;
   onSelectExposure?: (handId: number, exposedTiles: TileCode[]) => void;
+}
+
+// Helper to get segment color class
+function getSegmentColorClass(color: DisplaySegment['color'], classes: ReturnType<typeof useStyles>): string {
+  switch (color) {
+    case 'dot': return classes.segmentDot;
+    case 'bam': return classes.segmentBam;
+    case 'crak': return classes.segmentCrak;
+    case 'wind': return classes.segmentWind;
+    case 'dragon': return classes.segmentDragon;
+    case 'flower': return classes.segmentFlower;
+    case 'joker': return classes.segmentJoker;
+    case 'neutral':
+    default: return classes.segmentNeutral;
+  }
+}
+
+// Helper to render display pattern (string or segments)
+function renderDisplayPattern(
+  displayPattern: string | DisplaySegment[],
+  classes: ReturnType<typeof useStyles>
+): React.ReactNode {
+  if (typeof displayPattern === 'string') {
+    return displayPattern;
+  }
+  return displayPattern.map((segment, i) => (
+    <span key={i} className={getSegmentColorClass(segment.color, classes)}>
+      {segment.text}
+    </span>
+  ));
 }
 
 export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldColors, onOrganize, onSelectExposure }: ViableHandCardProps) {
@@ -426,7 +466,7 @@ export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldC
         <div className={classes.tilesSection}>
           <div className={classes.tilesHeader}>
             <span className={classes.pattern}>
-              {data.displayPattern}
+              {renderDisplayPattern(data.displayPattern, classes)}
               {data.notes && (
                 <span className={classes.notesIcon} title={data.notes}>&#8505;</span>
               )}

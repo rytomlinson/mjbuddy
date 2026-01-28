@@ -45,6 +45,9 @@ export const TilePatternSchema = z.object({
   // Offset from base number (for consecutive runs: X, X+1, X+2)
   numberOffset: z.number().int().optional(),
 
+  // Number must match one of the numbers used in the specified super group
+  numberMatchesSuperGroup: z.string().optional(),
+
   // Tile type constraint (when using variables)
   tileType: TileTypeSchema.optional(),
 
@@ -68,6 +71,9 @@ export const PatternGroupSchema = z.object({
   tile: TilePatternSchema,
   // If this specific group must remain concealed (even in exposed hands)
   mustBeConcealed: z.boolean().optional(),
+  // Super group ID - groups with the same superGroupId form an "exposure unit"
+  // that must be exposed together (e.g., "2025" = four singles that form one callable unit)
+  superGroupId: z.string().optional(),
 });
 
 export type PatternGroup = z.infer<typeof PatternGroupSchema>;
@@ -90,13 +96,31 @@ export enum HandCategory {
 export const HandCategorySchema = z.nativeEnum(HandCategory);
 
 /**
+ * A segment of display text with optional color
+ * Colors correspond to tile types or special markers
+ */
+export const DisplaySegmentSchema = z.object({
+  text: z.string(),
+  color: z.enum(['dot', 'bam', 'crak', 'wind', 'dragon', 'flower', 'joker', 'neutral']).optional(),
+  // Number variable - groups with same numberVar must have same number
+  numberVar: z.string().optional(),
+  // Indicates this is a variable number (evenOnly, oddOnly, or has numberVar)
+  isVariable: z.boolean().optional(),
+});
+
+export type DisplaySegment = z.infer<typeof DisplaySegmentSchema>;
+
+/**
  * Full card hand schema (for database storage)
  */
 export const CardHandSchema = z.object({
   id: z.number(),
   categoryId: z.number(),
   displayName: z.string(),
-  displayPattern: z.string(), // Human-readable like "FF 1111 2222 3333"
+  displayPattern: z.union([
+    z.string(), // Legacy: plain string
+    z.array(DisplaySegmentSchema), // New: colored segments
+  ]),
   patternGroups: z.array(PatternGroupSchema),
   isConcealed: z.boolean(),
   points: z.number(),
@@ -113,7 +137,10 @@ export type CardHand = z.infer<typeof CardHandSchema>;
 export const CreateCardHandSchema = z.object({
   categoryId: z.number(),
   displayName: z.string().min(1),
-  displayPattern: z.string().min(1),
+  displayPattern: z.union([
+    z.string().min(1),
+    z.array(DisplaySegmentSchema).min(1),
+  ]),
   patternGroups: z.array(PatternGroupSchema).min(1),
   isConcealed: z.boolean(),
   points: z.number().int().min(0),
@@ -130,7 +157,10 @@ export const UpdateCardHandSchema = z.object({
   id: z.number(),
   categoryId: z.number().optional(),
   displayName: z.string().min(1).optional(),
-  displayPattern: z.string().min(1).optional(),
+  displayPattern: z.union([
+    z.string().min(1),
+    z.array(DisplaySegmentSchema).min(1),
+  ]).optional(),
   patternGroups: z.array(PatternGroupSchema).min(1).optional(),
   isConcealed: z.boolean().optional(),
   points: z.number().int().min(0).optional(),

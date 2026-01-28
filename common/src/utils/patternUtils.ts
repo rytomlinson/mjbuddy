@@ -4,6 +4,7 @@ import {
   PatternGroup,
   TilePattern,
   GroupType,
+  DisplaySegment,
   encodeTile,
   getTileType,
   getTileValue,
@@ -452,4 +453,328 @@ export function concretePatternToString(pattern: ConcretePattern): string {
       return char.repeat(g.count);
     })
     .join(' ');
+}
+
+/**
+ * Helper to get the number value from a tile pattern (for display purposes)
+ * Returns a representative value when constraints are used (2 for even, 1 for odd, 3 for 369)
+ * Accounts for numberOffset when using number variables
+ */
+function getPatternNumber(pattern: TilePattern): number {
+  if (pattern.fixed !== undefined) {
+    return pattern.fixed & 0x0f;
+  }
+  if (pattern.constraints?.specificValues?.length === 1) {
+    return pattern.constraints.specificValues[0];
+  }
+
+  const offset = pattern.numberOffset ?? 0;
+
+  // Return representative values for even/odd constraints
+  // Base even is 2, base odd is 1, then add offset
+  if (pattern.constraints?.evenOnly) {
+    return 2 + offset; // Base even (2) plus offset
+  }
+  if (pattern.constraints?.oddOnly) {
+    return 1 + offset; // Base odd (1) plus offset
+  }
+
+  // Check for 3,6,9 constraint
+  if (pattern.constraints?.specificValues?.length === 3 &&
+      pattern.constraints.specificValues.includes(3) &&
+      pattern.constraints.specificValues.includes(6) &&
+      pattern.constraints.specificValues.includes(9)) {
+    return 3 + offset; // Base 369 (3) plus offset
+  }
+
+  // For numberVar with offset (no constraint), base is 1
+  return 1 + offset;
+}
+
+/**
+ * Helper to check if a pattern represents a specific number
+ */
+function patternHasNumber(pattern: TilePattern, num: number): boolean {
+  const patternNum = getPatternNumber(pattern);
+  return patternNum === num;
+}
+
+/**
+ * Generate display pattern string from pattern groups
+ *
+ * Rules:
+ * - Flowers: "F"
+ * - Dragons: "D" (but white dragon shown as "0" when between 2's)
+ * - Winds: first letter of direction ("N", "E", "S", "W")
+ * - Suit tiles: their number (1-9)
+ * - Groups separated by spaces
+ * - Character repeated based on group count
+ */
+export function generateDisplayPattern(groups: PatternGroup[]): string {
+  const parts: string[] = [];
+  let currentSuperGroupId: string | undefined = undefined;
+  let superGroupChars: string[] = [];
+
+  for (let i = 0; i < groups.length; i++) {
+    const group = groups[i];
+    const pattern = group.tile;
+    const count = group.type; // GroupType value equals count
+    let char = '?';
+
+    // Check for special patterns first
+    if (pattern.isAnyFlower) {
+      char = 'F';
+    } else if (pattern.isAnyWind) {
+      // Generic wind - show as "N" for any wind (North is conventional)
+      char = 'N';
+    } else if (pattern.isAnyDragon) {
+      char = 'D';
+    } else if (pattern.tileType === TileType.DRAGON && pattern.suitVar) {
+      // Dragon with suit variable - show as "D"
+      char = 'D';
+    } else if (pattern.isZero) {
+      // White dragon as zero - check if between 2's
+      const prevGroup = i > 0 ? groups[i - 1] : null;
+      const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+      const prevIs2 = prevGroup && patternHasNumber(prevGroup.tile, 2);
+      const nextIs2 = nextGroup && patternHasNumber(nextGroup.tile, 2);
+      char = (prevIs2 || nextIs2) ? '0' : 'D';
+    } else if (pattern.fixed !== undefined) {
+      // Fixed tile - decode it
+      const tileType = (pattern.fixed >> 4) as TileType;
+      const tileValue = pattern.fixed & 0x0f;
+
+      switch (tileType) {
+        case TileType.DOT:
+        case TileType.BAM:
+        case TileType.CRAK:
+          char = `${tileValue}`;
+          break;
+        case TileType.WIND:
+          char = ['E', 'S', 'W', 'N'][tileValue - 1] || 'W';
+          break;
+        case TileType.DRAGON:
+          // Check if white dragon between 2's
+          if (tileValue === Dragon.WHITE) {
+            const prevGroup = i > 0 ? groups[i - 1] : null;
+            const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+            const prevIs2 = prevGroup && patternHasNumber(prevGroup.tile, 2);
+            const nextIs2 = nextGroup && patternHasNumber(nextGroup.tile, 2);
+            char = (prevIs2 || nextIs2) ? '0' : 'D';
+          } else {
+            char = 'D';
+          }
+          break;
+        case TileType.FLOWER:
+          char = 'F';
+          break;
+        case TileType.JOKER:
+          char = 'J';
+          break;
+      }
+    } else if (pattern.suitVar || pattern.constraints || pattern.numberVar) {
+      // Suit variable or has constraints - show the number
+      char = `${getPatternNumber(pattern)}`;
+    }
+
+    const text = char.repeat(count);
+
+    // Handle super groups - concatenate without spaces, no brackets
+    if (group.superGroupId) {
+      if (group.superGroupId !== currentSuperGroupId) {
+        // Starting new super group - flush any previous one first
+        if (currentSuperGroupId && superGroupChars.length > 0) {
+          parts.push(superGroupChars.join(''));
+          superGroupChars = [];
+        }
+        currentSuperGroupId = group.superGroupId;
+      }
+      superGroupChars.push(text);
+
+      // Check if this is the last item in the super group
+      const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+      if (!nextGroup || nextGroup.superGroupId !== currentSuperGroupId) {
+        // End of super group - join without spaces, no brackets
+        parts.push(superGroupChars.join(''));
+        superGroupChars = [];
+        currentSuperGroupId = undefined;
+      }
+    } else {
+      // Not in a super group - flush any pending super group
+      if (currentSuperGroupId && superGroupChars.length > 0) {
+        parts.push(superGroupChars.join(''));
+        superGroupChars = [];
+        currentSuperGroupId = undefined;
+      }
+      parts.push(text);
+    }
+  }
+
+  // Flush any remaining super group
+  if (superGroupChars.length > 0) {
+    parts.push(superGroupChars.join(''));
+  }
+
+  return parts.join(' ');
+}
+
+/**
+ * Get color for a suit variable
+ * Suit A = blue (dot), Suit B = green (bam), Suit C = red (crak)
+ */
+function getSuitVarColor(suitVar: string): DisplaySegment['color'] {
+  switch (suitVar.toUpperCase()) {
+    case 'A': return 'dot';    // Blue
+    case 'B': return 'bam';    // Green
+    case 'C': return 'crak';   // Red
+    default: return 'neutral';
+  }
+}
+
+/**
+ * Generate display pattern as colored segments from pattern groups
+ *
+ * Color rules:
+ * - Suit Variable A: Blue
+ * - Suit Variable B: Green
+ * - Suit Variable C: Red
+ * - Flowers: Blue (same as Suit A)
+ * - Winds: Blue (same as Suit A)
+ * - Dragons: Orange
+ */
+export function generateDisplaySegments(groups: PatternGroup[]): DisplaySegment[] {
+  const segments: DisplaySegment[] = [];
+  let currentSuperGroupId: string | undefined = undefined;
+
+  for (let i = 0; i < groups.length; i++) {
+    const group = groups[i];
+    const pattern = group.tile;
+    const count = group.type;
+    let char = '?';
+    let color: DisplaySegment['color'] = 'neutral';
+
+    // Track super group membership (no brackets, just controls spacing)
+    if (group.superGroupId && group.superGroupId !== currentSuperGroupId) {
+      // Entering a new super group
+      currentSuperGroupId = group.superGroupId;
+    } else if (!group.superGroupId && currentSuperGroupId) {
+      // Exiting super group
+      currentSuperGroupId = undefined;
+    }
+
+    // Check for special patterns first
+    if (pattern.isAnyFlower) {
+      char = 'F';
+      color = 'dot'; // Flowers are blue (Suit A)
+    } else if (pattern.isAnyWind) {
+      char = 'N';
+      color = 'dot'; // Winds are blue (Suit A)
+    } else if (pattern.isAnyDragon) {
+      char = 'D';
+      color = 'dragon';
+    } else if (pattern.tileType === TileType.DRAGON && pattern.suitVar) {
+      // Dragon with suit variable - color based on suit var
+      char = 'D';
+      color = getSuitVarColor(pattern.suitVar);
+    } else if (pattern.isZero) {
+      // White dragon as zero
+      const prevGroup = i > 0 ? groups[i - 1] : null;
+      const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+      const prevIs2 = prevGroup && patternHasNumber(prevGroup.tile, 2);
+      const nextIs2 = nextGroup && patternHasNumber(nextGroup.tile, 2);
+      char = (prevIs2 || nextIs2) ? '0' : 'D';
+      color = 'dragon';
+    } else if (pattern.fixed !== undefined) {
+      const tileType = (pattern.fixed >> 4) as TileType;
+      const tileValue = pattern.fixed & 0x0f;
+
+      switch (tileType) {
+        case TileType.DOT:
+          char = `${tileValue}`;
+          color = 'dot';
+          break;
+        case TileType.BAM:
+          char = `${tileValue}`;
+          color = 'bam';
+          break;
+        case TileType.CRAK:
+          char = `${tileValue}`;
+          color = 'crak';
+          break;
+        case TileType.WIND:
+          char = ['E', 'S', 'W', 'N'][tileValue - 1] || 'W';
+          color = 'dot'; // Winds are blue (Suit A)
+          break;
+        case TileType.DRAGON:
+          if (tileValue === Dragon.WHITE) {
+            const prevGroup = i > 0 ? groups[i - 1] : null;
+            const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+            const prevIs2 = prevGroup && patternHasNumber(prevGroup.tile, 2);
+            const nextIs2 = nextGroup && patternHasNumber(nextGroup.tile, 2);
+            char = (prevIs2 || nextIs2) ? '0' : 'D';
+          } else {
+            char = 'D';
+          }
+          color = 'dragon';
+          break;
+        case TileType.FLOWER:
+          char = 'F';
+          color = 'dot'; // Flowers are blue (Suit A)
+          break;
+        case TileType.JOKER:
+          char = 'J';
+          color = 'joker';
+          break;
+      }
+    } else if (pattern.suitVar || pattern.constraints || pattern.numberVar) {
+      // Suit variable or has constraints - color based on variable letter (A=blue, B=green, C=red)
+      char = `${getPatternNumber(pattern)}`;
+      color = pattern.suitVar ? getSuitVarColor(pattern.suitVar) : 'neutral';
+    }
+
+    const text = char.repeat(count);
+
+    // Check for 3,6,9 constraint
+    const is369 = pattern.constraints?.specificValues?.length === 3 &&
+      pattern.constraints.specificValues.includes(3) &&
+      pattern.constraints.specificValues.includes(6) &&
+      pattern.constraints.specificValues.includes(9);
+
+    // Check if this is a variable number (has numberVar, evenOnly/oddOnly, or 369 constraint)
+    const isVariable = !!(
+      pattern.numberVar ||
+      pattern.constraints?.evenOnly ||
+      pattern.constraints?.oddOnly ||
+      is369
+    );
+
+    const segment: DisplaySegment = { text, color };
+    if (isVariable) {
+      segment.isVariable = true;
+    }
+    if (pattern.numberVar) {
+      segment.numberVar = pattern.numberVar;
+    }
+    segments.push(segment);
+
+    // Check if this is the last item in a super group
+    const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
+    const isEndOfSuperGroup = currentSuperGroupId && (!nextGroup || nextGroup.superGroupId !== currentSuperGroupId);
+
+    if (isEndOfSuperGroup) {
+      // End of super group - just clear tracking (no brackets)
+      currentSuperGroupId = undefined;
+    }
+
+    // Add space between groups (except after last)
+    if (i < groups.length - 1) {
+      // Don't add space within super groups (no space between tiles in super group)
+      const isInSameSuperGroup = group.superGroupId && nextGroup?.superGroupId === group.superGroupId;
+      if (!isInSameSuperGroup) {
+        segments.push({ text: ' ' });
+      }
+    }
+  }
+
+  return segments;
 }

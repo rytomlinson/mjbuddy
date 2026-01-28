@@ -2,255 +2,330 @@ import { useState } from 'react';
 import { createUseStyles } from 'react-jss';
 import { Link } from 'react-router-dom';
 import { trpc } from '../trpc';
+import { PatternGroupEditor } from '../components/PatternGroupEditor';
 import type { Theme } from '../theme';
-import type { PatternGroup } from 'common';
+import { generateDisplayPattern, generateDisplaySegments, GroupType } from 'common';
+import type { PatternGroup, DisplaySegment } from 'common';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   page: {
-    padding: theme.spacing.lg,
-    maxWidth: '1200px',
-    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100vh',
+    overflow: 'hidden',
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.spacing.lg,
+    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    borderBottom: `1px solid rgba(139, 125, 107, 0.4)`,
+    backgroundColor: 'rgba(200, 185, 165, 0.85)',
+    backdropFilter: 'blur(8px)',
+    flexShrink: 0,
   },
   title: {
-    fontSize: '24px',
+    fontSize: '18px',
     fontWeight: 'bold',
-    color: theme.colors.text,
+    color: '#2D2A26',
     margin: 0,
+    textShadow: '0 1px 0 rgba(255,255,255,0.3)',
   },
   backLink: {
-    color: theme.colors.primary,
+    color: '#8B3A3A',
     textDecoration: 'none',
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
     '&:hover': {
       textDecoration: 'underline',
     },
   },
-  section: {
-    backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.md,
-    border: `1px solid ${theme.colors.border}`,
-    marginBottom: theme.spacing.md,
-  },
-  sectionTitle: {
-    fontSize: theme.fontSizes.lg,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.md,
+  panels: {
     display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
+    flex: 1,
+    overflow: 'hidden',
   },
-  yearSelector: {
-    display: 'flex',
-    gap: theme.spacing.sm,
-    marginBottom: theme.spacing.md,
-  },
-  yearButton: {
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.text,
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    '&:hover': {
-      borderColor: theme.colors.primary,
-    },
-  },
-  yearButtonActive: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
-    color: 'white',
-  },
-  categoryTabs: {
-    display: 'flex',
-    gap: theme.spacing.xs,
-    flexWrap: 'wrap',
-    marginBottom: theme.spacing.md,
-    borderBottom: `1px solid ${theme.colors.border}`,
-    paddingBottom: theme.spacing.sm,
-  },
-  categoryTab: {
-    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    border: 'none',
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    cursor: 'pointer',
-    borderRadius: theme.borderRadius.sm,
-    fontSize: theme.fontSizes.sm,
-    transition: 'all 0.2s',
-    '&:hover': {
-      backgroundColor: theme.colors.surfaceHover,
-    },
-  },
-  categoryTabActive: {
-    backgroundColor: theme.colors.primary,
-    color: 'white',
-  },
-  handsList: {
+  panel: {
     display: 'flex',
     flexDirection: 'column',
-    gap: theme.spacing.sm,
+    borderRight: `1px solid rgba(139, 125, 107, 0.4)`,
+    backgroundColor: 'rgba(225, 215, 200, 0.82)',
+    overflow: 'hidden',
+    backdropFilter: 'blur(8px)',
   },
-  handCard: {
-    backgroundColor: theme.colors.background,
-    borderRadius: theme.borderRadius.sm,
-    padding: theme.spacing.md,
-    border: `1px solid ${theme.colors.border}`,
-    transition: 'all 0.2s',
-    '&:hover': {
-      borderColor: theme.colors.primary,
-    },
+  panelNarrow: {
+    width: '140px',
+    flexShrink: 0,
   },
-  handCardEditing: {
-    borderColor: theme.colors.primary,
-    boxShadow: '0 0 8px rgba(184, 74, 74, 0.3)',
+  panelMedium: {
+    width: '180px',
+    flexShrink: 0,
   },
-  handHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: theme.spacing.sm,
+  panelWide: {
+    width: '280px',
+    flexShrink: 0,
   },
-  handName: {
-    fontSize: theme.fontSizes.md,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    margin: 0,
+  panelFlex: {
+    flex: 1,
+    borderRight: 'none',
   },
-  handPattern: {
+  panelHeader: {
+    padding: theme.spacing.sm,
+    borderBottom: `1px solid rgba(139, 125, 107, 0.3)`,
+    backgroundColor: 'rgba(200, 185, 165, 0.6)',
+    flexShrink: 0,
+  },
+  panelTitle: {
     fontSize: theme.fontSizes.sm,
-    color: theme.colors.textSecondary,
-    fontFamily: 'monospace',
-    margin: `${theme.spacing.xs} 0`,
+    fontWeight: 'bold',
+    color: '#3D3832',
+    textTransform: 'uppercase',
+    margin: 0,
+    textShadow: '0 1px 0 rgba(255,255,255,0.3)',
+  },
+  panelContent: {
+    flex: 1,
+    overflow: 'auto',
+    backgroundColor: 'rgba(240, 235, 225, 0.5)',
+  },
+  panelFooter: {
+    padding: theme.spacing.sm,
+    borderTop: `1px solid rgba(139, 125, 107, 0.3)`,
+    backgroundColor: 'rgba(200, 185, 165, 0.6)',
+    flexShrink: 0,
+  },
+  listItem: {
+    padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
+    cursor: 'pointer',
+    borderBottom: `1px solid rgba(139, 125, 107, 0.2)`,
+    fontSize: theme.fontSizes.sm,
+    color: '#2D2A26',
     display: 'flex',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 250, 240, 0.4)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 250, 240, 0.7)',
+    },
+  },
+  listItemSelected: {
+    backgroundColor: 'rgba(184, 74, 74, 0.85)',
+    color: 'white',
+    textShadow: '0 1px 1px rgba(0,0,0,0.2)',
+    '&:hover': {
+      backgroundColor: 'rgba(184, 74, 74, 0.9)',
+    },
+  },
+  listItemActive: {
+    fontSize: '10px',
+    opacity: 0.8,
+  },
+  categoryItem: {
+    padding: `${theme.spacing.sm} ${theme.spacing.sm}`,
+    cursor: 'grab',
+    borderBottom: `1px solid rgba(139, 125, 107, 0.2)`,
+    fontSize: theme.fontSizes.sm,
+    color: '#2D2A26',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(255, 250, 240, 0.4)',
+    transition: 'background-color 0.15s, opacity 0.15s',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 250, 240, 0.7)',
+    },
+  },
+  categoryItemSelected: {
+    backgroundColor: 'rgba(184, 74, 74, 0.85)',
+    color: 'white',
+    textShadow: '0 1px 1px rgba(0,0,0,0.2)',
+    '&:hover': {
+      backgroundColor: 'rgba(184, 74, 74, 0.9)',
+    },
+  },
+  categoryItemDragging: {
+    opacity: 0.5,
+    cursor: 'grabbing',
+  },
+  categoryItemDragOver: {
+    borderTop: `2px solid ${theme.colors.primary}`,
+    marginTop: '-2px',
+  },
+  handItem: {
+    padding: theme.spacing.sm,
+    cursor: 'grab',
+    borderBottom: `1px solid rgba(139, 125, 107, 0.2)`,
+    transition: 'background-color 0.15s, transform 0.15s, opacity 0.15s',
+    backgroundColor: 'rgba(255, 250, 240, 0.4)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 250, 240, 0.75)',
+    },
+  },
+  handItemSelected: {
+    backgroundColor: 'rgba(184, 74, 74, 0.15)',
+    borderLeft: `3px solid ${theme.colors.primary}`,
+  },
+  handItemDragging: {
+    opacity: 0.5,
+    cursor: 'grabbing',
+  },
+  handItemDragOver: {
+    borderTop: `2px solid ${theme.colors.primary}`,
+    marginTop: '-2px',
+  },
+  handName: {
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
+    color: '#2D2A26',
+    margin: 0,
+    marginBottom: '2px',
+  },
+  handPattern: {
+    fontSize: '12px',
+    fontFamily: 'monospace',
+    margin: 0,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    color: '#3D3832',
+  },
+  handMeta: {
+    display: 'flex',
     gap: theme.spacing.xs,
+    marginTop: '4px',
+    fontSize: '10px',
+  },
+  badge: {
+    padding: '1px 4px',
+    borderRadius: '3px',
+    fontWeight: 'bold',
+  },
+  badgePoints: {
+    backgroundColor: 'rgba(184, 74, 74, 0.25)',
+    color: '#8B3A3A',
+  },
+  badgeConcealed: {
+    backgroundColor: 'rgba(142, 36, 170, 0.25)',
+    color: '#7B1FA2',
+  },
+  warningIcon: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '14px',
+    height: '14px',
+    borderRadius: '50%',
+    backgroundColor: '#FFA726',
+    color: 'white',
+    fontSize: '10px',
+    fontWeight: 'bold',
   },
   notesIcon: {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '16px',
-    height: '16px',
+    width: '12px',
+    height: '12px',
     borderRadius: '50%',
     backgroundColor: theme.colors.textMuted,
     color: 'white',
-    fontSize: '11px',
+    fontSize: '9px',
     fontWeight: 'bold',
-    cursor: 'help',
     fontFamily: 'serif',
     fontStyle: 'italic',
   },
-  handMeta: {
-    display: 'flex',
-    gap: theme.spacing.md,
-    fontSize: theme.fontSizes.sm,
-    color: theme.colors.textMuted,
+  // Segment colors - darker for better visibility on warm background
+  segmentDot: { color: '#1565C0' },
+  segmentBam: { color: '#2E7D32' },
+  segmentCrak: { color: '#C62828' },
+  segmentWind: { color: '#6A1B9A' },
+  segmentDragon: { color: '#E65100' },
+  segmentFlower: { color: '#AD1457' },
+  segmentJoker: { color: '#00838F' },
+  segmentNeutral: { color: '#4A4540' },
+  segmentVariable: {
+    borderBottom: '2px dotted currentColor',
+    paddingBottom: '1px',
   },
-  badge: {
-    padding: `2px ${theme.spacing.xs}`,
-    borderRadius: theme.borderRadius.sm,
-    fontSize: '11px',
-    fontWeight: 'bold',
-  },
-  badgeConcealed: {
-    backgroundColor: 'rgba(142, 36, 170, 0.2)',
-    color: '#CE93D8',
-  },
-  badgePoints: {
-    backgroundColor: 'rgba(184, 74, 74, 0.2)',
-    color: theme.colors.primary,
-  },
-  actions: {
-    display: 'flex',
-    gap: theme.spacing.xs,
-  },
-  actionButton: {
-    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
+  addButton: {
+    width: '100%',
+    padding: theme.spacing.sm,
+    border: 'none',
+    backgroundColor: 'rgba(255, 250, 240, 0.5)',
+    color: '#8B3A3A',
     cursor: 'pointer',
     fontSize: theme.fontSizes.sm,
-    transition: 'all 0.2s',
+    fontWeight: 'bold',
     '&:hover': {
-      borderColor: theme.colors.primary,
-      color: theme.colors.primary,
+      backgroundColor: 'rgba(184, 74, 74, 0.15)',
     },
   },
-  actionButtonDanger: {
-    '&:hover': {
-      borderColor: theme.colors.error,
-      color: theme.colors.error,
-    },
+  // Detail panel styles
+  detailPanel: {
+    padding: theme.spacing.md,
+    overflow: 'auto',
   },
-  editForm: {
-    marginTop: theme.spacing.md,
-    paddingTop: theme.spacing.md,
-    borderTop: `1px solid ${theme.colors.border}`,
-  },
-  formRow: {
+  detailEmpty: {
     display: 'flex',
-    gap: theme.spacing.md,
-    marginBottom: theme.spacing.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    color: '#6B5F52',
+    fontStyle: 'italic',
   },
   formGroup: {
-    flex: 1,
+    marginBottom: theme.spacing.md,
   },
   formLabel: {
     display: 'block',
     fontSize: theme.fontSizes.sm,
-    color: theme.colors.textSecondary,
+    color: '#4A4540',
     marginBottom: theme.spacing.xs,
+    fontWeight: 'bold',
   },
   formInput: {
     width: '100%',
     padding: theme.spacing.sm,
-    border: `1px solid ${theme.colors.border}`,
+    border: `1px solid rgba(139, 125, 107, 0.4)`,
     borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.text,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    color: '#2D2A26',
     fontSize: theme.fontSizes.sm,
     boxSizing: 'border-box',
     '&:focus': {
       outline: 'none',
       borderColor: theme.colors.primary,
+      backgroundColor: 'rgba(255, 255, 255, 0.95)',
     },
   },
-  formTextarea: {
-    width: '100%',
-    padding: theme.spacing.sm,
-    border: `1px solid ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: theme.colors.surface,
-    color: theme.colors.text,
-    fontSize: theme.fontSizes.sm,
-    fontFamily: 'monospace',
-    minHeight: '100px',
-    resize: 'vertical',
-    boxSizing: 'border-box',
-    '&:focus': {
-      outline: 'none',
-      borderColor: theme.colors.primary,
-    },
+  formRow: {
+    display: 'flex',
+    gap: theme.spacing.md,
+  },
+  formRowItem: {
+    flex: 1,
   },
   formCheckbox: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.xs,
+    fontSize: theme.fontSizes.sm,
+    color: '#2D2A26',
+  },
+  displayPatternPreview: {
+    padding: theme.spacing.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: theme.borderRadius.sm,
+    fontFamily: 'monospace',
+    fontSize: theme.fontSizes.md,
+    border: `1px solid rgba(139, 125, 107, 0.2)`,
   },
   formActions: {
     display: 'flex',
     gap: theme.spacing.sm,
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    borderTop: `1px solid rgba(139, 125, 107, 0.3)`,
   },
   saveButton: {
     padding: `${theme.spacing.sm} ${theme.spacing.md}`,
@@ -271,66 +346,68 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   cancelButton: {
     padding: `${theme.spacing.sm} ${theme.spacing.md}`,
-    backgroundColor: 'transparent',
-    color: theme.colors.textSecondary,
-    border: `1px solid ${theme.colors.border}`,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    color: '#4A4540',
+    border: `1px solid rgba(139, 125, 107, 0.4)`,
     borderRadius: theme.borderRadius.sm,
     cursor: 'pointer',
     fontSize: theme.fontSizes.sm,
     '&:hover': {
-      borderColor: theme.colors.textSecondary,
+      backgroundColor: 'rgba(255, 255, 255, 0.8)',
+      borderColor: '#4A4540',
+    },
+  },
+  cloneButton: {
+    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    backgroundColor: 'rgba(107, 142, 122, 0.2)',
+    color: '#4A6B5A',
+    border: `1px solid rgba(107, 142, 122, 0.5)`,
+    borderRadius: theme.borderRadius.sm,
+    cursor: 'pointer',
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
+    '&:hover': {
+      backgroundColor: 'rgba(107, 142, 122, 0.3)',
+      borderColor: '#4A6B5A',
+    },
+    '&:disabled': {
+      opacity: 0.5,
+      cursor: 'not-allowed',
+    },
+  },
+  deleteButton: {
+    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    color: '#B84A4A',
+    border: `1px solid #B84A4A`,
+    borderRadius: theme.borderRadius.sm,
+    cursor: 'pointer',
+    fontSize: theme.fontSizes.sm,
+    marginLeft: 'auto',
+    '&:hover': {
+      backgroundColor: 'rgba(184, 74, 74, 0.15)',
     },
   },
   loading: {
-    color: theme.colors.textMuted,
+    padding: theme.spacing.md,
+    color: '#6B5F52',
     fontStyle: 'italic',
-    padding: theme.spacing.md,
-  },
-  error: {
-    color: theme.colors.error,
-    padding: theme.spacing.md,
+    fontSize: theme.fontSizes.sm,
   },
   empty: {
-    color: theme.colors.textMuted,
-    fontStyle: 'italic',
     padding: theme.spacing.md,
-    textAlign: 'center',
-  },
-  dropZone: {
-    border: `2px dashed ${theme.colors.border}`,
-    borderRadius: theme.borderRadius.md,
-    padding: theme.spacing.xl,
-    textAlign: 'center',
-    color: theme.colors.textMuted,
-    backgroundColor: 'transparent',
-    transition: 'all 0.2s',
-    cursor: 'pointer',
-  },
-  dropZoneActive: {
-    borderColor: theme.colors.primary,
-    backgroundColor: 'rgba(184, 74, 74, 0.05)',
-    color: theme.colors.primary,
-  },
-  dropZoneIcon: {
-    fontSize: '48px',
-    marginBottom: theme.spacing.sm,
-    opacity: 0.5,
-  },
-  dropZoneText: {
-    fontSize: theme.fontSizes.md,
-    fontWeight: 500,
-    marginBottom: theme.spacing.xs,
-  },
-  dropZoneHint: {
+    color: '#6B5F52',
+    fontStyle: 'italic',
     fontSize: theme.fontSizes.sm,
-    opacity: 0.7,
+    textAlign: 'center',
   },
 }));
 
 interface EditFormData {
   displayName: string;
   displayPattern: string;
-  patternGroups: string; // JSON string for editing
+  displaySegments: DisplaySegment[];
+  patternGroups: PatternGroup[];
   isConcealed: boolean;
   points: number;
   notes: string;
@@ -340,19 +417,23 @@ interface EditFormData {
 export function AdminPage() {
   const classes = useStyles();
 
-  const [selectedYearId, setSelectedYearId] = useState<number | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
-  const [editingHandId, setEditingHandId] = useState<number | null>(null);
+  const [selectedHandId, setSelectedHandId] = useState<number | null>(null);
   const [editFormData, setEditFormData] = useState<EditFormData | null>(null);
-  const [isDragOver, setIsDragOver] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [draggedHandId, setDraggedHandId] = useState<number | null>(null);
+  const [dragOverHandId, setDragOverHandId] = useState<number | null>(null);
+  const [draggedCategoryId, setDraggedCategoryId] = useState<number | null>(null);
+  const [dragOverCategoryId, setDragOverCategoryId] = useState<number | null>(null);
 
-  // Fetch card years
-  const { data: years, isLoading: yearsLoading } = trpc.cardYear.list.useQuery();
+  // Fetch cards (formerly years)
+  const { data: cards, isLoading: cardsLoading } = trpc.cardYear.list.useQuery();
 
-  // Fetch categories for selected year
-  const { data: categories, isLoading: categoriesLoading } = trpc.cardHand.listCategories.useQuery(
-    { cardYearId: selectedYearId! },
-    { enabled: selectedYearId !== null }
+  // Fetch categories for selected card
+  const { data: categories, isLoading: categoriesLoading, refetch: refetchCategories } = trpc.cardHand.listCategories.useQuery(
+    { cardYearId: selectedCardId! },
+    { enabled: selectedCardId !== null }
   );
 
   // Fetch hands for selected category
@@ -361,49 +442,60 @@ export function AdminPage() {
     { enabled: selectedCategoryId !== null }
   );
 
-  // Fetch card years with refetch capability
-  const { refetch: refetchYears } = trpc.cardYear.list.useQuery(undefined, {
-    enabled: false, // We already have the query above
-  });
-
   // Mutations
-  const setActiveYear = trpc.cardYear.setActive.useMutation({
-    onSuccess: () => {
-      // Refetch years to update active status
-      window.location.reload(); // Simple reload to refresh all data
-    },
-  });
-
   const updateHand = trpc.cardHand.update.useMutation({
     onSuccess: () => {
       refetchHands();
-      setEditingHandId(null);
-      setEditFormData(null);
     },
   });
 
   const deleteHand = trpc.cardHand.delete.useMutation({
     onSuccess: () => {
       refetchHands();
+      setSelectedHandId(null);
+      setEditFormData(null);
     },
   });
 
-  // Auto-select first year
-  if (years && years.length > 0 && selectedYearId === null) {
-    setSelectedYearId(years[0].id);
+  const createHand = trpc.cardHand.create.useMutation({
+    onSuccess: (newHand) => {
+      refetchHands();
+      setIsCreatingNew(false);
+      setSelectedHandId(newHand.id);
+      loadHandIntoForm(newHand);
+    },
+  });
+
+  const reorderHands = trpc.cardHand.reorder.useMutation({
+    onSuccess: () => {
+      refetchHands();
+    },
+  });
+
+  const reorderCategoriesMutation = trpc.cardHand.reorderCategories.useMutation({
+    onSuccess: () => {
+      refetchCategories();
+    },
+  });
+
+  // Auto-select first card
+  if (cards && cards.length > 0 && selectedCardId === null) {
+    setSelectedCardId(cards[0].id);
   }
 
-  // Auto-select first category when year changes
+  // Auto-select first category when card changes
   if (categories && categories.length > 0 && selectedCategoryId === null) {
     setSelectedCategoryId(categories[0].id);
   }
 
-  const handleEditClick = (hand: NonNullable<typeof hands>[number]) => {
-    setEditingHandId(hand.id);
+  const loadHandIntoForm = (hand: NonNullable<typeof hands>[number]) => {
+    const derivedPattern = generateDisplayPattern(hand.patternGroups);
+    const derivedSegments = generateDisplaySegments(hand.patternGroups);
     setEditFormData({
       displayName: hand.displayName,
-      displayPattern: hand.displayPattern,
-      patternGroups: JSON.stringify(hand.patternGroups, null, 2),
+      displayPattern: derivedPattern,
+      displaySegments: derivedSegments,
+      patternGroups: hand.patternGroups,
       isConcealed: hand.isConcealed,
       points: hand.points,
       notes: hand.notes || '',
@@ -411,305 +503,525 @@ export function AdminPage() {
     });
   };
 
-  const handleCancelEdit = () => {
-    setEditingHandId(null);
+  const handleCardSelect = (cardId: number) => {
+    setSelectedCardId(cardId);
+    setSelectedCategoryId(null);
+    setSelectedHandId(null);
     setEditFormData(null);
+    setIsCreatingNew(false);
   };
 
-  const handleSaveEdit = () => {
-    if (!editFormData || editingHandId === null) return;
+  const handleCategorySelect = (categoryId: number) => {
+    setSelectedCategoryId(categoryId);
+    setSelectedHandId(null);
+    setEditFormData(null);
+    setIsCreatingNew(false);
+  };
 
-    let patternGroups: PatternGroup[];
-    try {
-      patternGroups = JSON.parse(editFormData.patternGroups);
-    } catch {
-      alert('Invalid JSON in pattern groups');
-      return;
-    }
+  const handleHandSelect = (hand: NonNullable<typeof hands>[number]) => {
+    setSelectedHandId(hand.id);
+    setIsCreatingNew(false);
+    loadHandIntoForm(hand);
+  };
 
-    updateHand.mutate({
-      id: editingHandId,
-      displayName: editFormData.displayName,
-      displayPattern: editFormData.displayPattern,
-      patternGroups,
-      isConcealed: editFormData.isConcealed,
-      points: editFormData.points,
-      notes: editFormData.notes || null,
-      displayOrder: editFormData.displayOrder,
+  const handleAddNewHand = () => {
+    if (selectedCategoryId === null) return;
+    setSelectedHandId(null);
+    setIsCreatingNew(true);
+    const nextOrder = (hands?.length || 0) + 1;
+    const defaultGroups: PatternGroup[] = [
+      { type: GroupType.PUNG, tile: { suitVar: 'A', constraints: { specificValues: [1] } } },
+    ];
+    setEditFormData({
+      displayName: 'New Hand',
+      displayPattern: generateDisplayPattern(defaultGroups),
+      displaySegments: generateDisplaySegments(defaultGroups),
+      patternGroups: defaultGroups,
+      isConcealed: false,
+      points: 25,
+      notes: '',
+      displayOrder: nextOrder,
     });
   };
 
-  const handleDeleteClick = (hand: NonNullable<typeof hands>[number]) => {
-    if (confirm(`Delete "${hand.displayName}"? This cannot be undone.`)) {
-      deleteHand.mutate({ id: hand.id });
+  const handleSave = () => {
+    if (!editFormData || selectedCategoryId === null) return;
+
+    if (editFormData.patternGroups.length === 0) {
+      alert('At least one pattern group is required');
+      return;
+    }
+
+    if (isCreatingNew) {
+      createHand.mutate({
+        categoryId: selectedCategoryId,
+        displayName: editFormData.displayName,
+        displayPattern: editFormData.displayPattern,
+        patternGroups: editFormData.patternGroups,
+        isConcealed: editFormData.isConcealed,
+        points: editFormData.points,
+        notes: editFormData.notes || null,
+        displayOrder: editFormData.displayOrder,
+      });
+    } else if (selectedHandId !== null) {
+      updateHand.mutate({
+        id: selectedHandId,
+        displayName: editFormData.displayName,
+        displayPattern: editFormData.displayPattern,
+        patternGroups: editFormData.patternGroups,
+        isConcealed: editFormData.isConcealed,
+        points: editFormData.points,
+        notes: editFormData.notes || null,
+        displayOrder: editFormData.displayOrder,
+      });
     }
   };
 
-  const handleYearChange = (yearId: number) => {
-    setSelectedYearId(yearId);
-    setSelectedCategoryId(null);
-    setEditingHandId(null);
-    setEditFormData(null);
+  const handleDelete = () => {
+    if (selectedHandId === null) return;
+    const hand = hands?.find(h => h.id === selectedHandId);
+    if (hand && confirm(`Delete "${hand.displayName}"? This cannot be undone.`)) {
+      deleteHand.mutate({ id: selectedHandId });
+    }
   };
 
-  const handleCategoryChange = (categoryId: number) => {
-    setSelectedCategoryId(categoryId);
-    setEditingHandId(null);
-    setEditFormData(null);
+  const handleCancel = () => {
+    if (isCreatingNew) {
+      setIsCreatingNew(false);
+      setEditFormData(null);
+    } else if (selectedHandId !== null && hands) {
+      const hand = hands.find(h => h.id === selectedHandId);
+      if (hand) {
+        loadHandIntoForm(hand);
+      }
+    }
+  };
+
+  const handleClone = () => {
+    if (!editFormData || selectedCategoryId === null) return;
+
+    const newName = prompt('Enter name for the cloned hand:', `${editFormData.displayName} (Copy)`);
+    if (!newName) return;
+
+    const nextOrder = (hands?.length || 0) + 1;
+
+    createHand.mutate({
+      categoryId: selectedCategoryId,
+      displayName: newName,
+      displayPattern: editFormData.displayPattern,
+      patternGroups: editFormData.patternGroups,
+      isConcealed: editFormData.isConcealed,
+      points: editFormData.points,
+      notes: editFormData.notes || null,
+      displayOrder: nextOrder,
+    });
+  };
+
+  const renderSegments = (segments: DisplaySegment[]) => {
+    return segments.map((segment, idx) => {
+      let colorClass = classes.segmentNeutral;
+      switch (segment.color) {
+        case 'dot': colorClass = classes.segmentDot; break;
+        case 'bam': colorClass = classes.segmentBam; break;
+        case 'crak': colorClass = classes.segmentCrak; break;
+        case 'wind': colorClass = classes.segmentWind; break;
+        case 'dragon': colorClass = classes.segmentDragon; break;
+        case 'flower': colorClass = classes.segmentFlower; break;
+        case 'joker': colorClass = classes.segmentJoker; break;
+      }
+      // Add variable indicator (dotted underline) and tooltip for variable numbers
+      const variableClass = segment.isVariable ? classes.segmentVariable : '';
+      const title = segment.numberVar
+        ? `Variable: groups with "${segment.numberVar}" must match`
+        : segment.isVariable
+        ? 'Variable number (any valid value)'
+        : undefined;
+      return (
+        <span
+          key={idx}
+          className={`${colorClass} ${variableClass}`}
+          title={title}
+        >
+          {segment.text}
+        </span>
+      );
+    });
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (e: React.DragEvent, handId: number) => {
+    setDraggedHandId(handId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, handId: number) => {
+    e.preventDefault();
+    if (draggedHandId !== null && draggedHandId !== handId) {
+      setDragOverHandId(handId);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverHandId(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedHandId(null);
+    setDragOverHandId(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetHandId: number) => {
+    e.preventDefault();
+    if (!hands || draggedHandId === null || draggedHandId === targetHandId) {
+      setDraggedHandId(null);
+      setDragOverHandId(null);
+      return;
+    }
+
+    // Create new order array
+    const handIds = hands.map(h => h.id);
+    const draggedIndex = handIds.indexOf(draggedHandId);
+    const targetIndex = handIds.indexOf(targetHandId);
+
+    // Remove dragged item and insert at target position
+    handIds.splice(draggedIndex, 1);
+    handIds.splice(targetIndex, 0, draggedHandId);
+
+    // Update order in database
+    reorderHands.mutate({ handIds });
+
+    setDraggedHandId(null);
+    setDragOverHandId(null);
+  };
+
+  // Category drag and drop handlers
+  const handleCategoryDragStart = (e: React.DragEvent, categoryId: number) => {
+    setDraggedCategoryId(categoryId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleCategoryDragOver = (e: React.DragEvent, categoryId: number) => {
+    e.preventDefault();
+    if (draggedCategoryId !== null && draggedCategoryId !== categoryId) {
+      setDragOverCategoryId(categoryId);
+    }
+  };
+
+  const handleCategoryDragLeave = () => {
+    setDragOverCategoryId(null);
+  };
+
+  const handleCategoryDragEnd = () => {
+    setDraggedCategoryId(null);
+    setDragOverCategoryId(null);
+  };
+
+  const handleCategoryDrop = (e: React.DragEvent, targetCategoryId: number) => {
+    e.preventDefault();
+    if (!categories || draggedCategoryId === null || draggedCategoryId === targetCategoryId) {
+      setDraggedCategoryId(null);
+      setDragOverCategoryId(null);
+      return;
+    }
+
+    // Create new order array
+    const categoryIds = categories.map(c => c.id);
+    const draggedIndex = categoryIds.indexOf(draggedCategoryId);
+    const targetIndex = categoryIds.indexOf(targetCategoryId);
+
+    // Remove dragged item and insert at target position
+    categoryIds.splice(draggedIndex, 1);
+    categoryIds.splice(targetIndex, 0, draggedCategoryId);
+
+    // Update order in database
+    reorderCategoriesMutation.mutate({ categoryIds });
+
+    setDraggedCategoryId(null);
+    setDragOverCategoryId(null);
   };
 
   return (
     <div className={classes.page}>
+      {/* Header */}
       <div className={classes.header}>
-        <h1 className={classes.title}>Card Hands Admin</h1>
+        <h1 className={classes.title}>Card Manager</h1>
         <Link to="/" className={classes.backLink}>
           &larr; Back to Analyzer
         </Link>
       </div>
 
-      {/* Card Image Upload */}
-      <div className={classes.section}>
-        <h2 className={classes.sectionTitle}>Import Card</h2>
-        <div
-          className={`${classes.dropZone} ${isDragOver ? classes.dropZoneActive : ''}`}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setIsDragOver(true);
-          }}
-          onDragLeave={() => setIsDragOver(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragOver(false);
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
-              // TODO: Process the card image
-              alert(`Card image "${file.name}" received. Processing not yet implemented.`);
-            }
-          }}
-        >
-          <div className={classes.dropZoneIcon}>🀄</div>
-          <div className={classes.dropZoneText}>Drag card image here to upload rules</div>
-          <div className={classes.dropZoneHint}>Supports JPEG, PNG images of NMJL cards</div>
+      {/* Four Panels */}
+      <div className={classes.panels}>
+        {/* Panel 1: Cards */}
+        <div className={`${classes.panel} ${classes.panelNarrow}`}>
+          <div className={classes.panelHeader}>
+            <h2 className={classes.panelTitle}>Cards</h2>
+          </div>
+          <div className={classes.panelContent}>
+            {cardsLoading ? (
+              <div className={classes.loading}>Loading...</div>
+            ) : cards && cards.length > 0 ? (
+              cards.map((card) => (
+                <div
+                  key={card.id}
+                  className={`${classes.listItem} ${selectedCardId === card.id ? classes.listItemSelected : ''}`}
+                  onClick={() => handleCardSelect(card.id)}
+                >
+                  <span>{card.name || card.year}</span>
+                  {card.isActive && <span className={classes.listItemActive}>Active</span>}
+                </div>
+              ))
+            ) : (
+              <div className={classes.empty}>No cards</div>
+            )}
+          </div>
+          <div className={classes.panelFooter}>
+            <button className={classes.addButton}>+ Add New</button>
+          </div>
         </div>
-      </div>
 
-      {/* Year Selection */}
-      <div className={classes.section}>
-        <h2 className={classes.sectionTitle}>Card Year</h2>
-        {yearsLoading ? (
-          <div className={classes.loading}>Loading years...</div>
-        ) : years && years.length > 0 ? (
-          <>
-            <div className={classes.yearSelector}>
-              {years.map((year) => (
-                <button
-                  key={year.id}
-                  className={`${classes.yearButton} ${selectedYearId === year.id ? classes.yearButtonActive : ''}`}
-                  onClick={() => handleYearChange(year.id)}
-                >
-                  {year.name || year.year} {year.isActive && '(Active)'}
-                </button>
-              ))}
-            </div>
-            {selectedYearId && years.find(y => y.id === selectedYearId) && !years.find(y => y.id === selectedYearId)?.isActive && (
-              <button
-                className={classes.saveButton}
-                onClick={() => setActiveYear.mutate({ id: selectedYearId })}
-                disabled={setActiveYear.isPending}
-                style={{ marginTop: '12px' }}
-              >
-                {setActiveYear.isPending ? 'Setting...' : `Set "${years.find(y => y.id === selectedYearId)?.name}" as Active`}
-              </button>
+        {/* Panel 2: Categories */}
+        <div className={`${classes.panel} ${classes.panelMedium}`}>
+          <div className={classes.panelHeader}>
+            <h2 className={classes.panelTitle}>Categories</h2>
+          </div>
+          <div className={classes.panelContent}>
+            {!selectedCardId ? (
+              <div className={classes.empty}>Select a card</div>
+            ) : categoriesLoading ? (
+              <div className={classes.loading}>Loading...</div>
+            ) : categories && categories.length > 0 ? (
+              categories.map((category) => {
+                const isDragging = draggedCategoryId === category.id;
+                const isDragOver = dragOverCategoryId === category.id;
+                return (
+                  <div
+                    key={category.id}
+                    className={`${classes.categoryItem} ${selectedCategoryId === category.id ? classes.categoryItemSelected : ''} ${isDragging ? classes.categoryItemDragging : ''} ${isDragOver ? classes.categoryItemDragOver : ''}`}
+                    onClick={() => handleCategorySelect(category.id)}
+                    draggable
+                    onDragStart={(e) => handleCategoryDragStart(e, category.id)}
+                    onDragOver={(e) => handleCategoryDragOver(e, category.id)}
+                    onDragLeave={handleCategoryDragLeave}
+                    onDragEnd={handleCategoryDragEnd}
+                    onDrop={(e) => handleCategoryDrop(e, category.id)}
+                  >
+                    {category.name}
+                  </div>
+                );
+              })
+            ) : (
+              <div className={classes.empty}>No categories</div>
             )}
-          </>
-        ) : (
-          <div className={classes.empty}>No card years found</div>
-        )}
-      </div>
+          </div>
+          <div className={classes.panelFooter}>
+            <button className={classes.addButton} disabled={!selectedCardId}>+ Add New</button>
+          </div>
+        </div>
 
-      {/* Categories and Hands */}
-      {selectedYearId && (
-        <div className={classes.section}>
-          <h2 className={classes.sectionTitle}>
-            Hands
-            {categories && selectedCategoryId && (
-              <span style={{ fontWeight: 'normal', fontSize: '14px', color: '#888' }}>
-                ({hands?.length || 0} hands)
-              </span>
-            )}
-          </h2>
-
-          {/* Category Tabs */}
-          {categoriesLoading ? (
-            <div className={classes.loading}>Loading categories...</div>
-          ) : categories && categories.length > 0 ? (
-            <div className={classes.categoryTabs}>
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`${classes.categoryTab} ${selectedCategoryId === category.id ? classes.categoryTabActive : ''}`}
-                  onClick={() => handleCategoryChange(category.id)}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-          ) : (
-            <div className={classes.empty}>No categories found</div>
-          )}
-
-          {/* Hands List */}
-          {selectedCategoryId && (
-            handsLoading ? (
-              <div className={classes.loading}>Loading hands...</div>
+        {/* Panel 3: Hands */}
+        <div className={`${classes.panel} ${classes.panelWide}`}>
+          <div className={classes.panelHeader}>
+            <h2 className={classes.panelTitle}>Hands {hands && `(${hands.length})`}</h2>
+          </div>
+          <div className={classes.panelContent}>
+            {!selectedCategoryId ? (
+              <div className={classes.empty}>Select a category</div>
+            ) : handsLoading ? (
+              <div className={classes.loading}>Loading...</div>
             ) : hands && hands.length > 0 ? (
-              <div className={classes.handsList}>
-                {hands.map((hand) => (
+              hands.map((hand) => {
+                const segments = generateDisplaySegments(hand.patternGroups);
+                const patternText = generateDisplayPattern(hand.patternGroups);
+                const charCount = patternText.replace(/\s/g, '').length;
+                const isDragging = draggedHandId === hand.id;
+                const isDragOver = dragOverHandId === hand.id;
+                return (
                   <div
                     key={hand.id}
-                    className={`${classes.handCard} ${editingHandId === hand.id ? classes.handCardEditing : ''}`}
+                    className={`${classes.handItem} ${selectedHandId === hand.id ? classes.handItemSelected : ''} ${isDragging ? classes.handItemDragging : ''} ${isDragOver ? classes.handItemDragOver : ''}`}
+                    onClick={() => handleHandSelect(hand)}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, hand.id)}
+                    onDragOver={(e) => handleDragOver(e, hand.id)}
+                    onDragLeave={handleDragLeave}
+                    onDragEnd={handleDragEnd}
+                    onDrop={(e) => handleDrop(e, hand.id)}
                   >
-                    <div className={classes.handHeader}>
-                      <div>
-                        <h3 className={classes.handName}>{hand.displayName}</h3>
-                        <p className={classes.handPattern}>
-                          {hand.displayPattern}
-                          {hand.notes && (
-                            <span className={classes.notesIcon} title={hand.notes}>&#8505;</span>
-                          )}
-                        </p>
-                        <div className={classes.handMeta}>
-                          <span className={`${classes.badge} ${classes.badgePoints}`}>
-                            {hand.points} pts
-                          </span>
-                          {hand.isConcealed && (
-                            <span className={`${classes.badge} ${classes.badgeConcealed}`}>
-                              Concealed
-                            </span>
-                          )}
-                          <span>Order: {hand.displayOrder}</span>
-                        </div>
-                      </div>
-                      <div className={classes.actions}>
-                        {editingHandId !== hand.id && (
-                          <>
-                            <button
-                              className={classes.actionButton}
-                              onClick={() => handleEditClick(hand)}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className={`${classes.actionButton} ${classes.actionButtonDanger}`}
-                              onClick={() => handleDeleteClick(hand)}
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
-                      </div>
+                    <h4 className={classes.handName}>{hand.displayName}</h4>
+                    <p className={classes.handPattern}>
+                      {renderSegments(segments)}
+                      {hand.notes && <span className={classes.notesIcon} title={hand.notes}>i</span>}
+                      {charCount !== 14 && (
+                        <span className={classes.warningIcon} title={`${charCount} tiles (need 14)`}>!</span>
+                      )}
+                    </p>
+                    <div className={classes.handMeta}>
+                      <span className={`${classes.badge} ${classes.badgePoints}`}>{hand.points} pts</span>
+                      {hand.isConcealed && (
+                        <span className={`${classes.badge} ${classes.badgeConcealed}`}>C</span>
+                      )}
                     </div>
-
-                    {/* Edit Form */}
-                    {editingHandId === hand.id && editFormData && (
-                      <div className={classes.editForm}>
-                        <div className={classes.formRow}>
-                          <div className={classes.formGroup}>
-                            <label className={classes.formLabel}>Display Name</label>
-                            <input
-                              type="text"
-                              className={classes.formInput}
-                              value={editFormData.displayName}
-                              onChange={(e) => setEditFormData({ ...editFormData, displayName: e.target.value })}
-                            />
-                          </div>
-                          <div className={classes.formGroup}>
-                            <label className={classes.formLabel}>Points</label>
-                            <input
-                              type="number"
-                              className={classes.formInput}
-                              value={editFormData.points}
-                              onChange={(e) => setEditFormData({ ...editFormData, points: parseInt(e.target.value) || 0 })}
-                            />
-                          </div>
-                          <div className={classes.formGroup}>
-                            <label className={classes.formLabel}>Display Order</label>
-                            <input
-                              type="number"
-                              className={classes.formInput}
-                              value={editFormData.displayOrder}
-                              onChange={(e) => setEditFormData({ ...editFormData, displayOrder: parseInt(e.target.value) || 0 })}
-                            />
-                          </div>
-                        </div>
-
-                        <div className={classes.formGroup}>
-                          <label className={classes.formLabel}>Display Pattern</label>
-                          <input
-                            type="text"
-                            className={classes.formInput}
-                            value={editFormData.displayPattern}
-                            onChange={(e) => setEditFormData({ ...editFormData, displayPattern: e.target.value })}
-                          />
-                        </div>
-
-                        <div className={classes.formGroup}>
-                          <label className={classes.formLabel}>Pattern Groups (JSON)</label>
-                          <textarea
-                            className={classes.formTextarea}
-                            value={editFormData.patternGroups}
-                            onChange={(e) => setEditFormData({ ...editFormData, patternGroups: e.target.value })}
-                          />
-                        </div>
-
-                        <div className={classes.formRow}>
-                          <div className={classes.formGroup}>
-                            <label className={classes.formLabel}>Notes</label>
-                            <input
-                              type="text"
-                              className={classes.formInput}
-                              value={editFormData.notes}
-                              onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
-                            />
-                          </div>
-                          <div className={classes.formGroup}>
-                            <label className={classes.formCheckbox}>
-                              <input
-                                type="checkbox"
-                                checked={editFormData.isConcealed}
-                                onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.checked })}
-                              />
-                              Concealed Hand
-                            </label>
-                          </div>
-                        </div>
-
-                        <div className={classes.formActions}>
-                          <button
-                            className={classes.saveButton}
-                            onClick={handleSaveEdit}
-                            disabled={updateHand.isPending}
-                          >
-                            {updateHand.isPending ? 'Saving...' : 'Save Changes'}
-                          </button>
-                          <button
-                            className={classes.cancelButton}
-                            onClick={handleCancelEdit}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                ))}
+                );
+              })
+            ) : (
+              <div className={classes.empty}>No hands</div>
+            )}
+          </div>
+          <div className={classes.panelFooter}>
+            <button className={classes.addButton} onClick={handleAddNewHand} disabled={!selectedCategoryId}>
+              + Add New
+            </button>
+          </div>
+        </div>
+
+        {/* Panel 4: Hand Details */}
+        <div className={`${classes.panel} ${classes.panelFlex}`}>
+          <div className={classes.panelHeader}>
+            <h2 className={classes.panelTitle}>
+              {isCreatingNew ? 'New Hand' : editFormData ? 'Edit Hand' : 'Hand Details'}
+            </h2>
+          </div>
+          <div className={classes.panelContent}>
+            {editFormData ? (
+              <div className={classes.detailPanel}>
+                {/* Display Name */}
+                <div className={classes.formGroup}>
+                  <label className={classes.formLabel}>Display Name</label>
+                  <input
+                    type="text"
+                    className={classes.formInput}
+                    value={editFormData.displayName}
+                    onChange={(e) => setEditFormData({ ...editFormData, displayName: e.target.value })}
+                  />
+                </div>
+
+                {/* Display Pattern Preview */}
+                <div className={classes.formGroup}>
+                  <label className={classes.formLabel}>
+                    Display Pattern
+                    {(() => {
+                      const count = editFormData.displayPattern.replace(/\s/g, '').length;
+                      const isValid = count === 14;
+                      return (
+                        <span style={{
+                          marginLeft: '8px',
+                          fontWeight: 'normal',
+                          color: isValid ? '#4CAF50' : '#FFA726',
+                        }}>
+                          ({count}/14 tiles{isValid ? ' ✓' : ' ⚠'})
+                        </span>
+                      );
+                    })()}
+                  </label>
+                  <div className={classes.displayPatternPreview}>
+                    {renderSegments(editFormData.displaySegments)}
+                  </div>
+                </div>
+
+                {/* Pattern Groups */}
+                <div className={classes.formGroup}>
+                  <label className={classes.formLabel}>Pattern Groups</label>
+                  <PatternGroupEditor
+                    groups={editFormData.patternGroups}
+                    onChange={(groups) => setEditFormData({
+                      ...editFormData,
+                      patternGroups: groups,
+                      displayPattern: generateDisplayPattern(groups),
+                      displaySegments: generateDisplaySegments(groups),
+                    })}
+                  />
+                </div>
+
+                {/* Points and Order */}
+                <div className={classes.formRow}>
+                  <div className={classes.formRowItem}>
+                    <div className={classes.formGroup}>
+                      <label className={classes.formLabel}>Points</label>
+                      <input
+                        type="number"
+                        className={classes.formInput}
+                        value={editFormData.points}
+                        onChange={(e) => setEditFormData({ ...editFormData, points: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+                  <div className={classes.formRowItem}>
+                    <div className={classes.formGroup}>
+                      <label className={classes.formLabel}>Display Order</label>
+                      <input
+                        type="number"
+                        className={classes.formInput}
+                        value={editFormData.displayOrder}
+                        onChange={(e) => setEditFormData({ ...editFormData, displayOrder: parseInt(e.target.value) || 0 })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className={classes.formGroup}>
+                  <label className={classes.formLabel}>Notes</label>
+                  <input
+                    type="text"
+                    className={classes.formInput}
+                    value={editFormData.notes}
+                    onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                    placeholder="e.g., Any 1 Suit, Pairs Only"
+                  />
+                </div>
+
+                {/* Concealed */}
+                <div className={classes.formGroup}>
+                  <label className={classes.formCheckbox}>
+                    <input
+                      type="checkbox"
+                      checked={editFormData.isConcealed}
+                      onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.checked })}
+                    />
+                    Concealed Hand
+                  </label>
+                </div>
+
+                {/* Actions */}
+                <div className={classes.formActions}>
+                  <button
+                    className={classes.saveButton}
+                    onClick={handleSave}
+                    disabled={updateHand.isPending || createHand.isPending}
+                  >
+                    {updateHand.isPending || createHand.isPending ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    className={classes.cloneButton}
+                    onClick={handleClone}
+                    disabled={createHand.isPending}
+                  >
+                    Clone
+                  </button>
+                  <button className={classes.cancelButton} onClick={handleCancel}>
+                    Cancel
+                  </button>
+                  {!isCreatingNew && selectedHandId && (
+                    <button
+                      className={classes.deleteButton}
+                      onClick={handleDelete}
+                      disabled={deleteHand.isPending}
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className={classes.empty}>No hands in this category</div>
-            )
-          )}
+              <div className={classes.detailEmpty}>
+                Select a hand to edit
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

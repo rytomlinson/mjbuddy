@@ -1,6 +1,10 @@
 /**
- * Seed script for 2025_Special NMJL card
+ * Seed script for NMJL 2025 card
  * Run with: npx tsx src/seed2025Special.ts
+ *
+ * NOTE: The complete NMJL card data is copyrighted by the National Mah Jongg League, Inc.
+ * This file contains patterns gathered from publicly available clarification documents.
+ * For the complete official card, please purchase from the NMJL.
  */
 
 import { initDb, query, closeDb } from './db.js';
@@ -527,6 +531,295 @@ const categories: { name: string; hands: HandData[] }[] = [
       },
     ],
   },
+  {
+    name: 'CONSECUTIVE RUN',
+    hands: [
+      {
+        displayName: 'Consec Run #1',
+        displayPattern: '11 22 333 444 5555',
+        patternGroups: [
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 4 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit',
+      },
+      {
+        displayName: 'Consec Run #2',
+        displayPattern: '111 2222 3333 44',
+        patternGroups: [
+          pung({ suitVar: 'A', numberVar: 'X' }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit',
+      },
+      {
+        displayName: 'Consec Run #3',
+        displayPattern: '11 222 3333 4444',
+        patternGroups: [
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit',
+      },
+      {
+        displayName: 'Consec Run #4',
+        displayPattern: '1111 222 333 4444',
+        patternGroups: [
+          kong({ suitVar: 'A', numberVar: 'X' }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit',
+      },
+      {
+        displayName: 'Consec Run #5',
+        displayPattern: 'FF 11 22 33 44 55',
+        patternGroups: [
+          pair({ isAnyFlower: true }),
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 4 }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any 5 Consecutive Numbers, Concealed',
+      },
+      {
+        displayName: 'Consec Run #6',
+        displayPattern: '111 222 333 4444',
+        patternGroups: [
+          pung({ suitVar: 'A', numberVar: 'X' }),
+          pung({ suitVar: 'B', numberVar: 'X', numberOffset: 1 }),
+          pung({ suitVar: 'C', numberVar: 'X', numberOffset: 2 }),
+          kong({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: '3 Suits',
+      },
+      {
+        displayName: 'Consec Run #7',
+        displayPattern: '11 222 333 444 55',
+        patternGroups: [
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pung({ suitVar: 'B', numberVar: 'X', numberOffset: 1 }),
+          pung({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          pung({ suitVar: 'B', numberVar: 'X', numberOffset: 3 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 4 }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: '2 Suits',
+      },
+    ],
+  },
+  {
+    name: '369',
+    hands: [
+      {
+        displayName: '369 #1',
+        displayPattern: '333 6666 666 9999',
+        patternGroups: [
+          pung({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          kong({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          pung({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          kong({ suitVar: 'A', constraints: { specificValues: [9] } }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit',
+      },
+      {
+        displayName: '369 #2',
+        displayPattern: '33 66 99 33 66 99',
+        patternGroups: [
+          pair({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [9] } }),
+          pair({ suitVar: 'B', constraints: { specificValues: [3] } }),
+          pair({ suitVar: 'B', constraints: { specificValues: [6] } }),
+          pair({ suitVar: 'B', constraints: { specificValues: [9] } }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any 2 Suits, Concealed',
+      },
+      {
+        displayName: '369 #3',
+        displayPattern: '3333 66 9999 DD',
+        patternGroups: [
+          kong({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          kong({ suitVar: 'A', constraints: { specificValues: [9] } }),
+          pair({ isAnyDragon: true }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit, Matching Dragon',
+      },
+      {
+        displayName: '369 #4',
+        displayPattern: '33 66 333 666 999',
+        patternGroups: [
+          pair({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          pung({ suitVar: 'B', constraints: { specificValues: [3] } }),
+          pung({ suitVar: 'B', constraints: { specificValues: [6] } }),
+          pung({ suitVar: 'B', constraints: { specificValues: [9] } }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: '2 Suits',
+      },
+      {
+        displayName: '369 #5',
+        displayPattern: 'FF 33 666 9999 DD',
+        patternGroups: [
+          pair({ isAnyFlower: true }),
+          pair({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pung({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          kong({ suitVar: 'A', constraints: { specificValues: [9] } }),
+          pair({ isAnyDragon: true }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit, Matching Dragon',
+      },
+      {
+        displayName: '369 #6',
+        displayPattern: 'FF 333 666 999 DD',
+        patternGroups: [
+          pair({ isAnyFlower: true }),
+          pung({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pung({ suitVar: 'A', constraints: { specificValues: [6] } }),
+          pung({ suitVar: 'A', constraints: { specificValues: [9] } }),
+          pair({ isAnyDragon: true }),
+        ],
+        isConcealed: false,
+        points: 25,
+        notes: 'Any 1 Suit, Matching Dragon',
+      },
+    ],
+  },
+  {
+    name: 'SINGLES AND PAIRS',
+    hands: [
+      {
+        displayName: 'Singles & Pairs #1',
+        displayPattern: 'NN EE WW SS 11 11',
+        patternGroups: [
+          pair({ fixed: (TileType.WIND << 4) | NORTH }),
+          pair({ fixed: (TileType.WIND << 4) | EAST }),
+          pair({ fixed: (TileType.WIND << 4) | WEST }),
+          pair({ fixed: (TileType.WIND << 4) | SOUTH }),
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pair({ suitVar: 'B', numberVar: 'X' }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any 2 Suits, Same Number, Concealed',
+      },
+      {
+        displayName: 'Singles & Pairs #2',
+        displayPattern: '11 22 33 44 55 66',
+        patternGroups: [
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 1 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 2 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 3 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 4 }),
+          pair({ suitVar: 'A', numberVar: 'X', numberOffset: 5 }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any 6 Consecutive Numbers, 1 Suit, Concealed',
+      },
+      {
+        displayName: 'Singles & Pairs #3',
+        displayPattern: '11 33 55 77 99 DD',
+        patternGroups: [
+          pair({ suitVar: 'A', constraints: { specificValues: [1] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [3] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [5] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [7] } }),
+          pair({ suitVar: 'A', constraints: { specificValues: [9] } }),
+          pair({ isAnyDragon: true }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any 1 Suit, Matching Dragon, Concealed',
+      },
+      {
+        displayName: 'Singles & Pairs #4',
+        displayPattern: 'FF 11 DD 11 DD 11',
+        patternGroups: [
+          pair({ isAnyFlower: true }),
+          pair({ suitVar: 'A', numberVar: 'X' }),
+          pair({ fixed: (TileType.DRAGON << 4) | RED }),
+          pair({ suitVar: 'B', numberVar: 'X' }),
+          pair({ fixed: (TileType.DRAGON << 4) | GREEN }),
+          pair({ suitVar: 'C', numberVar: 'X' }),
+        ],
+        isConcealed: true,
+        points: 25,
+        notes: 'Any Like Numbers, 3 Suits, 2 Dragons, Concealed',
+      },
+      {
+        displayName: 'Singles & Pairs #5',
+        displayPattern: '2025 NEWS 2025',
+        patternGroups: [
+          single({ suitVar: 'A', constraints: { specificValues: [2] } }),
+          single({ isZero: true }),
+          single({ suitVar: 'A', constraints: { specificValues: [2] } }),
+          single({ suitVar: 'A', constraints: { specificValues: [5] } }),
+          single({ fixed: (TileType.WIND << 4) | NORTH }),
+          single({ fixed: (TileType.WIND << 4) | EAST }),
+          single({ fixed: (TileType.WIND << 4) | WEST }),
+          single({ fixed: (TileType.WIND << 4) | SOUTH }),
+          single({ suitVar: 'B', constraints: { specificValues: [2] } }),
+          single({ isZero: true }),
+          single({ suitVar: 'B', constraints: { specificValues: [2] } }),
+          single({ suitVar: 'B', constraints: { specificValues: [5] } }),
+        ],
+        isConcealed: true,
+        points: 30,
+        notes: '2 Suits, Concealed',
+      },
+      {
+        displayName: 'Singles & Pairs #6',
+        displayPattern: 'FF DD DD GG RR WW',
+        patternGroups: [
+          pair({ isAnyFlower: true }),
+          pair({ fixed: (TileType.DRAGON << 4) | GREEN }),
+          pair({ fixed: (TileType.DRAGON << 4) | RED }),
+          pair({ fixed: (TileType.DRAGON << 4) | GREEN }),
+          pair({ fixed: (TileType.DRAGON << 4) | RED }),
+          pair({ fixed: (TileType.DRAGON << 4) | WHITE }),
+        ],
+        isConcealed: true,
+        points: 30,
+        notes: 'Concealed',
+      },
+    ],
+  },
 ];
 
 async function seed() {
@@ -540,18 +833,29 @@ async function seed() {
   });
 
   try {
-    console.log('Creating card year 2025_Special...');
+    console.log('Creating card year NMJL_2025...');
 
-    // Create card year
+    // Create or update card year
     const yearResult = await query<{ id: number }>(
       `INSERT INTO card_years (year, name, is_active, created_at)
        VALUES (:year, :name, :isActive, NOW())
        ON CONFLICT (year) DO UPDATE SET name = :name
        RETURNING id`,
-      { year: 2025, name: '2025_Special', isActive: true }
+      { year: 2025, name: 'NMJL_2025', isActive: true }
     );
     const cardYearId = yearResult.rows[0].id;
-    console.log(`Card year created with ID: ${cardYearId}`);
+    console.log(`Card year created/updated with ID: ${cardYearId}`);
+
+    // Clear existing categories and hands for this year
+    console.log('Clearing existing categories and hands...');
+    await query(
+      `DELETE FROM card_hands WHERE category_id IN (SELECT id FROM hand_categories WHERE card_year_id = :cardYearId)`,
+      { cardYearId }
+    );
+    await query(
+      `DELETE FROM hand_categories WHERE card_year_id = :cardYearId`,
+      { cardYearId }
+    );
 
     // Create categories and hands
     let categoryOrder = 1;

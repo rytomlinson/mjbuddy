@@ -1,4 +1,5 @@
 import { createUseStyles } from 'react-jss';
+import type { DisplaySegment } from 'common';
 import type { Theme } from '../theme';
 
 const useStyles = createUseStyles((theme: Theme) => ({
@@ -34,6 +35,15 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontFamily: 'monospace',
     margin: 0,
   },
+  // Segment colors for display pattern
+  segmentDot: { color: '#2196F3' },
+  segmentBam: { color: '#4CAF50' },
+  segmentCrak: { color: '#F44336' },
+  segmentWind: { color: '#9C27B0' },
+  segmentDragon: { color: '#FF9800' },
+  segmentFlower: { color: '#E91E63' },
+  segmentJoker: { color: '#00BCD4' },
+  segmentNeutral: { color: theme.colors.textSecondary },
   callInfo: {
     display: 'flex',
     flexDirection: 'column',
@@ -103,7 +113,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 export interface CallAdviceData {
   handId: number;
   handName: string;
-  displayPattern: string;
+  displayPattern: string | DisplaySegment[];
   canCall: boolean;
   callType: 'pung' | 'kong' | 'quint' | 'win' | null;
   newDistance: number;
@@ -112,6 +122,29 @@ export interface CallAdviceData {
 
 interface CallAdviceCardProps {
   data: CallAdviceData;
+}
+
+// Helper to render display pattern with colors
+function renderDisplayPattern(
+  displayPattern: string | DisplaySegment[],
+  classes: ReturnType<typeof useStyles>
+): React.ReactNode {
+  if (typeof displayPattern === 'string') {
+    return displayPattern;
+  }
+  return displayPattern.map((segment, i) => {
+    let colorClass = classes.segmentNeutral;
+    switch (segment.color) {
+      case 'dot': colorClass = classes.segmentDot; break;
+      case 'bam': colorClass = classes.segmentBam; break;
+      case 'crak': colorClass = classes.segmentCrak; break;
+      case 'wind': colorClass = classes.segmentWind; break;
+      case 'dragon': colorClass = classes.segmentDragon; break;
+      case 'flower': colorClass = classes.segmentFlower; break;
+      case 'joker': colorClass = classes.segmentJoker; break;
+    }
+    return <span key={i} className={colorClass}>{segment.text}</span>;
+  });
 }
 
 export function CallAdviceCard({ data }: CallAdviceCardProps) {
@@ -152,7 +185,7 @@ export function CallAdviceCard({ data }: CallAdviceCardProps) {
       <div className={classes.cardTop}>
         <div className={classes.handInfo}>
           <h3 className={classes.handName}>{data.handName}</h3>
-          <p className={classes.pattern}>{data.displayPattern}</p>
+          <p className={classes.pattern}>{renderDisplayPattern(data.displayPattern, classes)}</p>
         </div>
         <div className={classes.callInfo}>
           <span className={`${classes.callType} ${getCallTypeClass()}`}>

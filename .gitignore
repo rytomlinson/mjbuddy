@@ -29,3 +29,12 @@ coverage/
 
 # TypeScript
 *.tsbuildinfo
+
+# Build artifacts in src (should be in dist)
+common/src/**/*.js
+common/src/**/*.js.map
+common/src/**/*.d.ts
+common/src/**/*.d.ts.map
+
+# SQLite databases
+*.db

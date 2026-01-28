@@ -17,12 +17,14 @@ import {
   reorderTile,
   addExposedMeld,
   swapJokerInMeld,
+  loadSavedHand,
   ExposedMeld,
 } from '../slices/handSlice';
 import { trpc } from '../trpc';
 import { TilePicker } from './TilePicker';
 import { TileRack, getMeldColor } from './TileRack';
 import { ViableHandCard, ViableHandData, CallHighlight } from './ViableHandCard';
+import { SavedHands } from './SavedHands';
 import { Tile } from './Tile';
 import type { Theme } from '../theme';
 
@@ -770,6 +772,18 @@ export function HandAnalyzer() {
     }
   };
 
+  const handleLoadSavedHand = (
+    savedTiles: TileCode[],
+    savedDrawnTile: TileCode | null,
+    savedExposedMelds: ExposedMeld[]
+  ) => {
+    dispatch(loadSavedHand({
+      tiles: savedTiles,
+      drawnTile: savedDrawnTile,
+      exposedMelds: savedExposedMelds,
+    }));
+  };
+
   // Compute disabled tiles (tiles that have reached their max count)
   const disabledTiles = (() => {
     // Collect all tiles in use
@@ -930,6 +944,13 @@ export function HandAnalyzer() {
         <TilePicker
           onTileSelect={handleTileSelect}
           disabledTiles={disabledTiles}
+        />
+
+        <SavedHands
+          currentTiles={tiles}
+          currentDrawnTile={drawnTile}
+          currentExposedMelds={exposedMelds}
+          onLoadHand={handleLoadSavedHand}
         />
 
       </div>

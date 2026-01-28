@@ -131,6 +131,12 @@ const handSlice = createSlice({
         }
       }
     },
+    loadSavedHand: (state, action: PayloadAction<{ tiles: TileCode[]; drawnTile: TileCode | null; exposedMelds: ExposedMeld[] }>) => {
+      const { tiles, drawnTile, exposedMelds } = action.payload;
+      state.tiles = tiles;
+      state.drawnTile = drawnTile;
+      state.exposedMelds = exposedMelds;
+    },
   },
 });
 
@@ -151,6 +157,7 @@ export const {
   resetHand,
   reorderTile,
   swapJokerInMeld,
+  loadSavedHand,
 } = handSlice.actions;
 
 // Selectors

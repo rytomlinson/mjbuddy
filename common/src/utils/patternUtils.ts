@@ -778,3 +778,108 @@ export function generateDisplaySegments(groups: PatternGroup[]): DisplaySegment[
 
   return segments;
 }
+
+/**
+ * Generate a valid example hand from pattern groups.
+ * This creates one concrete example by assigning specific suits and numbers to variables.
+ */
+export function generateValidExample(groups: PatternGroup[]): TileCode[] {
+  const tiles: TileCode[] = [];
+
+  // Assign suits to suit variables (A=DOT, B=BAM, C=CRAK)
+  const suitMap: Record<string, TileType> = {
+    'A': TileType.DOT,
+    'B': TileType.BAM,
+    'C': TileType.CRAK,
+  };
+
+  // Assign numbers to number variables (start from 1, respecting constraints)
+  const numberMap: Record<string, number> = {};
+
+  // First pass: determine number variable values
+  for (const group of groups) {
+    const pattern = group.tile;
+    if (pattern.numberVar && !numberMap[pattern.numberVar]) {
+      // Find a valid starting number for this variable
+      let baseNumber = 1;
+
+      if (pattern.constraints?.evenOnly) {
+        baseNumber = 2;
+      } else if (pattern.constraints?.oddOnly) {
+        baseNumber = 1;
+      } else if (pattern.constraints?.specificValues?.length) {
+        baseNumber = pattern.constraints.specificValues[0];
+      }
+
+      // Check if we need to adjust for offsets (to avoid going > 9)
+      const maxOffset = groups
+        .filter(g => g.tile.numberVar === pattern.numberVar && g.tile.numberOffset)
+        .reduce((max, g) => Math.max(max, g.tile.numberOffset ?? 0), 0);
+
+      if (baseNumber + maxOffset > 9) {
+        baseNumber = 9 - maxOffset;
+        // Adjust for even/odd if needed
+        if (pattern.constraints?.evenOnly && baseNumber % 2 !== 0) {
+          baseNumber -= 1;
+        } else if (pattern.constraints?.oddOnly && baseNumber % 2 === 0) {
+          baseNumber -= 1;
+        }
+      }
+
+      numberMap[pattern.numberVar] = baseNumber;
+    }
+  }
+
+  // Second pass: generate tiles
+  for (const group of groups) {
+    const pattern = group.tile;
+    const count = group.type; // GroupType value equals count
+    let tile: TileCode;
+
+    if (pattern.fixed !== undefined) {
+      tile = pattern.fixed;
+    } else if (pattern.isAnyFlower) {
+      tile = encodeTile(TileType.FLOWER, 1);
+    } else if (pattern.isAnyDragon) {
+      tile = encodeTile(TileType.DRAGON, Dragon.RED);
+    } else if (pattern.isAnyWind) {
+      tile = encodeTile(TileType.WIND, Wind.NORTH);
+    } else if (pattern.isZero) {
+      tile = encodeTile(TileType.DRAGON, Dragon.WHITE);
+    } else if (pattern.tileType === TileType.DRAGON && pattern.suitVar) {
+      // Dragon with suit variable - map suit var to dragon color
+      const dragonMap: Record<string, number> = {
+        'A': Dragon.RED,
+        'B': Dragon.GREEN,
+        'C': Dragon.WHITE,
+      };
+      tile = encodeTile(TileType.DRAGON, dragonMap[pattern.suitVar] ?? Dragon.RED);
+    } else if (pattern.suitVar) {
+      // Suit variable tile
+      const suit = suitMap[pattern.suitVar] ?? TileType.DOT;
+      let number = 1;
+
+      if (pattern.numberVar) {
+        number = (numberMap[pattern.numberVar] ?? 1) + (pattern.numberOffset ?? 0);
+      } else if (pattern.constraints?.specificValues?.length) {
+        number = pattern.constraints.specificValues[0];
+      } else if (pattern.constraints?.evenOnly) {
+        number = 2;
+      } else if (pattern.constraints?.oddOnly) {
+        number = 1;
+      }
+
+      tile = encodeTile(suit, number);
+    } else {
+      // Fallback
+      tile = encodeTile(TileType.DOT, 1);
+    }
+
+    // Add the tile 'count' times
+    for (let i = 0; i < count; i++) {
+      tiles.push(tile);
+    }
+  }
+
+  return tiles;
+}

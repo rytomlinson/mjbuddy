@@ -1,0 +1,5747 @@
+{
+  "year": 2025,
+  "name": "NMJL_2025",
+  "exportedAt": "2026-01-28T21:21:19.915Z",
+  "categories": [
+    {
+      "name": "2025",
+      "hands": [
+        {
+          "displayName": "2025 #1",
+          "displayPattern": "FFFF 2 0 2 5 222 222",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576059643"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576059643"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576059643"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576059643"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Like Pungs 2s or 5s in Opp. Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                18,
+                83,
+                18,
+                21,
+                34,
+                34,
+                34,
+                50,
+                50,
+                50
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2025 #2",
+          "displayPattern": "222 0000 222 5555",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suites",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                18,
+                83,
+                83,
+                83,
+                83,
+                34,
+                34,
+                34,
+                37,
+                37,
+                37,
+                37
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2025 #3",
+          "displayPattern": "2 0 2 5 222 555 DDDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576445183"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576445183"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576445183"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769576445183"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                83,
+                18,
+                21,
+                34,
+                34,
+                34,
+                37,
+                37,
+                37,
+                81,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2025 #4",
+          "displayPattern": "FF 222 000 222 555",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                18,
+                18,
+                83,
+                83,
+                83,
+                34,
+                34,
+                34,
+                53,
+                53,
+                53
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2468",
+      "hands": [
+        {
+          "displayName": "2468 #1a",
+          "displayPattern": "222 4444 666 8888",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                18,
+                20,
+                20,
+                20,
+                20,
+                22,
+                22,
+                22,
+                24,
+                24,
+                24,
+                24
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #1b",
+          "displayPattern": "222 4444 666 8888",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                18,
+                20,
+                20,
+                20,
+                20,
+                38,
+                38,
+                38,
+                40,
+                40,
+                40,
+                40
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #2a",
+          "displayPattern": "FF 2222 4444 6666",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                18,
+                18,
+                18,
+                36,
+                36,
+                36,
+                36,
+                54,
+                54,
+                54,
+                54
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #2b",
+          "displayPattern": "FF 2222 6666 8888",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                18,
+                18,
+                18,
+                38,
+                38,
+                38,
+                38,
+                56,
+                56,
+                56,
+                56
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #3",
+          "displayPattern": "22 444 66 888 DDDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                20,
+                20,
+                20,
+                22,
+                22,
+                24,
+                24,
+                24,
+                81,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #4",
+          "displayPattern": "FFFF 2 4 6 8 ??? ???",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769577532492"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769577532492"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769577532492"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769577532492"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Like Pungs Any Even No",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                18,
+                20,
+                22,
+                24,
+                34,
+                34,
+                34,
+                50,
+                50,
+                50
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #5",
+          "displayPattern": "FFF 22 44 666 8888",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                18,
+                18,
+                20,
+                20,
+                22,
+                22,
+                22,
+                24,
+                24,
+                24,
+                24
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #6",
+          "displayPattern": "222 4444 666 88 88",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Pairs 8s Only",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                18,
+                20,
+                20,
+                20,
+                20,
+                22,
+                22,
+                22,
+                40,
+                40,
+                56,
+                56
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #7",
+          "displayPattern": "FF ???? DDDD ????",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Like Kongs Any Even No.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                18,
+                18,
+                18,
+                81,
+                81,
+                81,
+                81,
+                34,
+                34,
+                34,
+                34
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #8",
+          "displayPattern": "FF ???? DDDD ????",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Like Kongs Any Even No,.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                18,
+                18,
+                18,
+                81,
+                81,
+                81,
+                81,
+                34,
+                34,
+                34,
+                34
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "2468 #9",
+          "displayPattern": "22 44 66 88 ??? ???",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": true,
+          "points": 23,
+          "notes": "Any 3 Suits, Like Pungs Any Even No",
+          "examples": [
+            {
+              "tiles": [
+                18,
+                18,
+                20,
+                20,
+                22,
+                22,
+                24,
+                24,
+                34,
+                34,
+                34,
+                50,
+                50,
+                50
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ANY LIKE NUMBERS",
+      "hands": [
+        {
+          "displayName": "Like Numbers #1",
+          "displayPattern": "FF ???? ? ???? ? ??",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X"
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X"
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 16,
+          "notes": "Any 3 suits, all like numbers",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                17,
+                17,
+                81,
+                33,
+                33,
+                33,
+                33,
+                82,
+                49,
+                49
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Like Numbers #2",
+          "displayPattern": "FFFF 11 111 111 11",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 3 Suits, Paris Must Be Same Suit",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                17,
+                17,
+                33,
+                33,
+                33,
+                49,
+                49,
+                49,
+                17,
+                17
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Like Numbers #3",
+          "displayPattern": "FF 111 111 111 DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 3 Suits, Any Dragon",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                17,
+                33,
+                33,
+                33,
+                49,
+                49,
+                49,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "QUINTS",
+      "hands": [
+        {
+          "displayName": "Quints #1",
+          "displayPattern": "FF 111 1111 11111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 5
+            }
+          ],
+          "isConcealed": false,
+          "points": 40,
+          "notes": "Any 3 Suits, Any 3 Consec, No's",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                17,
+                34,
+                34,
+                34,
+                34,
+                51,
+                51,
+                51,
+                51,
+                51
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Quints #2",
+          "displayPattern": "11111 WWWW 11111",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 5
+            },
+            {
+              "tile": {
+                "isAnyWind": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 5
+            }
+          ],
+          "isConcealed": false,
+          "points": 45,
+          "notes": "Any 1 Suit, Any 2 Consec Nos., Any Wind",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                17,
+                17,
+                68,
+                68,
+                68,
+                68,
+                18,
+                18,
+                18,
+                18,
+                18
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Quints #3",
+          "displayPattern": "FF 11111 11 11111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 5
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X"
+              },
+              "type": 5
+            }
+          ],
+          "isConcealed": false,
+          "points": 45,
+          "notes": "Any 3 Suits, Any Like Nos.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                17,
+                17,
+                17,
+                33,
+                33,
+                49,
+                49,
+                49,
+                49,
+                49
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "CONSECUTIVE RUN",
+      "hands": [
+        {
+          "displayName": "Consec Run #1a",
+          "displayPattern": "11 222 3333 444 55",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit, These Nos. Only",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                18,
+                18,
+                18,
+                19,
+                19,
+                19,
+                19,
+                20,
+                20,
+                20,
+                21,
+                21
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #1b",
+          "displayPattern": "55 666 7777 888 99",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit, These Nos. Only",
+          "examples": [
+            {
+              "tiles": [
+                21,
+                21,
+                22,
+                22,
+                22,
+                23,
+                23,
+                23,
+                23,
+                24,
+                24,
+                24,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #2a",
+          "displayPattern": "111 1111 111 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 3
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit, Any 4 Consec. Nos.",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                18,
+                18,
+                18,
+                18,
+                19,
+                19,
+                19,
+                20,
+                20,
+                20,
+                20
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #2b",
+          "displayPattern": "111 1111 111 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 3
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suits, Any 4 Consec. Nos.",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                18,
+                18,
+                18,
+                18,
+                35,
+                35,
+                35,
+                36,
+                36,
+                36,
+                36
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #3a",
+          "displayPattern": "FFFF 1111 11 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit, Any 3 Consec. Nos.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                17,
+                17,
+                17,
+                17,
+                18,
+                18,
+                19,
+                19,
+                19,
+                19
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #3b",
+          "displayPattern": "FFFF 1111 11 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suit, Any 3 Consec. Nos.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                17,
+                17,
+                17,
+                17,
+                34,
+                34,
+                51,
+                51,
+                51,
+                51
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #4",
+          "displayPattern": "FFF 111 1111 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 1,
+              "superGroupId": "sg_1769581971836"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 1,
+              "superGroupId": "sg_1769581971836"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 1,
+              "superGroupId": "sg_1769581971836"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 3
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "numberOffset": 4
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, Any 5 Consec. Nos",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                17,
+                18,
+                19,
+                36,
+                36,
+                36,
+                36,
+                53,
+                53,
+                53,
+                53
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #5",
+          "displayPattern": "FF 11 111 1111 DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "isAnyDragon": true
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": true,
+          "points": 25,
+          "notes": "Any 1 Suit, Any 3 Consec. Nos",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                18,
+                18,
+                18,
+                19,
+                19,
+                19,
+                19,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #6",
+          "displayPattern": "111 111 1111 DD DD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "tileType": 5
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits, ANy 3 Consec. Nos. Opp. Dragons",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                18,
+                18,
+                18,
+                19,
+                19,
+                19,
+                19,
+                82,
+                82,
+                83,
+                83
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #7",
+          "displayPattern": "111111 1111 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 2,
+              "superGroupId": "sg_1769582842967"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 1,
+              "superGroupId": "sg_1769582842967"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 1,
+              "superGroupId": "sg_1769582842967"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberMatchesSuperGroup": "sg_1769582842967"
+              },
+              "type": 1,
+              "superGroupId": "sg_1769582842967"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberMatchesSuperGroup": "sg_1769582842967"
+              },
+              "type": 1,
+              "superGroupId": "sg_1769582842967"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "Y"
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "Y"
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 5 Consec. Nos. Pair ANy No. in Run Knogs Match Pair",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                18,
+                19,
+                17,
+                17,
+                33,
+                33,
+                33,
+                33,
+                49,
+                49,
+                49,
+                49
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Consec Run #8",
+          "displayPattern": "FF 1 11 111 1 11 111",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X"
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 2 Suits, Any Same 3 Consec. Nos.",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                18,
+                18,
+                19,
+                19,
+                19,
+                33,
+                34,
+                34,
+                35,
+                35,
+                35
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "13579",
+      "hands": [
+        {
+          "displayName": "13579 #1a",
+          "displayPattern": "11 333 5555 777 99",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                19,
+                19,
+                19,
+                21,
+                21,
+                21,
+                21,
+                23,
+                23,
+                23,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #1b",
+          "displayPattern": "11 333 5555 777 99",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                19,
+                19,
+                19,
+                37,
+                37,
+                37,
+                37,
+                55,
+                55,
+                55,
+                57,
+                57
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #2a",
+          "displayPattern": "111 3333 333 5555",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                19,
+                19,
+                19,
+                19,
+                35,
+                35,
+                35,
+                37,
+                37,
+                37,
+                37
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #2b",
+          "displayPattern": "555 7777 777 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                21,
+                21,
+                21,
+                23,
+                23,
+                23,
+                23,
+                39,
+                39,
+                39,
+                41,
+                41,
+                41,
+                41
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #3a",
+          "displayPattern": "1111 333 5555 DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                17,
+                19,
+                19,
+                19,
+                21,
+                21,
+                21,
+                21,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #3b",
+          "displayPattern": "5555 777 9999 DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                21,
+                21,
+                21,
+                21,
+                23,
+                23,
+                23,
+                25,
+                25,
+                25,
+                25,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #4",
+          "displayPattern": "FFFF 1111 9999 1D",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584022745"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584022745"
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suits, These Nos. Only",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                17,
+                17,
+                17,
+                17,
+                25,
+                25,
+                25,
+                25,
+                33,
+                83
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #5a",
+          "displayPattern": "FFF 335 7777 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                19,
+                19,
+                21,
+                23,
+                23,
+                23,
+                23,
+                25,
+                25,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #5b",
+          "displayPattern": "FFF 335 7777 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584124270"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                19,
+                19,
+                21,
+                39,
+                39,
+                39,
+                39,
+                57,
+                57,
+                57,
+                57
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #6a",
+          "displayPattern": "111 333 5555 DD DD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "tileType": 5
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Add 4 Suits w Opp Dragons",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                19,
+                19,
+                19,
+                21,
+                21,
+                21,
+                21,
+                82,
+                82,
+                83,
+                83
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #6b",
+          "displayPattern": "555 777 9999 DD DD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "tileType": 5
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Add 4 Suits w Opp Dragons",
+          "examples": [
+            {
+              "tiles": [
+                21,
+                21,
+                21,
+                23,
+                23,
+                23,
+                25,
+                25,
+                25,
+                25,
+                82,
+                82,
+                83,
+                83
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #7a",
+          "displayPattern": "11 333 NEWS 333 55",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                19,
+                19,
+                19,
+                68,
+                65,
+                67,
+                66,
+                35,
+                35,
+                35,
+                37,
+                37
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #7b",
+          "displayPattern": "55 777 NEWS 777 99",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 1,
+              "superGroupId": "sg_1769584474894"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                21,
+                21,
+                23,
+                23,
+                23,
+                68,
+                65,
+                67,
+                66,
+                39,
+                39,
+                39,
+                41,
+                41
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #8",
+          "displayPattern": "1111 33 55 77 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "Any 2 Suits",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                17,
+                35,
+                35,
+                37,
+                37,
+                39,
+                39,
+                25,
+                25,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #9a",
+          "displayPattern": "FF 11 33 111 333 55",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                19,
+                19,
+                33,
+                33,
+                33,
+                35,
+                35,
+                35,
+                53,
+                53
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "13579 #9b",
+          "displayPattern": "FF 55 77 555 777 99",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    7
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                21,
+                21,
+                23,
+                23,
+                37,
+                37,
+                37,
+                39,
+                39,
+                39,
+                57,
+                57
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "WINDS - DRAGONS",
+      "hands": [
+        {
+          "displayName": "Winds-Dragons #1a",
+          "displayPattern": "NNNN EEE WWW SSSS",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": null,
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                68,
+                68,
+                65,
+                65,
+                65,
+                67,
+                67,
+                67,
+                66,
+                66,
+                66,
+                66
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #1b",
+          "displayPattern": "NNN EEEE WWWW SSS",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": null,
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                68,
+                65,
+                65,
+                65,
+                65,
+                67,
+                67,
+                67,
+                67,
+                66,
+                66,
+                66
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #2",
+          "displayPattern": "FF 111 DD DDD DDDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585054944"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585054944"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585054944"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "tileType": 5
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 COnsec. Nos. in Any 1 Suit. Any 3 Dragons",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                18,
+                19,
+                82,
+                82,
+                83,
+                83,
+                83,
+                81,
+                81,
+                81,
+                81
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #3",
+          "displayPattern": "FFF NN EE WWW SSSS",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": null,
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                68,
+                68,
+                65,
+                65,
+                67,
+                67,
+                67,
+                66,
+                66,
+                66,
+                66
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #4",
+          "displayPattern": "FFFF DDD NEWS DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585436620"
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585436620"
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585436620"
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585436620"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Dragon any 2 suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                97,
+                81,
+                81,
+                81,
+                68,
+                65,
+                67,
+                66,
+                82,
+                82,
+                82
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #4",
+          "displayPattern": "NNNN 1 11 111 SSSS",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any like odd nos in 3 suits",
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                68,
+                68,
+                17,
+                33,
+                33,
+                49,
+                49,
+                49,
+                66,
+                66,
+                66,
+                66
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #5",
+          "displayPattern": "EEEE 2 22 222 WWWW",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "constraints": {
+                  "evenOnly": true
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any like even nos in 3 suits",
+          "examples": [
+            {
+              "tiles": [
+                65,
+                65,
+                65,
+                65,
+                18,
+                34,
+                34,
+                50,
+                50,
+                50,
+                67,
+                67,
+                67,
+                67
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #6a",
+          "displayPattern": "NN EEE WWW SS 2025",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            }
+          ],
+          "isConcealed": false,
+          "points": 30,
+          "notes": "2025 any 1 suit",
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                65,
+                65,
+                65,
+                67,
+                67,
+                67,
+                66,
+                66,
+                18,
+                83,
+                18,
+                21
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Winds-Dragons #6b",
+          "displayPattern": "NNN EE WW SSS 2025",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769585980427"
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "2025 any 1 suit",
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                68,
+                65,
+                65,
+                67,
+                67,
+                66,
+                66,
+                66,
+                18,
+                83,
+                18,
+                21
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "369",
+      "hands": [
+        {
+          "displayName": "369 #1a",
+          "displayPattern": "333 6666 666 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 Suit",
+          "examples": [
+            {
+              "tiles": [
+                19,
+                19,
+                19,
+                22,
+                22,
+                22,
+                22,
+                38,
+                38,
+                38,
+                41,
+                41,
+                41,
+                41
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #1b",
+          "displayPattern": "333 6666 666 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                19,
+                19,
+                19,
+                22,
+                22,
+                22,
+                22,
+                38,
+                38,
+                38,
+                57,
+                57,
+                57,
+                57
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #2a",
+          "displayPattern": "FF 3333 6666 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 1 Suit",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                19,
+                19,
+                19,
+                19,
+                22,
+                22,
+                22,
+                22,
+                25,
+                25,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #2b",
+          "displayPattern": "FF 3333 6666 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 Suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                19,
+                19,
+                19,
+                19,
+                38,
+                38,
+                38,
+                38,
+                57,
+                57,
+                57,
+                57
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #3",
+          "displayPattern": "1111 DDD 1111 DDD",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "specificValues": [
+                    3,
+                    6,
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "specificValues": [
+                    3,
+                    6,
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 3
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 suits, like kongs 3,6 or 9 w/ matching dragons.",
+          "examples": [
+            {
+              "tiles": [
+                19,
+                19,
+                19,
+                19,
+                81,
+                81,
+                81,
+                35,
+                35,
+                35,
+                35,
+                82,
+                82,
+                82
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #4",
+          "displayPattern": "FFF 3333 369 9999",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769586682241"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769586682241"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769586682241"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 2 suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                97,
+                19,
+                19,
+                19,
+                19,
+                35,
+                38,
+                41,
+                25,
+                25,
+                25,
+                25
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #4",
+          "displayPattern": "33 66 99 1111 1111",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "specificValues": [
+                    3,
+                    6,
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "specificValues": [
+                    3,
+                    6,
+                    9
+                  ]
+                }
+              },
+              "type": 4
+            }
+          ],
+          "isConcealed": false,
+          "points": 25,
+          "notes": "Any 3 suits, like kongs 3, 6 or 9",
+          "examples": [
+            {
+              "tiles": [
+                19,
+                19,
+                22,
+                22,
+                25,
+                25,
+                35,
+                35,
+                35,
+                35,
+                35,
+                35,
+                35,
+                35
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "369 #6",
+          "displayPattern": "FF 333 D 666 D 999 D",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 1
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 3
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "tileType": 5
+              },
+              "type": 1
+            }
+          ],
+          "isConcealed": true,
+          "points": 30,
+          "notes": "Any 3 suits w/ matching dragons",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                19,
+                19,
+                19,
+                81,
+                38,
+                38,
+                38,
+                82,
+                57,
+                57,
+                57,
+                83
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SINGLES AND PAIRS",
+      "hands": [
+        {
+          "displayName": "Singles & Pairs #1",
+          "displayPattern": "NN EW SS 11 11 11 11",
+          "patternGroups": [
+            {
+              "tile": {
+                "fixed": 68
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "fixed": 65
+              },
+              "type": 1,
+              "superGroupId": "sg_1769586958314"
+            },
+            {
+              "tile": {
+                "fixed": 67
+              },
+              "type": 1,
+              "superGroupId": "sg_1769586958314"
+            },
+            {
+              "tile": {
+                "fixed": 66
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 2
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 3
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "Any  1 suit, any 4 consec nos",
+          "examples": [
+            {
+              "tiles": [
+                68,
+                68,
+                65,
+                67,
+                66,
+                66,
+                17,
+                17,
+                34,
+                34,
+                19,
+                19,
+                20,
+                20
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Singles & Pairs #2",
+          "displayPattern": "FF 2468 DD 2468 DD",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587150171"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587150171"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587150171"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587150171"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "tileType": 5
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587223476"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    4
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587223476"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587223476"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    8
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587223476"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "tileType": 5
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "Any 2 suits w/ matching dragons",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                20,
+                22,
+                24,
+                81,
+                81,
+                34,
+                36,
+                38,
+                40,
+                82,
+                82
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Singles & Pairs #3",
+          "displayPattern": "336699 336699 11",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587340456"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587340456"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587340456"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    3
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587376107"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    6
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587376107"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    9
+                  ]
+                }
+              },
+              "type": 2,
+              "superGroupId": "sg_1769587376107"
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    3,
+                    6,
+                    9
+                  ]
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "Any 3 suits, pair 3, 6 or 9 in third suit",
+          "examples": [
+            {
+              "tiles": [
+                19,
+                19,
+                22,
+                22,
+                25,
+                25,
+                35,
+                35,
+                38,
+                38,
+                41,
+                41,
+                51,
+                51
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Singles & Pairs #4 (fix)",
+          "displayPattern": "FF 11 11 11 11 11 11",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "Y"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "Y",
+                "numberOffset": 1
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "Z"
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "Z",
+                "numberOffset": 1
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "Any 3 suits, any 2 consec nos",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                17,
+                17,
+                18,
+                18,
+                33,
+                33,
+                34,
+                34,
+                49,
+                49,
+                50,
+                50
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Singles & Pairs #5 (fix)",
+          "displayPattern": "11 11 11 11 11 11 11",
+          "patternGroups": [
+            {
+              "tile": {
+                "suitVar": "A",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "numberVar": "X",
+                "constraints": {
+                  "oddOnly": true
+                }
+              },
+              "type": 2
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "Any 3 suits, pairs any like odd nos in opp suits",
+          "examples": [
+            {
+              "tiles": [
+                17,
+                17,
+                17,
+                17,
+                17,
+                17,
+                17,
+                17,
+                17,
+                17,
+                33,
+                33,
+                49,
+                49
+              ],
+              "isValid": true
+            }
+          ]
+        },
+        {
+          "displayName": "Singles & Pairs #6",
+          "displayPattern": "FF 2021 2025 2025",
+          "patternGroups": [
+            {
+              "tile": {
+                "isAnyFlower": true
+              },
+              "type": 2
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587945001"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587945001"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587945001"
+            },
+            {
+              "tile": {
+                "suitVar": "A",
+                "constraints": {
+                  "specificValues": [
+                    1
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769587945001"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588004427"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588004427"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588004427"
+            },
+            {
+              "tile": {
+                "suitVar": "B",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588004427"
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588050907"
+            },
+            {
+              "tile": {
+                "isZero": true
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588050907"
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    2
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588050907"
+            },
+            {
+              "tile": {
+                "suitVar": "C",
+                "constraints": {
+                  "specificValues": [
+                    5
+                  ]
+                }
+              },
+              "type": 1,
+              "superGroupId": "sg_1769588050907"
+            }
+          ],
+          "isConcealed": true,
+          "points": 50,
+          "notes": "any 3 suits",
+          "examples": [
+            {
+              "tiles": [
+                97,
+                97,
+                18,
+                83,
+                18,
+                17,
+                34,
+                83,
+                34,
+                37,
+                50,
+                83,
+                50,
+                53
+              ],
+              "isValid": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

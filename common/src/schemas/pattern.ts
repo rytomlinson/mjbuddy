@@ -111,6 +111,17 @@ export const DisplaySegmentSchema = z.object({
 export type DisplaySegment = z.infer<typeof DisplaySegmentSchema>;
 
 /**
+ * An example hand - a concrete set of tiles that is valid or invalid for a pattern
+ */
+export const HandExampleSchema = z.object({
+  tiles: z.array(TileCodeSchema),
+  isValid: z.boolean(),
+  note: z.string().optional(),
+});
+
+export type HandExample = z.infer<typeof HandExampleSchema>;
+
+/**
  * Full card hand schema (for database storage)
  */
 export const CardHandSchema = z.object({
@@ -126,6 +137,7 @@ export const CardHandSchema = z.object({
   points: z.number(),
   notes: z.string().nullable(),
   displayOrder: z.number(),
+  examples: z.array(HandExampleSchema).optional(),
   createdAt: z.date(),
 });
 
@@ -146,6 +158,7 @@ export const CreateCardHandSchema = z.object({
   points: z.number().int().min(0),
   notes: z.string().nullable().optional(),
   displayOrder: z.number().int(),
+  examples: z.array(HandExampleSchema).optional(),
 });
 
 export type CreateCardHand = z.infer<typeof CreateCardHandSchema>;
@@ -166,6 +179,7 @@ export const UpdateCardHandSchema = z.object({
   points: z.number().int().min(0).optional(),
   notes: z.string().nullable().optional(),
   displayOrder: z.number().int().optional(),
+  examples: z.array(HandExampleSchema).optional(),
 });
 
 export type UpdateCardHand = z.infer<typeof UpdateCardHandSchema>;

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { router, authedProcedure } from '../trpc.js';
-import { CreateCardHandSchema, UpdateCardHandSchema, CreateHandCategorySchema } from 'common';
+import { CreateCardHandSchema, UpdateCardHandSchema, CreateHandCategorySchema, clearExpansionCache } from 'common';
 import {
   getHandsByCategory,
   getHandsByCardYear,
@@ -79,12 +79,16 @@ export const cardHandRouter = router({
   update: authedProcedure
     .input(UpdateCardHandSchema)
     .mutation(async ({ input }) => {
+      // Clear expansion cache for this hand since pattern may have changed
+      clearExpansionCache(input.id);
       return updateCardHand(input);
     }),
 
   delete: authedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
+      // Clear expansion cache for this hand
+      clearExpansionCache(input.id);
       return deleteCardHand(input.id);
     }),
 

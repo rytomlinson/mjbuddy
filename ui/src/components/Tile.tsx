@@ -30,6 +30,17 @@ const useStyles = createUseStyles((theme: Theme) => ({
       boxShadow: '3px 3px 6px rgba(0,0,0,0.3)',
     },
   },
+  tileTiny: {
+    width: '24px',
+    height: '32px',
+    fontSize: '11px',
+    borderWidth: '1px',
+    boxShadow: '1px 1px 2px rgba(0,0,0,0.15)',
+    '&:hover': {
+      transform: 'translateY(-1px)',
+      boxShadow: '2px 2px 3px rgba(0,0,0,0.2)',
+    },
+  },
   tileSmall: {
     width: '32px',
     height: '42px',
@@ -127,7 +138,7 @@ const useStyles = createUseStyles((theme: Theme) => ({
 
 interface TileProps {
   code: TileCode;
-  size?: 'small' | 'medium' | 'large';
+  size?: 'tiny' | 'small' | 'medium' | 'large';
   selected?: boolean;
   disabled?: boolean;
   onClick?: () => void;
@@ -158,7 +169,7 @@ export function Tile({ code, size = 'medium', selected, disabled, onClick }: Til
   const tileType = getTileType(code);
   const value = getTileValue(code);
 
-  const sizeClass = size === 'small' ? classes.tileSmall : size === 'large' ? classes.tileLarge : '';
+  const sizeClass = size === 'tiny' ? classes.tileTiny : size === 'small' ? classes.tileSmall : size === 'large' ? classes.tileLarge : '';
 
   const getTypeClass = () => {
     switch (tileType) {

@@ -18,6 +18,37 @@ import {
 } from './tileUtils.js';
 
 /**
+ * Cache for expanded pattern variations
+ * Key: hand ID, Value: expanded concrete patterns
+ */
+const expansionCache = new Map<number, ConcretePattern[]>();
+
+/**
+ * Get expanded patterns for a hand, using cache if available
+ */
+function getExpandedPatterns(hand: CardHand): ConcretePattern[] {
+  const cached = expansionCache.get(hand.id);
+  if (cached) {
+    return cached;
+  }
+
+  const expanded = expandPatternGroups(hand.patternGroups);
+  expansionCache.set(hand.id, expanded);
+  return expanded;
+}
+
+/**
+ * Clear the expansion cache (useful when hand patterns are updated)
+ */
+export function clearExpansionCache(handId?: number): void {
+  if (handId !== undefined) {
+    expansionCache.delete(handId);
+  } else {
+    expansionCache.clear();
+  }
+}
+
+/**
  * Result of analyzing a single hand against player's tiles
  */
 export interface HandAnalysisResult {
@@ -322,8 +353,8 @@ export function analyzeHand(
     };
   }
 
-  // Expand pattern to all concrete variations
-  const variations = expandPatternGroups(hand.patternGroups);
+  // Expand pattern to all concrete variations (cached)
+  const variations = getExpandedPatterns(hand);
 
   if (variations.length === 0) {
     return {

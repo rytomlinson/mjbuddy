@@ -3,9 +3,10 @@ import { createUseStyles } from 'react-jss';
 import { Link } from 'react-router-dom';
 import { trpc } from '../trpc';
 import { PatternGroupEditor } from '../components/PatternGroupEditor';
+import { ExampleEditor } from '../components/ExampleEditor';
 import type { Theme } from '../theme';
 import { generateDisplayPattern, generateDisplaySegments, GroupType } from 'common';
-import type { PatternGroup, DisplaySegment } from 'common';
+import type { PatternGroup, DisplaySegment, HandExample } from 'common';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   page: {
@@ -305,6 +306,39 @@ const useStyles = createUseStyles((theme: Theme) => ({
   formRowItem: {
     flex: 1,
   },
+  formHeader: {
+    display: 'flex',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+  },
+  formHeaderLeft: {
+    flex: 1,
+  },
+  formHeaderRight: {
+    width: '180px',
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.sm,
+  },
+  formHeaderRightRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+  },
+  pointsInput: {
+    width: '70px',
+    padding: '4px 8px',
+    border: `1px solid rgba(139, 125, 107, 0.4)`,
+    borderRadius: theme.borderRadius.sm,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    color: '#2D2A26',
+    fontSize: theme.fontSizes.sm,
+    '&:focus': {
+      outline: 'none',
+      borderColor: theme.colors.primary,
+    },
+  },
   formCheckbox: {
     display: 'flex',
     alignItems: 'center',
@@ -322,19 +356,31 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   formActions: {
     display: 'flex',
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
+    gap: theme.spacing.xs,
+    padding: theme.spacing.sm,
     borderTop: `1px solid rgba(139, 125, 107, 0.3)`,
+    backgroundColor: 'rgba(200, 185, 165, 0.6)',
+    flexShrink: 0,
+  },
+  editPanelContent: {
+    flex: 1,
+    overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  editPanelForm: {
+    flex: 1,
+    overflow: 'auto',
+    padding: theme.spacing.md,
   },
   saveButton: {
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    padding: '4px 10px',
     backgroundColor: theme.colors.primary,
     color: 'white',
     border: 'none',
     borderRadius: theme.borderRadius.sm,
     cursor: 'pointer',
-    fontSize: theme.fontSizes.sm,
+    fontSize: '12px',
     fontWeight: 'bold',
     '&:hover': {
       backgroundColor: theme.colors.primaryHover,
@@ -345,26 +391,26 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
   },
   cancelButton: {
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    padding: '4px 10px',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
     color: '#4A4540',
     border: `1px solid rgba(139, 125, 107, 0.4)`,
     borderRadius: theme.borderRadius.sm,
     cursor: 'pointer',
-    fontSize: theme.fontSizes.sm,
+    fontSize: '12px',
     '&:hover': {
       backgroundColor: 'rgba(255, 255, 255, 0.8)',
       borderColor: '#4A4540',
     },
   },
   cloneButton: {
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    padding: '4px 10px',
     backgroundColor: 'rgba(107, 142, 122, 0.2)',
     color: '#4A6B5A',
     border: `1px solid rgba(107, 142, 122, 0.5)`,
     borderRadius: theme.borderRadius.sm,
     cursor: 'pointer',
-    fontSize: theme.fontSizes.sm,
+    fontSize: '12px',
     fontWeight: 'bold',
     '&:hover': {
       backgroundColor: 'rgba(107, 142, 122, 0.3)',
@@ -376,13 +422,13 @@ const useStyles = createUseStyles((theme: Theme) => ({
     },
   },
   deleteButton: {
-    padding: `${theme.spacing.sm} ${theme.spacing.md}`,
+    padding: '4px 10px',
     backgroundColor: 'rgba(255, 255, 255, 0.6)',
     color: '#B84A4A',
     border: `1px solid #B84A4A`,
     borderRadius: theme.borderRadius.sm,
     cursor: 'pointer',
-    fontSize: theme.fontSizes.sm,
+    fontSize: '12px',
     marginLeft: 'auto',
     '&:hover': {
       backgroundColor: 'rgba(184, 74, 74, 0.15)',
@@ -412,6 +458,7 @@ interface EditFormData {
   points: number;
   notes: string;
   displayOrder: number;
+  examples: HandExample[];
 }
 
 export function AdminPage() {
@@ -500,6 +547,7 @@ export function AdminPage() {
       points: hand.points,
       notes: hand.notes || '',
       displayOrder: hand.displayOrder,
+      examples: hand.examples || [],
     });
   };
 
@@ -541,6 +589,7 @@ export function AdminPage() {
       points: 25,
       notes: '',
       displayOrder: nextOrder,
+      examples: [],
     });
   };
 
@@ -562,6 +611,7 @@ export function AdminPage() {
         points: editFormData.points,
         notes: editFormData.notes || null,
         displayOrder: editFormData.displayOrder,
+        examples: editFormData.examples.length > 0 ? editFormData.examples : undefined,
       });
     } else if (selectedHandId !== null) {
       updateHand.mutate({
@@ -573,6 +623,7 @@ export function AdminPage() {
         points: editFormData.points,
         notes: editFormData.notes || null,
         displayOrder: editFormData.displayOrder,
+        examples: editFormData.examples.length > 0 ? editFormData.examples : undefined,
       });
     }
   };
@@ -614,6 +665,7 @@ export function AdminPage() {
       points: editFormData.points,
       notes: editFormData.notes || null,
       displayOrder: nextOrder,
+      examples: editFormData.examples.length > 0 ? editFormData.examples : undefined,
     });
   };
 
@@ -883,40 +935,78 @@ export function AdminPage() {
               {isCreatingNew ? 'New Hand' : editFormData ? 'Edit Hand' : 'Hand Details'}
             </h2>
           </div>
-          <div className={classes.panelContent}>
-            {editFormData ? (
-              <div className={classes.detailPanel}>
-                {/* Display Name */}
-                <div className={classes.formGroup}>
-                  <label className={classes.formLabel}>Display Name</label>
-                  <input
-                    type="text"
-                    className={classes.formInput}
-                    value={editFormData.displayName}
-                    onChange={(e) => setEditFormData({ ...editFormData, displayName: e.target.value })}
-                  />
-                </div>
+          {editFormData ? (
+            <div className={classes.editPanelContent}>
+              <div className={classes.editPanelForm}>
+                {/* Header row: Name/Pattern on left, Points/Concealed/Notes on right */}
+                <div className={classes.formHeader}>
+                  <div className={classes.formHeaderLeft}>
+                    {/* Display Name */}
+                    <div className={classes.formGroup}>
+                      <label className={classes.formLabel}>Display Name</label>
+                      <input
+                        type="text"
+                        className={classes.formInput}
+                        value={editFormData.displayName}
+                        onChange={(e) => setEditFormData({ ...editFormData, displayName: e.target.value })}
+                      />
+                    </div>
 
-                {/* Display Pattern Preview */}
-                <div className={classes.formGroup}>
-                  <label className={classes.formLabel}>
-                    Display Pattern
-                    {(() => {
-                      const count = editFormData.displayPattern.replace(/\s/g, '').length;
-                      const isValid = count === 14;
-                      return (
-                        <span style={{
-                          marginLeft: '8px',
-                          fontWeight: 'normal',
-                          color: isValid ? '#4CAF50' : '#FFA726',
-                        }}>
-                          ({count}/14 tiles{isValid ? ' ✓' : ' ⚠'})
-                        </span>
-                      );
-                    })()}
-                  </label>
-                  <div className={classes.displayPatternPreview}>
-                    {renderSegments(editFormData.displaySegments)}
+                    {/* Display Pattern Preview */}
+                    <div className={classes.formGroup}>
+                      <label className={classes.formLabel}>
+                        Display Pattern
+                        {(() => {
+                          const count = editFormData.displayPattern.replace(/\s/g, '').length;
+                          const isValid = count === 14;
+                          return (
+                            <span style={{
+                              marginLeft: '8px',
+                              fontWeight: 'normal',
+                              color: isValid ? '#4CAF50' : '#FFA726',
+                            }}>
+                              ({count}/14 tiles{isValid ? ' ✓' : ' ⚠'})
+                            </span>
+                          );
+                        })()}
+                      </label>
+                      <div className={classes.displayPatternPreview}>
+                        {renderSegments(editFormData.displaySegments)}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className={classes.formHeaderRight}>
+                    {/* Points and Concealed on same row */}
+                    <div className={classes.formHeaderRightRow}>
+                      <label className={classes.formLabel} style={{ margin: 0 }}>Points</label>
+                      <input
+                        type="number"
+                        className={classes.pointsInput}
+                        value={editFormData.points}
+                        onChange={(e) => setEditFormData({ ...editFormData, points: parseInt(e.target.value) || 0 })}
+                      />
+                      <label className={classes.formCheckbox} style={{ marginLeft: 'auto' }}>
+                        <input
+                          type="checkbox"
+                          checked={editFormData.isConcealed}
+                          onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.checked })}
+                        />
+                        Concealed
+                      </label>
+                    </div>
+
+                    {/* Notes */}
+                    <div>
+                      <label className={classes.formLabel}>Notes</label>
+                      <input
+                        type="text"
+                        className={classes.formInput}
+                        value={editFormData.notes}
+                        onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
+                        placeholder="e.g., Any 1 Suit"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -934,92 +1024,58 @@ export function AdminPage() {
                   />
                 </div>
 
-                {/* Points and Order */}
-                <div className={classes.formRow}>
-                  <div className={classes.formRowItem}>
-                    <div className={classes.formGroup}>
-                      <label className={classes.formLabel}>Points</label>
-                      <input
-                        type="number"
-                        className={classes.formInput}
-                        value={editFormData.points}
-                        onChange={(e) => setEditFormData({ ...editFormData, points: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                  </div>
-                  <div className={classes.formRowItem}>
-                    <div className={classes.formGroup}>
-                      <label className={classes.formLabel}>Display Order</label>
-                      <input
-                        type="number"
-                        className={classes.formInput}
-                        value={editFormData.displayOrder}
-                        onChange={(e) => setEditFormData({ ...editFormData, displayOrder: parseInt(e.target.value) || 0 })}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Notes */}
+                {/* Examples */}
                 <div className={classes.formGroup}>
-                  <label className={classes.formLabel}>Notes</label>
-                  <input
-                    type="text"
-                    className={classes.formInput}
-                    value={editFormData.notes}
-                    onChange={(e) => setEditFormData({ ...editFormData, notes: e.target.value })}
-                    placeholder="e.g., Any 1 Suit, Pairs Only"
+                  <label className={classes.formLabel}>
+                    Examples
+                    <span style={{ marginLeft: '8px', fontWeight: 'normal', color: '#666', fontSize: '11px' }}>
+                      ({editFormData.examples.filter(e => e.isValid).length} valid, {editFormData.examples.filter(e => !e.isValid).length} invalid)
+                    </span>
+                  </label>
+                  <ExampleEditor
+                    examples={editFormData.examples}
+                    onChange={(examples) => setEditFormData({ ...editFormData, examples })}
                   />
                 </div>
-
-                {/* Concealed */}
-                <div className={classes.formGroup}>
-                  <label className={classes.formCheckbox}>
-                    <input
-                      type="checkbox"
-                      checked={editFormData.isConcealed}
-                      onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.checked })}
-                    />
-                    Concealed Hand
-                  </label>
-                </div>
-
-                {/* Actions */}
-                <div className={classes.formActions}>
-                  <button
-                    className={classes.saveButton}
-                    onClick={handleSave}
-                    disabled={updateHand.isPending || createHand.isPending}
-                  >
-                    {updateHand.isPending || createHand.isPending ? 'Saving...' : 'Save'}
-                  </button>
-                  <button
-                    className={classes.cloneButton}
-                    onClick={handleClone}
-                    disabled={createHand.isPending}
-                  >
-                    Clone
-                  </button>
-                  <button className={classes.cancelButton} onClick={handleCancel}>
-                    Cancel
-                  </button>
-                  {!isCreatingNew && selectedHandId && (
-                    <button
-                      className={classes.deleteButton}
-                      onClick={handleDelete}
-                      disabled={deleteHand.isPending}
-                    >
-                      Delete
-                    </button>
-                  )}
-                </div>
               </div>
-            ) : (
+
+              {/* Sticky Footer Actions */}
+              <div className={classes.formActions}>
+                <button
+                  className={classes.saveButton}
+                  onClick={handleSave}
+                  disabled={updateHand.isPending || createHand.isPending}
+                >
+                  {updateHand.isPending || createHand.isPending ? 'Saving...' : 'Save'}
+                </button>
+                <button
+                  className={classes.cloneButton}
+                  onClick={handleClone}
+                  disabled={createHand.isPending}
+                >
+                  Clone
+                </button>
+                <button className={classes.cancelButton} onClick={handleCancel}>
+                  Cancel
+                </button>
+                {!isCreatingNew && selectedHandId && (
+                  <button
+                    className={classes.deleteButton}
+                    onClick={handleDelete}
+                    disabled={deleteHand.isPending}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className={classes.panelContent}>
               <div className={classes.detailEmpty}>
                 Select a hand to edit
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

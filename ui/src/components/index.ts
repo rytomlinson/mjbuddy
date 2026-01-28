@@ -6,3 +6,4 @@ export * from './HandAnalyzer';
 export * from './ViableHandCard';
 export * from './CallAdviceCard';
 export * from './CallAdvisor';
+export * from './SavedHands';

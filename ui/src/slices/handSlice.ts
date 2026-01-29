@@ -8,7 +8,7 @@ export interface ExposedMeld {
   jokerCount: number;
 }
 
-interface HandState {
+export interface HandState {
   tiles: TileCode[];
   drawnTile: TileCode | null;
   exposedMelds: ExposedMeld[];

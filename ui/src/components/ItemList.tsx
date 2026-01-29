@@ -199,7 +199,8 @@ export function ItemList() {
   useEffect(() => {
     dispatch(setLoading(isLoading));
     if (data) {
-      dispatch(setItems(data));
+      // tRPC serializes dates as strings, cast to match Item type
+      dispatch(setItems(data as unknown as Parameters<typeof setItems>[0]));
     }
   }, [data, isLoading, dispatch]);
 
@@ -212,7 +213,7 @@ export function ItemList() {
       description: description.trim() || null,
     });
 
-    dispatch(addItem(newItem));
+    dispatch(addItem(newItem as unknown as Parameters<typeof addItem>[0]));
     setName('');
     setDescription('');
     setShowForm(false);

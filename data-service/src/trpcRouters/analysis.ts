@@ -198,6 +198,59 @@ export const analysisRouter = router({
     }),
 
   /**
+   * Analyze call options for a specific discarded tile
+   */
+  analyzeCall: authedProcedure
+    .input(
+      z.object({
+        discardedTile: TileCodeSchema,
+        playerState: PlayerHandStateSchema,
+        cardYearId: z.number().optional(),
+      })
+    )
+    .query(async ({ input }) => {
+      // Get card year
+      let cardYearId = input.cardYearId;
+      if (!cardYearId) {
+        const activeYear = await getActiveCardYear();
+        if (!activeYear) {
+          return { calls: [] };
+        }
+        cardYearId = activeYear.id;
+      }
+
+      // Get all hands
+      const hands = await getHandsByCardYear(cardYearId);
+
+      // Analyze hand to get viable hands
+      const playerState: PlayerHandState = {
+        tiles: input.playerState.tiles,
+        drawnTile: input.playerState.drawnTile,
+        exposedMelds: input.playerState.exposedMelds,
+      };
+
+      const viableHands = analyzeAllHands(hands, playerState, 20);
+
+      // Analyze call options for this specific tile
+      const callAdvice = analyzeCall(input.discardedTile, viableHands, playerState);
+
+      // Map to response format
+      const calls = callAdvice
+        .filter((c) => c.canCall && c.callType)
+        .map((c) => ({
+          handId: c.hand.id,
+          handName: c.hand.displayName,
+          displayPattern: generateDisplaySegments(c.hand.patternGroups),
+          canCall: c.canCall,
+          callType: c.callType as 'pung' | 'kong' | 'quint' | 'win',
+          newDistance: c.newDistance,
+          points: c.hand.points,
+        }));
+
+      return { calls };
+    }),
+
+  /**
    * Get strategic advice from LLM based on current hand analysis
    */
   getAdvice: authedProcedure

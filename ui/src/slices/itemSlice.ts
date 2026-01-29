@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type { Item } from 'common';
 import type { RootState } from '../store';
 
-interface ItemState {
+export interface ItemState {
   items: Item[];
   loading: boolean;
   error: string | null;

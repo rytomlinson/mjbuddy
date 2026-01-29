@@ -11,46 +11,6 @@ import { initDb, query, closeDb } from './db.js';
 import { TileType, GroupType } from 'common';
 import type { PatternGroup, TilePattern } from 'common';
 
-// Helper to create fixed tile pattern
-function fixed(type: TileType, value: number): TilePattern {
-  return { fixed: (type << 4) | value };
-}
-
-// Helper for suit variable with number
-function suitNum(suitVar: string, num: number): TilePattern {
-  return { suitVar, fixed: num }; // Will need to fix this
-}
-
-// Helper for any flower
-function flower(): TilePattern {
-  return { isAnyFlower: true };
-}
-
-// Helper for any dragon
-function dragon(): TilePattern {
-  return { isAnyDragon: true };
-}
-
-// Helper for suit variable with specific number
-function suit(suitVar: string, num: number, tileType?: TileType): TilePattern {
-  return {
-    suitVar,
-    numberVar: String(num),
-    tileType: tileType ?? TileType.DOT, // Will be expanded to all suits
-    constraints: { specificValues: [num] }
-  };
-}
-
-// Helper for wind
-function wind(value: number): TilePattern {
-  return { fixed: (TileType.WIND << 4) | value };
-}
-
-// Helper for specific dragon
-function dragonFixed(value: number): TilePattern {
-  return { fixed: (TileType.DRAGON << 4) | value };
-}
-
 // Dragon values: RED=1, GREEN=2, WHITE=3
 const RED = 1, GREEN = 2, WHITE = 3;
 // Wind values: EAST=1, SOUTH=2, WEST=3, NORTH=4

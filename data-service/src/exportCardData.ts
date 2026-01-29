@@ -6,7 +6,7 @@
  */
 
 import { config } from 'dotenv';
-import { resolve, dirname } from 'path';
+import { resolve } from 'path';
 import { writeFileSync, mkdirSync } from 'fs';
 import { initDb, query, closeDb } from './db.js';
 import type { PatternGroup, HandExample } from 'common';

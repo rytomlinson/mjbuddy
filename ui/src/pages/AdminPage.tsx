@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { createUseStyles } from 'react-jss';
 import { Link } from 'react-router-dom';
 import { trpc } from '../trpc';
 import { PatternGroupEditor } from '../components/PatternGroupEditor';
 import { ExampleEditor } from '../components/ExampleEditor';
 import type { Theme } from '../theme';
-import { generateDisplayPattern, generateDisplaySegments, GroupType } from 'common';
-import type { PatternGroup, DisplaySegment, HandExample } from 'common';
+import { generateDisplayPattern, generateDisplaySegments, GroupType, generateValidExample, validateHandExamples } from 'common';
+import type { PatternGroup, DisplaySegment, HandExample, CardHand, HandValidationResult } from 'common';
 
 const useStyles = createUseStyles((theme: Theme) => ({
   page: {
@@ -221,6 +221,27 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontSize: '10px',
     fontWeight: 'bold',
   },
+  validationBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '16px',
+    height: '16px',
+    borderRadius: '8px',
+    backgroundColor: '#FF5722',
+    color: 'white',
+    fontSize: '10px',
+    fontWeight: 'bold',
+    padding: '0 4px',
+    marginLeft: '4px',
+  },
+  validationBadgeSmall: {
+    minWidth: '14px',
+    height: '14px',
+    borderRadius: '7px',
+    fontSize: '9px',
+    padding: '0 3px',
+  },
   notesIcon: {
     display: 'inline-flex',
     alignItems: 'center',
@@ -312,28 +333,32 @@ const useStyles = createUseStyles((theme: Theme) => ({
     marginBottom: theme.spacing.md,
   },
   formHeaderLeft: {
-    flex: 1,
+    width: '50%',
+    flexShrink: 0,
   },
   formHeaderRight: {
-    width: '180px',
+    width: '50%',
     flexShrink: 0,
     display: 'flex',
     flexDirection: 'column',
     gap: theme.spacing.sm,
+    alignItems: 'flex-start',
   },
   formHeaderRightRow: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing.sm,
+    width: '100%',
   },
   pointsInput: {
     width: '70px',
-    padding: '4px 8px',
+    padding: theme.spacing.sm,
     border: `1px solid rgba(139, 125, 107, 0.4)`,
     borderRadius: theme.borderRadius.sm,
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
     color: '#2D2A26',
     fontSize: theme.fontSizes.sm,
+    boxSizing: 'border-box',
     '&:focus': {
       outline: 'none',
       borderColor: theme.colors.primary,
@@ -489,16 +514,24 @@ export function AdminPage() {
     { enabled: selectedCategoryId !== null }
   );
 
+  // Fetch ALL hands for the selected card (for validation badges on all categories)
+  const { data: allHandsForCard, refetch: refetchAllHands } = trpc.cardHand.listByCardYear.useQuery(
+    { cardYearId: selectedCardId! },
+    { enabled: selectedCardId !== null }
+  );
+
   // Mutations
   const updateHand = trpc.cardHand.update.useMutation({
     onSuccess: () => {
       refetchHands();
+      refetchAllHands();
     },
   });
 
   const deleteHand = trpc.cardHand.delete.useMutation({
     onSuccess: () => {
       refetchHands();
+      refetchAllHands();
       setSelectedHandId(null);
       setEditFormData(null);
     },
@@ -507,6 +540,7 @@ export function AdminPage() {
   const createHand = trpc.cardHand.create.useMutation({
     onSuccess: (newHand) => {
       refetchHands();
+      refetchAllHands();
       setIsCreatingNew(false);
       setSelectedHandId(newHand.id);
       loadHandIntoForm(newHand);
@@ -534,6 +568,77 @@ export function AdminPage() {
   if (categories && categories.length > 0 && selectedCategoryId === null) {
     setSelectedCategoryId(categories[0].id);
   }
+
+  // Compute validation results for all hands in the current category
+  const handValidationResults = useMemo(() => {
+    if (!hands) return new Map<number, HandValidationResult>();
+    const results = new Map<number, HandValidationResult>();
+    for (const hand of hands) {
+      // Create a CardHand-like object for validation
+      const cardHand: CardHand = {
+        id: hand.id,
+        categoryId: hand.categoryId,
+        displayName: hand.displayName,
+        displayPattern: hand.displayPattern,
+        patternGroups: hand.patternGroups,
+        isConcealed: hand.isConcealed,
+        points: hand.points,
+        notes: hand.notes,
+        displayOrder: hand.displayOrder,
+        examples: hand.examples || [],
+        createdAt: new Date(), // Required by CardHand type but not used in validation
+      };
+      results.set(hand.id, validateHandExamples(cardHand));
+    }
+    return results;
+  }, [hands]);
+
+  // Compute validation issue counts for ALL categories in the selected card
+  const categoryIssueCounts = useMemo(() => {
+    if (!allHandsForCard) return new Map<number, number>();
+    const counts = new Map<number, number>();
+
+    for (const hand of allHandsForCard) {
+      const cardHand: CardHand = {
+        id: hand.id,
+        categoryId: hand.categoryId,
+        displayName: hand.displayName,
+        displayPattern: hand.displayPattern,
+        patternGroups: hand.patternGroups,
+        isConcealed: hand.isConcealed,
+        points: hand.points,
+        notes: hand.notes,
+        displayOrder: hand.displayOrder,
+        examples: hand.examples || [],
+        createdAt: new Date(),
+      };
+      const validation = validateHandExamples(cardHand);
+      const current = counts.get(hand.categoryId) ?? 0;
+      counts.set(hand.categoryId, current + validation.issueCount);
+    }
+
+    return counts;
+  }, [allHandsForCard]);
+
+  // Compute validation for current editing form (for real-time feedback)
+  const editFormValidation = useMemo(() => {
+    if (!editFormData) return null;
+    // Create a CardHand-like object for validation
+    const cardHand: CardHand = {
+      id: selectedHandId ?? 0,
+      categoryId: selectedCategoryId ?? 0,
+      displayName: editFormData.displayName,
+      displayPattern: editFormData.displayPattern,
+      patternGroups: editFormData.patternGroups,
+      isConcealed: editFormData.isConcealed,
+      points: editFormData.points,
+      notes: editFormData.notes || null,
+      displayOrder: editFormData.displayOrder,
+      examples: editFormData.examples,
+      createdAt: new Date(), // Required by CardHand type but not used in validation
+    };
+    return validateHandExamples(cardHand);
+  }, [editFormData, selectedHandId, selectedCategoryId]);
 
   const loadHandIntoForm = (hand: NonNullable<typeof hands>[number]) => {
     const derivedPattern = generateDisplayPattern(hand.patternGroups);
@@ -645,6 +750,20 @@ export function AdminPage() {
       if (hand) {
         loadHandIntoForm(hand);
       }
+    }
+  };
+
+  const handleRebuildExamples = () => {
+    if (!editFormData) return;
+    try {
+      const tiles = generateValidExample(editFormData.patternGroups);
+      setEditFormData({
+        ...editFormData,
+        examples: [{ tiles, isValid: true }],
+      });
+    } catch (err) {
+      console.error('Failed to generate example:', err);
+      alert('Failed to generate example. Check console for details.');
     }
   };
 
@@ -846,6 +965,7 @@ export function AdminPage() {
               categories.map((category) => {
                 const isDragging = draggedCategoryId === category.id;
                 const isDragOver = dragOverCategoryId === category.id;
+                const issueCount = categoryIssueCounts.get(category.id) ?? 0;
                 return (
                   <div
                     key={category.id}
@@ -858,7 +978,15 @@ export function AdminPage() {
                     onDragEnd={handleCategoryDragEnd}
                     onDrop={(e) => handleCategoryDrop(e, category.id)}
                   >
-                    {category.name}
+                    <span>{category.name}</span>
+                    {issueCount > 0 && (
+                      <span
+                        className={`${classes.validationBadge} ${classes.validationBadgeSmall}`}
+                        title={`${issueCount} example issue${issueCount > 1 ? 's' : ''} in this category`}
+                      >
+                        {issueCount}
+                      </span>
+                    )}
                   </div>
                 );
               })
@@ -888,6 +1016,9 @@ export function AdminPage() {
                 const charCount = patternText.replace(/\s/g, '').length;
                 const isDragging = draggedHandId === hand.id;
                 const isDragOver = dragOverHandId === hand.id;
+                const validationResult = handValidationResults.get(hand.id);
+                const hasValidationIssues = validationResult?.hasIssues ?? false;
+                const validationIssueCount = validationResult?.issueCount ?? 0;
                 return (
                   <div
                     key={hand.id}
@@ -900,7 +1031,17 @@ export function AdminPage() {
                     onDragEnd={handleDragEnd}
                     onDrop={(e) => handleDrop(e, hand.id)}
                   >
-                    <h4 className={classes.handName}>{hand.displayName}</h4>
+                    <h4 className={classes.handName}>
+                      {hand.displayName}
+                      {hasValidationIssues && (
+                        <span
+                          className={`${classes.validationBadge} ${classes.validationBadgeSmall}`}
+                          title={`${validationIssueCount} example issue${validationIssueCount > 1 ? 's' : ''} need review`}
+                        >
+                          {validationIssueCount}
+                        </span>
+                      )}
+                    </h4>
                     <p className={classes.handPattern}>
                       {renderSegments(segments)}
                       {hand.notes && <span className={classes.notesIcon} title={hand.notes}>i</span>}
@@ -977,27 +1118,32 @@ export function AdminPage() {
                   </div>
 
                   <div className={classes.formHeaderRight}>
-                    {/* Points and Concealed on same row */}
+                    {/* Points and Type */}
                     <div className={classes.formHeaderRightRow}>
-                      <label className={classes.formLabel} style={{ margin: 0 }}>Points</label>
+                      <label className={classes.formLabel} style={{ margin: 0, width: '80px' }}>Points</label>
+                      <label className={classes.formLabel} style={{ margin: 0 }}>Type</label>
+                    </div>
+                    <div className={classes.formHeaderRightRow}>
                       <input
                         type="number"
                         className={classes.pointsInput}
+                        style={{ width: '80px' }}
                         value={editFormData.points}
                         onChange={(e) => setEditFormData({ ...editFormData, points: parseInt(e.target.value) || 0 })}
                       />
-                      <label className={classes.formCheckbox} style={{ marginLeft: 'auto' }}>
-                        <input
-                          type="checkbox"
-                          checked={editFormData.isConcealed}
-                          onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.checked })}
-                        />
-                        Concealed
-                      </label>
+                      <select
+                        className={classes.formInput}
+                        value={editFormData.isConcealed ? 'concealed' : 'exposed'}
+                        onChange={(e) => setEditFormData({ ...editFormData, isConcealed: e.target.value === 'concealed' })}
+                        style={{ flex: 1 }}
+                      >
+                        <option value="exposed">Exposed</option>
+                        <option value="concealed">Concealed</option>
+                      </select>
                     </div>
 
                     {/* Notes */}
-                    <div>
+                    <div style={{ width: '100%' }}>
                       <label className={classes.formLabel}>Notes</label>
                       <input
                         type="text"
@@ -1026,15 +1172,26 @@ export function AdminPage() {
 
                 {/* Examples */}
                 <div className={classes.formGroup}>
-                  <label className={classes.formLabel}>
-                    Examples
-                    <span style={{ marginLeft: '8px', fontWeight: 'normal', color: '#666', fontSize: '11px' }}>
-                      ({editFormData.examples.filter(e => e.isValid).length} valid, {editFormData.examples.filter(e => !e.isValid).length} invalid)
-                    </span>
-                  </label>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <label className={classes.formLabel} style={{ margin: 0 }}>
+                      Examples
+                      <span style={{ marginLeft: '8px', fontWeight: 'normal', color: '#666', fontSize: '11px' }}>
+                        ({editFormData.examples.filter(e => e.isValid).length} valid, {editFormData.examples.filter(e => !e.isValid).length} invalid)
+                      </span>
+                    </label>
+                    <button
+                      className={classes.cancelButton}
+                      onClick={handleRebuildExamples}
+                      title="Delete all examples and generate one valid example"
+                    >
+                      Rebuild Examples
+                    </button>
+                  </div>
                   <ExampleEditor
                     examples={editFormData.examples}
+                    patternGroups={editFormData.patternGroups}
                     onChange={(examples) => setEditFormData({ ...editFormData, examples })}
+                    validationResults={editFormValidation?.exampleResults}
                   />
                 </div>
               </div>

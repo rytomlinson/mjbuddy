@@ -7,6 +7,7 @@ interface CardHandRow {
   display_name: string;
   display_pattern: string;
   pattern_json: PatternGroup[];
+  alternative_patterns_json: PatternGroup[][] | null;
   is_concealed: boolean;
   points: number;
   notes: string | null;
@@ -22,6 +23,7 @@ function mapRowToCardHand(row: CardHandRow): CardHand {
     displayName: row.display_name,
     displayPattern: row.display_pattern,
     patternGroups: row.pattern_json,
+    alternativePatterns: row.alternative_patterns_json ?? undefined,
     isConcealed: row.is_concealed,
     points: row.points,
     notes: row.notes,
@@ -34,7 +36,8 @@ function mapRowToCardHand(row: CardHandRow): CardHand {
 export async function getHandsByCategory(categoryId: number): Promise<CardHand[]> {
   return get<CardHandRow, CardHand>(
     `SELECT id, category_id, display_name, display_pattern, pattern_json,
-            is_concealed, points, notes, display_order, examples_json, created_at
+            alternative_patterns_json, is_concealed, points, notes, display_order,
+            examples_json, created_at
      FROM card_hands
      WHERE category_id = :categoryId
      ORDER BY display_order ASC`,
@@ -46,7 +49,8 @@ export async function getHandsByCategory(categoryId: number): Promise<CardHand[]
 export async function getHandsByCardYear(cardYearId: number): Promise<CardHand[]> {
   return get<CardHandRow, CardHand>(
     `SELECT ch.id, ch.category_id, ch.display_name, ch.display_pattern, ch.pattern_json,
-            ch.is_concealed, ch.points, ch.notes, ch.display_order, ch.examples_json, ch.created_at
+            ch.alternative_patterns_json, ch.is_concealed, ch.points, ch.notes, ch.display_order,
+            ch.examples_json, ch.created_at
      FROM card_hands ch
      JOIN hand_categories hc ON hc.id = ch.category_id
      WHERE hc.card_year_id = :cardYearId
@@ -59,7 +63,8 @@ export async function getHandsByCardYear(cardYearId: number): Promise<CardHand[]
 export async function getCardHandById(id: number): Promise<CardHand | null> {
   return getOne<CardHandRow, CardHand>(
     `SELECT id, category_id, display_name, display_pattern, pattern_json,
-            is_concealed, points, notes, display_order, examples_json, created_at
+            alternative_patterns_json, is_concealed, points, notes, display_order,
+            examples_json, created_at
      FROM card_hands
      WHERE id = :id`,
     mapRowToCardHand,
@@ -70,16 +75,20 @@ export async function getCardHandById(id: number): Promise<CardHand | null> {
 export async function createCardHand(data: CreateCardHand): Promise<CardHand> {
   const result = await query<CardHandRow>(
     `INSERT INTO card_hands (category_id, display_name, display_pattern, pattern_json,
-                             is_concealed, points, notes, display_order, examples_json, created_at)
+                             alternative_patterns_json, is_concealed, points, notes,
+                             display_order, examples_json, created_at)
      VALUES (:categoryId, :displayName, :displayPattern, :patternJson,
-             :isConcealed, :points, :notes, :displayOrder, :examplesJson, NOW())
+             :alternativePatternsJson, :isConcealed, :points, :notes, :displayOrder,
+             :examplesJson, NOW())
      RETURNING id, category_id, display_name, display_pattern, pattern_json,
-               is_concealed, points, notes, display_order, examples_json, created_at`,
+               alternative_patterns_json, is_concealed, points, notes, display_order,
+               examples_json, created_at`,
     {
       categoryId: data.categoryId,
       displayName: data.displayName,
       displayPattern: data.displayPattern,
       patternJson: JSON.stringify(data.patternGroups),
+      alternativePatternsJson: data.alternativePatterns ? JSON.stringify(data.alternativePatterns) : null,
       isConcealed: data.isConcealed,
       points: data.points,
       notes: data.notes ?? null,
@@ -102,6 +111,7 @@ export async function updateCardHand(data: UpdateCardHand): Promise<CardHand | n
          display_name = :displayName,
          display_pattern = :displayPattern,
          pattern_json = :patternJson,
+         alternative_patterns_json = :alternativePatternsJson,
          is_concealed = :isConcealed,
          points = :points,
          notes = :notes,
@@ -109,13 +119,17 @@ export async function updateCardHand(data: UpdateCardHand): Promise<CardHand | n
          examples_json = :examplesJson
      WHERE id = :id
      RETURNING id, category_id, display_name, display_pattern, pattern_json,
-               is_concealed, points, notes, display_order, examples_json, created_at`,
+               alternative_patterns_json, is_concealed, points, notes, display_order,
+               examples_json, created_at`,
     {
       id: data.id,
       categoryId: data.categoryId ?? current.categoryId,
       displayName: data.displayName ?? current.displayName,
       displayPattern: data.displayPattern ?? current.displayPattern,
       patternJson: JSON.stringify(data.patternGroups ?? current.patternGroups),
+      alternativePatternsJson: data.alternativePatterns !== undefined
+        ? (data.alternativePatterns ? JSON.stringify(data.alternativePatterns) : null)
+        : (current.alternativePatterns ? JSON.stringify(current.alternativePatterns) : null),
       isConcealed: data.isConcealed ?? current.isConcealed,
       points: data.points ?? current.points,
       notes: data.notes !== undefined ? data.notes : current.notes,

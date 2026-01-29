@@ -112,11 +112,15 @@ export type DisplaySegment = z.infer<typeof DisplaySegmentSchema>;
 
 /**
  * An example hand - a concrete set of tiles that is valid or invalid for a pattern
+ * groupOrder tracks the visual display order of pattern groups for this example.
+ * If undefined, groups are displayed in pattern definition order.
+ * Example: [0, 4, 1, 2, 3, 5] means pattern group 4 is displayed second.
  */
 export const HandExampleSchema = z.object({
   tiles: z.array(TileCodeSchema),
   isValid: z.boolean(),
   note: z.string().optional(),
+  groupOrder: z.array(z.number()).optional(),
 });
 
 export type HandExample = z.infer<typeof HandExampleSchema>;
@@ -133,6 +137,9 @@ export const CardHandSchema = z.object({
     z.array(DisplaySegmentSchema), // New: colored segments
   ]),
   patternGroups: z.array(PatternGroupSchema),
+  // Alternative pattern structures (for hands where grouping can vary)
+  // Each alternative is a complete set of pattern groups
+  alternativePatterns: z.array(z.array(PatternGroupSchema)).optional(),
   isConcealed: z.boolean(),
   points: z.number(),
   notes: z.string().nullable(),
@@ -154,6 +161,7 @@ export const CreateCardHandSchema = z.object({
     z.array(DisplaySegmentSchema).min(1),
   ]),
   patternGroups: z.array(PatternGroupSchema).min(1),
+  alternativePatterns: z.array(z.array(PatternGroupSchema).min(1)).optional(),
   isConcealed: z.boolean(),
   points: z.number().int().min(0),
   notes: z.string().nullable().optional(),
@@ -175,6 +183,7 @@ export const UpdateCardHandSchema = z.object({
     z.array(DisplaySegmentSchema).min(1),
   ]).optional(),
   patternGroups: z.array(PatternGroupSchema).min(1).optional(),
+  alternativePatterns: z.array(z.array(PatternGroupSchema).min(1)).optional(),
   isConcealed: z.boolean().optional(),
   points: z.number().int().min(0).optional(),
   notes: z.string().nullable().optional(),

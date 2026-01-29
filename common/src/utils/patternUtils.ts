@@ -139,6 +139,28 @@ function expandGroupWithContext(
   if (pattern.isAnyFlower) return encodeTile(TileType.FLOWER, 1);
   if (pattern.isZero) return encodeTile(TileType.DRAGON, Dragon.WHITE);
 
+  // Handle dragons with suit variable specially
+  // Traditional American Mahjong: Dot→White, Bam→Green, Crak→Red
+  if (pattern.tileType === TileType.DRAGON && pattern.suitVar && ctx.suitBindings.has(pattern.suitVar)) {
+    const suit = ctx.suitBindings.get(pattern.suitVar)!;
+    const suitToDragonMap: Partial<Record<TileType, number>> = {
+      [TileType.DOT]: Dragon.WHITE,
+      [TileType.BAM]: Dragon.GREEN,
+      [TileType.CRAK]: Dragon.RED,
+    };
+    return encodeTile(TileType.DRAGON, suitToDragonMap[suit] ?? Dragon.WHITE);
+  }
+
+  // Handle isAnyDragon and isAnyWind patterns with bindings
+  if (pattern.isAnyDragon && ctx.numberBindings.has('dragon')) {
+    const dragonValue = ctx.numberBindings.get('dragon')!;
+    return encodeTile(TileType.DRAGON, dragonValue);
+  }
+  if (pattern.isAnyWind && ctx.numberBindings.has('wind')) {
+    const windValue = ctx.numberBindings.get('wind')!;
+    return encodeTile(TileType.WIND, windValue);
+  }
+
   // Resolve suit
   let tileType = pattern.tileType;
   if (pattern.suitVar && ctx.suitBindings.has(pattern.suitVar)) {
@@ -153,14 +175,6 @@ function expandGroupWithContext(
     value = ctx.numberBindings.get(pattern.numberVar)! + (pattern.numberOffset ?? 0);
   } else if (pattern.constraints?.specificValues?.length === 1) {
     value = pattern.constraints.specificValues[0];
-  }
-
-  // For winds/dragons with isAnyWind/isAnyDragon, we need specific bindings
-  if (pattern.isAnyWind && ctx.numberBindings.has('wind')) {
-    value = ctx.numberBindings.get('wind');
-  }
-  if (pattern.isAnyDragon && ctx.numberBindings.has('dragon')) {
-    value = ctx.numberBindings.get('dragon');
   }
 
   if (value === undefined) return null;
@@ -185,10 +199,14 @@ function collectVariables(groups: PatternGroup[]): {
   suitVars: Set<string>;
   numberVars: Set<string>;
   constraints: Map<string, TilePattern['constraints']>;
+  hasAnyDragon: boolean;
+  hasAnyWind: boolean;
 } {
   const suitVars = new Set<string>();
   const numberVars = new Set<string>();
   const constraints = new Map<string, TilePattern['constraints']>();
+  let hasAnyDragon = false;
+  let hasAnyWind = false;
 
   for (const group of groups) {
     if (group.tile.suitVar) {
@@ -204,9 +222,16 @@ function collectVariables(groups: PatternGroup[]): {
         }
       }
     }
+    // Track if we have any "any dragon" or "any wind" patterns
+    if (group.tile.isAnyDragon) {
+      hasAnyDragon = true;
+    }
+    if (group.tile.isAnyWind) {
+      hasAnyWind = true;
+    }
   }
 
-  return { suitVars, numberVars, constraints };
+  return { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind };
 }
 
 /**
@@ -260,7 +285,7 @@ function isValidConsecutive(groups: PatternGroup[], numberBindings: Map<string, 
  * Expand pattern groups to all concrete patterns
  */
 export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
-  const { suitVars, numberVars, constraints } = collectVariables(groups);
+  const { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind } = collectVariables(groups);
   const results: ConcretePattern[] = [];
 
   // Generate all suit combinations
@@ -292,8 +317,16 @@ export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
     generateSuitCombos(0, new Map(), new Set());
   }
 
-  // Generate all number combinations
+  // Generate all number combinations (including special dragon/wind variables)
   const numberVarList = Array.from(numberVars);
+  // Add special variables for "any dragon" and "any wind" patterns
+  if (hasAnyDragon) {
+    numberVarList.push('dragon');
+  }
+  if (hasAnyWind) {
+    numberVarList.push('wind');
+  }
+
   const numberCombinations: Map<string, number>[] = [];
 
   if (numberVarList.length === 0) {
@@ -309,6 +342,23 @@ export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
       }
 
       const varName = numberVarList[index];
+
+      // Special handling for dragon and wind variables
+      if (varName === 'dragon') {
+        for (const dragonValue of [Dragon.RED, Dragon.GREEN, Dragon.WHITE]) {
+          current.set(varName, dragonValue);
+          generateNumberCombos(index + 1, current);
+        }
+        return;
+      }
+      if (varName === 'wind') {
+        for (const windValue of [Wind.EAST, Wind.SOUTH, Wind.WEST, Wind.NORTH]) {
+          current.set(varName, windValue);
+          generateNumberCombos(index + 1, current);
+        }
+        return;
+      }
+
       const varConstraints = constraints.get(varName);
       const validNumbers = getValidNumbers(varConstraints);
 
@@ -645,6 +695,7 @@ function getSuitVarColor(suitVar: string): DisplaySegment['color'] {
 export function generateDisplaySegments(groups: PatternGroup[]): DisplaySegment[] {
   const segments: DisplaySegment[] = [];
   let currentSuperGroupId: string | undefined = undefined;
+  let superGroupSegments: DisplaySegment[] = []; // Accumulate segments within super groups
 
   for (let i = 0; i < groups.length; i++) {
     const group = groups[i];
@@ -653,12 +704,22 @@ export function generateDisplaySegments(groups: PatternGroup[]): DisplaySegment[
     let char = '?';
     let color: DisplaySegment['color'] = 'neutral';
 
-    // Track super group membership (no brackets, just controls spacing)
-    if (group.superGroupId && group.superGroupId !== currentSuperGroupId) {
-      // Entering a new super group
-      currentSuperGroupId = group.superGroupId;
-    } else if (!group.superGroupId && currentSuperGroupId) {
-      // Exiting super group
+    // Handle super group transitions (similar to generateDisplayPattern approach)
+    if (group.superGroupId) {
+      if (group.superGroupId !== currentSuperGroupId) {
+        // Starting new super group - flush any previous one first
+        if (currentSuperGroupId && superGroupSegments.length > 0) {
+          segments.push(...superGroupSegments);
+          superGroupSegments = [];
+        }
+        currentSuperGroupId = group.superGroupId;
+      }
+    } else if (currentSuperGroupId) {
+      // Exiting super group - flush accumulated segments
+      if (superGroupSegments.length > 0) {
+        segments.push(...superGroupSegments);
+        superGroupSegments = [];
+      }
       currentSuperGroupId = undefined;
     }
 
@@ -755,25 +816,41 @@ export function generateDisplaySegments(groups: PatternGroup[]): DisplaySegment[
     if (pattern.numberVar) {
       segment.numberVar = pattern.numberVar;
     }
-    segments.push(segment);
 
-    // Check if this is the last item in a super group
+    // Handle segment accumulation and spacing based on super group membership
     const nextGroup = i < groups.length - 1 ? groups[i + 1] : null;
-    const isEndOfSuperGroup = currentSuperGroupId && (!nextGroup || nextGroup.superGroupId !== currentSuperGroupId);
 
-    if (isEndOfSuperGroup) {
-      // End of super group - just clear tracking (no brackets)
-      currentSuperGroupId = undefined;
-    }
+    if (currentSuperGroupId) {
+      // Inside a super group - accumulate segments without spaces
+      superGroupSegments.push(segment);
 
-    // Add space between groups (except after last)
-    if (i < groups.length - 1) {
-      // Don't add space within super groups (no space between tiles in super group)
-      const isInSameSuperGroup = group.superGroupId && nextGroup?.superGroupId === group.superGroupId;
-      if (!isInSameSuperGroup) {
+      // Check if this is the last item in the super group
+      if (!nextGroup || nextGroup.superGroupId !== currentSuperGroupId) {
+        // End of super group - flush accumulated segments, then add space
+        segments.push(...superGroupSegments);
+        superGroupSegments = [];
+        currentSuperGroupId = undefined;
+
+        // Add space after super group (if not last group)
+        if (i < groups.length - 1) {
+          segments.push({ text: ' ' });
+        }
+      }
+      // No space added within super group - just continue accumulating
+    } else {
+      // Not in a super group - push segment directly
+      segments.push(segment);
+
+      // Add space after this group (if not last group)
+      if (i < groups.length - 1) {
         segments.push({ text: ' ' });
       }
     }
+  }
+
+  // Flush any remaining super group segments
+  if (superGroupSegments.length > 0) {
+    segments.push(...superGroupSegments);
   }
 
   return segments;
@@ -847,13 +924,15 @@ export function generateValidExample(groups: PatternGroup[]): TileCode[] {
     } else if (pattern.isZero) {
       tile = encodeTile(TileType.DRAGON, Dragon.WHITE);
     } else if (pattern.tileType === TileType.DRAGON && pattern.suitVar) {
-      // Dragon with suit variable - map suit var to dragon color
-      const dragonMap: Record<string, number> = {
-        'A': Dragon.RED,
-        'B': Dragon.GREEN,
-        'C': Dragon.WHITE,
+      // Dragon with suit variable - map suit to corresponding dragon
+      // Traditional American Mahjong: Dot→White, Bam→Green, Crak→Red
+      const suit = suitMap[pattern.suitVar] ?? TileType.DOT;
+      const suitToDragonMap: Partial<Record<TileType, number>> = {
+        [TileType.DOT]: Dragon.WHITE,
+        [TileType.BAM]: Dragon.GREEN,
+        [TileType.CRAK]: Dragon.RED,
       };
-      tile = encodeTile(TileType.DRAGON, dragonMap[pattern.suitVar] ?? Dragon.RED);
+      tile = encodeTile(TileType.DRAGON, suitToDragonMap[suit] ?? Dragon.WHITE);
     } else if (pattern.suitVar) {
       // Suit variable tile
       const suit = suitMap[pattern.suitVar] ?? TileType.DOT;

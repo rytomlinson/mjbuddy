@@ -6,6 +6,8 @@ import {
   isJoker,
   isFlower,
   encodeTile,
+  HandExample,
+  PatternGroup,
 } from '../schemas/index.js';
 import {
   ConcretePattern,
@@ -25,6 +27,7 @@ const expansionCache = new Map<number, ConcretePattern[]>();
 
 /**
  * Get expanded patterns for a hand, using cache if available
+ * Includes both primary pattern and all alternative patterns
  */
 function getExpandedPatterns(hand: CardHand): ConcretePattern[] {
   const cached = expansionCache.get(hand.id);
@@ -32,7 +35,17 @@ function getExpandedPatterns(hand: CardHand): ConcretePattern[] {
     return cached;
   }
 
+  // Expand primary pattern
   const expanded = expandPatternGroups(hand.patternGroups);
+
+  // Also expand alternative patterns if present
+  if (hand.alternativePatterns) {
+    for (const altPattern of hand.alternativePatterns) {
+      const altExpanded = expandPatternGroups(altPattern);
+      expanded.push(...altExpanded);
+    }
+  }
+
   expansionCache.set(hand.id, expanded);
   return expanded;
 }
@@ -566,4 +579,125 @@ export function analyzeCall(
   }
 
   return advice;
+}
+
+/**
+ * Validation result for a single example
+ */
+export interface ExampleValidationResult {
+  exampleIndex: number;
+  isValid: boolean; // Whether the example is marked as valid
+  issues: ExampleIssue[];
+}
+
+export interface ExampleIssue {
+  type: 'wrong_tile_count' | 'has_empty_slots' | 'valid_not_matching' | 'invalid_matches';
+  message: string;
+}
+
+/**
+ * Validation result for a hand (aggregates all example results)
+ */
+export interface HandValidationResult {
+  handId: number;
+  hasIssues: boolean;
+  exampleResults: ExampleValidationResult[];
+  issueCount: number;
+}
+
+/**
+ * Validate a single example against the hand's pattern
+ */
+export function validateExample(
+  example: HandExample,
+  exampleIndex: number,
+  patternGroups: PatternGroup[],
+  hand: CardHand
+): ExampleValidationResult {
+  const issues: ExampleIssue[] = [];
+
+  // Calculate expected tile count from pattern groups
+  const expectedTileCount = patternGroups.reduce((sum, pg) => sum + pg.type, 0);
+
+  // Filter out empty slots (0 values) to get actual tiles
+  const actualTiles = example.tiles.filter(t => t !== 0);
+
+  // Check for empty slots
+  const emptySlotCount = example.tiles.filter(t => t === 0).length;
+  if (emptySlotCount > 0) {
+    issues.push({
+      type: 'has_empty_slots',
+      message: `Example has ${emptySlotCount} empty slot${emptySlotCount > 1 ? 's' : ''}`,
+    });
+  }
+
+  // Check tile count
+  if (actualTiles.length !== expectedTileCount) {
+    issues.push({
+      type: 'wrong_tile_count',
+      message: `Expected ${expectedTileCount} tiles, found ${actualTiles.length}`,
+    });
+  }
+
+  // Only check pattern matching if we have the right number of tiles
+  if (actualTiles.length === expectedTileCount && emptySlotCount === 0) {
+    // Clear the expansion cache for this hand to ensure we use current patternGroups
+    clearExpansionCache(hand.id);
+
+    // Create a mock player state with just the example tiles
+    const playerState: PlayerHandState = {
+      tiles: actualTiles as TileCode[],
+      exposedMelds: [],
+    };
+
+    // Analyze the hand
+    const result = analyzeHand(hand, playerState);
+    const matches = result.distance === 0;
+
+    if (example.isValid && !matches) {
+      issues.push({
+        type: 'valid_not_matching',
+        message: 'Marked as valid but tiles do not match pattern',
+      });
+    } else if (!example.isValid && matches) {
+      issues.push({
+        type: 'invalid_matches',
+        message: 'Marked as invalid but tiles match pattern',
+      });
+    }
+  }
+
+  return {
+    exampleIndex,
+    isValid: example.isValid,
+    issues,
+  };
+}
+
+/**
+ * Validate all examples for a hand
+ */
+export function validateHandExamples(hand: CardHand): HandValidationResult {
+  const exampleResults: ExampleValidationResult[] = [];
+
+  if (hand.examples && hand.examples.length > 0) {
+    for (let i = 0; i < hand.examples.length; i++) {
+      const result = validateExample(
+        hand.examples[i],
+        i,
+        hand.patternGroups,
+        hand
+      );
+      exampleResults.push(result);
+    }
+  }
+
+  const issueCount = exampleResults.reduce((sum, r) => sum + r.issues.length, 0);
+
+  return {
+    handId: hand.id,
+    hasIssues: issueCount > 0,
+    exampleResults,
+    issueCount,
+  };
 }

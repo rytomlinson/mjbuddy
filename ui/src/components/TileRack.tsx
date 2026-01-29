@@ -674,7 +674,7 @@ export function TileRack({
         {pendingDiscard
           ? 'Click a tile to discard.'
           : mode === 'hand'
-          ? 'Set your starting hand using the tiles below.'
+          ? 'Set your hand tiles.'
           : mode === 'charleston'
           ? (isHandFull
               ? 'Select up to 3 using suggestions, then "Pass", then replace.'

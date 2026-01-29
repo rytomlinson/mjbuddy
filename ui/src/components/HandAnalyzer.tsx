@@ -344,6 +344,7 @@ export function HandAnalyzer() {
   const [strategyCollapsed, setStrategyCollapsed] = useState(false);
   const [charlestonSelected, setCharlestonSelected] = useState<Set<number>>(new Set());
   const [pendingDiscard, setPendingDiscard] = useState(false);
+  const [expandedHandId, setExpandedHandId] = useState<number | null>(null);
   const callConfirmRef = useRef<HTMLDivElement>(null);
 
   // Query for analysis
@@ -946,13 +947,6 @@ export function HandAnalyzer() {
           disabledTiles={disabledTiles}
         />
 
-        <SavedHands
-          currentTiles={tiles}
-          currentDrawnTile={drawnTile}
-          currentExposedMelds={exposedMelds}
-          onLoadHand={handleLoadSavedHand}
-        />
-
       </div>
 
       {/* Recommended Hands Section - only in Charleston and Gameplay modes */}
@@ -998,6 +992,8 @@ export function HandAnalyzer() {
                     callInfo={callInfo}
                     isExposureSelected={selectedExposure?.handId === result.handId}
                     meldColors={meldColors}
+                    isExpanded={expandedHandId === result.handId}
+                    onToggleExpand={(handId) => setExpandedHandId(expandedHandId === handId ? null : handId)}
                     onOrganize={handleOrganizeTiles}
                     onSelectExposure={selectedCallableTile ? handleSelectExposure : undefined}
                   />
@@ -1008,6 +1004,14 @@ export function HandAnalyzer() {
           </div>
         </div>
       )}
+
+      {/* Saved Hands - always at the bottom */}
+      <SavedHands
+        currentTiles={tiles}
+        currentDrawnTile={drawnTile}
+        currentExposedMelds={exposedMelds}
+        onLoadHand={handleLoadSavedHand}
+      />
     </div>
   );
 }

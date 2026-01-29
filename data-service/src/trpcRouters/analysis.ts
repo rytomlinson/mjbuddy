@@ -6,6 +6,7 @@ import {
   analyzeAllHands,
   analyzeCall,
   PlayerHandState,
+  generateDisplaySegments,
 } from 'common';
 import { getHandsByCardYear } from '../models/cardHand.js';
 import { getActiveCardYear } from '../models/cardYear.js';
@@ -83,7 +84,7 @@ export const analysisRouter = router({
           return {
             handId: r.hand.id,
             handName: r.hand.displayName,
-            displayPattern: r.hand.displayPattern,
+            displayPattern: generateDisplaySegments(r.hand.patternGroups),
             category: r.hand.categoryId,
             distance: r.distance,
             points: r.hand.points,
@@ -97,6 +98,7 @@ export const analysisRouter = router({
             probability: r.probability,
             viabilityScore: r.viabilityScore,
             notes: r.hand.notes,
+            examples: r.hand.examples,
           };
         }),
         cardYearId,

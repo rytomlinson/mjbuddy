@@ -1,6 +1,6 @@
 import { createUseStyles } from 'react-jss';
 import { TileCode } from 'common';
-import type { DisplaySegment } from 'common';
+import type { DisplaySegment, HandExample } from 'common';
 import { Tile } from './Tile';
 import type { Theme } from '../theme';
 
@@ -44,6 +44,9 @@ const useStyles = createUseStyles((theme: Theme) => ({
     alignItems: 'center',
     gap: theme.spacing.sm,
   },
+  patternTitle: {
+    fontFamily: 'monospace',
+  },
   rankBadge: {
     backgroundColor: theme.colors.textMuted,
     color: 'white',
@@ -58,9 +61,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     color: theme.colors.textSecondary,
     fontFamily: 'monospace',
     margin: 0,
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing.xs,
   },
   // Segment colors for display pattern
   segmentDot: { color: '#2196F3' },      // Blue for dots
@@ -75,27 +75,28 @@ const useStyles = createUseStyles((theme: Theme) => ({
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '14px',
-    height: '14px',
+    width: '24px',
+    height: '24px',
     borderRadius: '50%',
     backgroundColor: theme.colors.textMuted,
     color: 'white',
-    fontSize: '10px',
+    fontSize: '12px',
     fontWeight: 'bold',
     cursor: 'help',
     fontFamily: 'serif',
     fontStyle: 'italic',
   },
-  stats: {
+  distanceValue: {
+    fontSize: theme.fontSizes.md,
+    fontWeight: 'bold',
+    padding: `2px ${theme.spacing.sm}`,
+    borderRadius: theme.borderRadius.sm,
+    height: '24px',
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing.sm,
-  },
-  distanceValue: {
-    fontSize: theme.fontSizes.lg,
-    fontWeight: 'bold',
-    padding: `${theme.spacing.xs} ${theme.spacing.sm}`,
-    borderRadius: theme.borderRadius.sm,
+    justifyContent: 'center',
+    minWidth: '24px',
+    boxSizing: 'border-box',
   },
   distanceGood: {
     backgroundColor: '#2E7D32',
@@ -113,20 +114,29 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontSize: theme.fontSizes.sm,
     color: theme.colors.primary,
     fontWeight: 'bold',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
   },
   tagConcealed: {
     fontSize: theme.fontSizes.sm,
-    padding: `2px ${theme.spacing.xs}`,
+    padding: `0 ${theme.spacing.xs}`,
     borderRadius: theme.borderRadius.sm,
     backgroundColor: 'rgba(142, 36, 170, 0.2)',
     color: '#CE93D8',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
   },
   tagRevealed: {
     fontSize: theme.fontSizes.sm,
-    padding: `2px ${theme.spacing.xs}`,
+    padding: `0 ${theme.spacing.xs}`,
     borderRadius: theme.borderRadius.sm,
     backgroundColor: theme.colors.surfaceHover,
     color: theme.colors.textSecondary,
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
   },
   handMeta: {
     display: 'flex',
@@ -137,8 +147,102 @@ const useStyles = createUseStyles((theme: Theme) => ({
   },
   tilesSection: {
     marginTop: theme.spacing.sm,
+  },
+  bottomRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.sm,
     paddingTop: theme.spacing.sm,
     borderTop: `1px solid ${theme.colors.border}`,
+    height: '24px',
+  },
+  bottomRowIcon: {
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    opacity: 0.6,
+    transition: 'all 0.2s',
+    '& img': {
+      width: '20px',
+      height: '20px',
+    },
+    '&:hover': {
+      opacity: 1,
+    },
+  },
+  expandButton: {
+    width: '24px',
+    height: '24px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    opacity: 0.6,
+    fontSize: '14px',
+    color: theme.colors.textSecondary,
+    transition: 'all 0.2s',
+    marginLeft: 'auto',
+    '&:hover': {
+      opacity: 1,
+    },
+  },
+  expandedSection: {
+    marginTop: theme.spacing.sm,
+    paddingTop: theme.spacing.sm,
+    borderTop: `1px solid ${theme.colors.border}`,
+  },
+  notesSection: {
+    marginBottom: theme.spacing.sm,
+    padding: theme.spacing.sm,
+    backgroundColor: theme.colors.surfaceHover,
+    borderRadius: theme.borderRadius.sm,
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textSecondary,
+    fontStyle: 'italic',
+  },
+  examplesSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.sm,
+  },
+  exampleSectionHeader: {
+    fontSize: theme.fontSizes.sm,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginTop: theme.spacing.xs,
+  },
+  exampleItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xs,
+  },
+  exampleHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    fontSize: theme.fontSizes.sm,
+  },
+  exampleValid: {
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  exampleInvalid: {
+    color: '#F44336',
+    fontWeight: 'bold',
+  },
+  exampleNote: {
+    fontSize: theme.fontSizes.sm,
+    color: theme.colors.textMuted,
+    fontStyle: 'italic',
+  },
+  exampleTiles: {
+    display: 'flex',
+    gap: '2px',
+    flexWrap: 'wrap',
   },
   tilesHeader: {
     display: 'flex',
@@ -337,6 +441,7 @@ export interface ViableHandData {
   probability: number;
   viabilityScore: number;
   notes?: string | null;
+  examples?: HandExample[];
 }
 
 export interface CallHighlight {
@@ -351,6 +456,8 @@ interface ViableHandCardProps {
   callInfo?: CallHighlight;
   isExposureSelected?: boolean;
   meldColors?: string[]; // Colors for each exposed meld (indexed by meld index)
+  isExpanded?: boolean;
+  onToggleExpand?: (handId: number) => void;
   onOrganize?: (fullHandTiles: TileCode[]) => void;
   onSelectExposure?: (handId: number, exposedTiles: TileCode[]) => void;
 }
@@ -385,11 +492,14 @@ function renderDisplayPattern(
   ));
 }
 
-export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldColors, onOrganize, onSelectExposure }: ViableHandCardProps) {
+export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldColors, isExpanded, onToggleExpand, onOrganize, onSelectExposure }: ViableHandCardProps) {
   const classes = useStyles();
 
   // Card is clickable when there's call info and a handler to select exposure
   const isClickable = callInfo && onSelectExposure;
+
+  // Check if card has expandable content
+  const hasExpandableContent = data.notes || (data.examples && data.examples.length > 0);
 
   // Build a map of tile indices to meld colors
   // For each meld, find which group it maps to and color those tiles
@@ -428,50 +538,24 @@ export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldC
       className={`${classes.card} ${isClickable ? classes.cardClickable : ''} ${isExposureSelected ? classes.cardSelected : ''}`}
       onClick={handleCardClick}
     >
+      {/* Row 1: Rank + Pattern */}
       <div className={classes.cardTop}>
-        <div className={classes.handInfo}>
-          <h3 className={classes.handName}>
-            <span className={classes.rankBadge}>{rank}</span>
-            {data.handName}
-            {callInfo && (
-              <span className={classes.callBadge}>
-                {callInfo.callType}
-              </span>
-            )}
-          </h3>
-          <p className={classes.handMeta}>
-            <span className={classes.points}>{data.points} pts</span>
-            <span className={data.isConcealed ? classes.tagConcealed : classes.tagRevealed}>
-              {data.isConcealed ? 'Concealed' : 'Exposed'}
-            </span>
-          </p>
-        </div>
-        <div className={classes.stats}>
-          <span className={`${classes.distanceValue} ${getDistanceClass()}`}>
-            {data.distance}
+        <h3 className={classes.handName}>
+          <span className={classes.rankBadge}>{rank}</span>
+          <span className={classes.patternTitle}>
+            {renderDisplayPattern(data.displayPattern, classes)}
           </span>
-          {onOrganize && (
-            <div
-              className={classes.organizeIcon}
-              onClick={() => onOrganize(data.fullHandTiles)}
-              title="Organize hand to match"
-            >
-              <img src="/hand.svg" alt="Organize" />
-            </div>
+          {callInfo && (
+            <span className={classes.callBadge}>
+              {callInfo.callType}
+            </span>
           )}
-        </div>
+        </h3>
       </div>
 
+      {/* Row 2: Tiles */}
       {data.fullHandTiles.length > 0 && (
         <div className={classes.tilesSection}>
-          <div className={classes.tilesHeader}>
-            <span className={classes.pattern}>
-              {renderDisplayPattern(data.displayPattern, classes)}
-              {data.notes && (
-                <span className={classes.notesIcon} title={data.notes}>&#8505;</span>
-              )}
-            </span>
-          </div>
           <div className={classes.allTiles}>
             {(() => {
               // Create a copy of needed tiles to track which are still needed
@@ -530,6 +614,88 @@ export function ViableHandCard({ data, rank, callInfo, isExposureSelected, meldC
               });
             })()}
           </div>
+        </div>
+      )}
+
+      {/* Row 3: Stats row - tiles needed, points, type, hand icon, expand button */}
+      <div className={classes.bottomRow}>
+        <span className={`${classes.distanceValue} ${getDistanceClass()}`}>
+          {data.distance} Tiles Needed
+        </span>
+        <span className={classes.points}>{data.points} pts</span>
+        <span className={data.isConcealed ? classes.tagConcealed : classes.tagRevealed}>
+          {data.isConcealed ? 'C' : 'X'}
+        </span>
+        {onOrganize && (
+          <div
+            className={classes.bottomRowIcon}
+            onClick={(e) => { e.stopPropagation(); onOrganize(data.fullHandTiles); }}
+            title="Organize hand to match"
+          >
+            <img src="/hand.svg" alt="Organize" />
+          </div>
+        )}
+        {hasExpandableContent && onToggleExpand && (
+          <div
+            className={classes.expandButton}
+            onClick={(e) => { e.stopPropagation(); onToggleExpand(data.handId); }}
+            title={isExpanded ? 'Collapse' : 'Show details'}
+          >
+            {isExpanded ? '▲' : '▼'}
+          </div>
+        )}
+      </div>
+
+      {/* Expanded section: notes and examples */}
+      {isExpanded && hasExpandableContent && (
+        <div className={classes.expandedSection}>
+          {data.notes && (
+            <div className={classes.notesSection}>
+              {data.notes}
+            </div>
+          )}
+          {data.examples && data.examples.length > 0 && (() => {
+            const validExamples = data.examples.filter(e => e.isValid);
+            const invalidExamples = data.examples.filter(e => !e.isValid);
+            return (
+              <div className={classes.examplesSection}>
+                {validExamples.length > 0 && (
+                  <>
+                    <div className={classes.exampleSectionHeader}>Valid Examples</div>
+                    {validExamples.map((example, idx) => (
+                      <div key={`valid-${idx}`} className={classes.exampleItem}>
+                        <div className={classes.exampleTiles}>
+                          {example.tiles.filter(t => t !== 0).map((tile, tileIdx) => (
+                            <Tile key={tileIdx} code={tile} size="tiny" />
+                          ))}
+                        </div>
+                        {example.note && (
+                          <span className={classes.exampleNote}>{example.note}</span>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+                {invalidExamples.length > 0 && (
+                  <>
+                    <div className={classes.exampleSectionHeader}>Invalid Examples</div>
+                    {invalidExamples.map((example, idx) => (
+                      <div key={`invalid-${idx}`} className={classes.exampleItem}>
+                        <div className={classes.exampleTiles}>
+                          {example.tiles.filter(t => t !== 0).map((tile, tileIdx) => (
+                            <Tile key={tileIdx} code={tile} size="tiny" />
+                          ))}
+                        </div>
+                        {example.note && (
+                          <span className={classes.exampleNote}>{example.note}</span>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

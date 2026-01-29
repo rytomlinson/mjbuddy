@@ -185,9 +185,6 @@ const useStyles = createUseStyles((theme: Theme) => ({
     fontSize: '12px',
     fontFamily: 'monospace',
     margin: 0,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '4px',
     color: '#3D3832',
   },
   handMeta: {
@@ -1049,7 +1046,6 @@ export function AdminPage() {
                     </h4>
                     <p className={classes.handPattern}>
                       {renderSegments(segments)}
-                      {hand.notes && <span className={classes.notesIcon} title={hand.notes}>i</span>}
                       {charCount !== 14 && (
                         <span className={classes.warningIcon} title={`${charCount} tiles (need 14)`}>!</span>
                       )}

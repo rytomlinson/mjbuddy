@@ -19,6 +19,7 @@ interface ExportedHand {
   displayName: string;
   displayPattern: string;
   patternGroups: PatternGroup[];
+  alternativePatterns?: PatternGroup[][];
   isConcealed: boolean;
   points: number;
   notes: string | null;
@@ -133,16 +134,19 @@ async function importCardData() {
         await query(
           `INSERT INTO card_hands (
             category_id, display_name, display_pattern, pattern_json,
-            is_concealed, points, notes, display_order, examples_json, created_at
+            alternative_patterns_json, is_concealed, points, notes,
+            display_order, examples_json, created_at
           ) VALUES (
             :categoryId, :displayName, :displayPattern, :patternJson,
-            :isConcealed, :points, :notes, :displayOrder, :examplesJson, NOW()
+            :alternativePatternsJson, :isConcealed, :points, :notes,
+            :displayOrder, :examplesJson, NOW()
           )`,
           {
             categoryId,
             displayName: hand.displayName,
             displayPattern: hand.displayPattern,
             patternJson: JSON.stringify(hand.patternGroups),
+            alternativePatternsJson: hand.alternativePatterns ? JSON.stringify(hand.alternativePatterns) : null,
             isConcealed: hand.isConcealed,
             points: hand.points,
             notes: hand.notes,

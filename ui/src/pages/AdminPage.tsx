@@ -479,6 +479,7 @@ interface EditFormData {
   displayPattern: string;
   displaySegments: DisplaySegment[];
   patternGroups: PatternGroup[];
+  alternativePatterns?: PatternGroup[][];
   isConcealed: boolean;
   points: number;
   notes: string;
@@ -581,6 +582,7 @@ export function AdminPage() {
         displayName: hand.displayName,
         displayPattern: hand.displayPattern,
         patternGroups: hand.patternGroups,
+        alternativePatterns: hand.alternativePatterns,
         isConcealed: hand.isConcealed,
         points: hand.points,
         notes: hand.notes,
@@ -605,6 +607,7 @@ export function AdminPage() {
         displayName: hand.displayName,
         displayPattern: hand.displayPattern,
         patternGroups: hand.patternGroups,
+        alternativePatterns: hand.alternativePatterns,
         isConcealed: hand.isConcealed,
         points: hand.points,
         notes: hand.notes,
@@ -630,6 +633,7 @@ export function AdminPage() {
       displayName: editFormData.displayName,
       displayPattern: editFormData.displayPattern,
       patternGroups: editFormData.patternGroups,
+      alternativePatterns: editFormData.alternativePatterns,
       isConcealed: editFormData.isConcealed,
       points: editFormData.points,
       notes: editFormData.notes || null,
@@ -648,6 +652,7 @@ export function AdminPage() {
       displayPattern: derivedPattern,
       displaySegments: derivedSegments,
       patternGroups: hand.patternGroups,
+      alternativePatterns: hand.alternativePatterns,
       isConcealed: hand.isConcealed,
       points: hand.points,
       notes: hand.notes || '',

@@ -119,6 +119,7 @@ export function getGroupCount(type: GroupType): number {
 interface ExpansionContext {
   suitBindings: Map<string, TileType>;
   numberBindings: Map<string, number>;
+  freeNumberBindings: Map<number, number>; // groupIndex -> chosen number
 }
 
 /**
@@ -126,6 +127,7 @@ interface ExpansionContext {
  */
 function expandGroupWithContext(
   group: PatternGroup,
+  groupIndex: number,
   ctx: ExpansionContext
 ): TileCode | null {
   const pattern = group.tile;
@@ -173,6 +175,9 @@ function expandGroupWithContext(
 
   if (pattern.numberVar && ctx.numberBindings.has(pattern.numberVar)) {
     value = ctx.numberBindings.get(pattern.numberVar)! + (pattern.numberOffset ?? 0);
+  } else if (ctx.freeNumberBindings.has(groupIndex)) {
+    // Free number choice for this group
+    value = ctx.freeNumberBindings.get(groupIndex);
   } else if (pattern.constraints?.specificValues?.length === 1) {
     value = pattern.constraints.specificValues[0];
   }
@@ -193,6 +198,23 @@ function expandGroupWithContext(
 const SUIT_TYPES = [TileType.DOT, TileType.BAM, TileType.CRAK];
 
 /**
+ * Info about a super group's number composition
+ */
+interface SuperGroupNumberInfo {
+  baseVar: string;
+  offsets: number[]; // All offsets used (including 0 for base)
+  pairOffset?: number; // Offset of the pair in this super group (if any)
+}
+
+/**
+ * Info about a "free" number choice for groups with multiple specificValues but no numberVar
+ */
+interface FreeNumberChoice {
+  groupIndex: number;
+  validNumbers: number[];
+}
+
+/**
  * Collect all unique variables from pattern groups
  */
 function collectVariables(groups: PatternGroup[]): {
@@ -201,14 +223,23 @@ function collectVariables(groups: PatternGroup[]): {
   constraints: Map<string, TilePattern['constraints']>;
   hasAnyDragon: boolean;
   hasAnyWind: boolean;
+  superGroupInfo: Map<string, SuperGroupNumberInfo>;
+  numberVarSuperGroupConstraint: Map<string, string>; // numberVar -> superGroupId
+  numberVarPairInSuperGroupConstraint: Map<string, string>; // numberVar -> superGroupId (for pair matching)
+  freeNumberChoices: FreeNumberChoice[]; // Groups with multiple specificValues but no numberVar
 } {
   const suitVars = new Set<string>();
   const numberVars = new Set<string>();
   const constraints = new Map<string, TilePattern['constraints']>();
   let hasAnyDragon = false;
   let hasAnyWind = false;
+  const superGroupInfo = new Map<string, SuperGroupNumberInfo>();
+  const numberVarSuperGroupConstraint = new Map<string, string>();
+  const numberVarPairInSuperGroupConstraint = new Map<string, string>();
+  const freeNumberChoices: FreeNumberChoice[] = [];
 
-  for (const group of groups) {
+  for (let groupIndex = 0; groupIndex < groups.length; groupIndex++) {
+    const group = groups[groupIndex];
     if (group.tile.suitVar) {
       suitVars.add(group.tile.suitVar);
     }
@@ -221,6 +252,38 @@ function collectVariables(groups: PatternGroup[]): {
           constraints.set(group.tile.numberVar, group.tile.constraints);
         }
       }
+      // Track if this numberVar is constrained to a super group
+      if (group.tile.numberVarMatchesSuperGroup) {
+        numberVarSuperGroupConstraint.set(group.tile.numberVar, group.tile.numberVarMatchesSuperGroup);
+      }
+      // Track if this numberVar should match the pair in a super group
+      if (group.tile.numberVarMatchesPairInSuperGroup) {
+        numberVarPairInSuperGroupConstraint.set(group.tile.numberVar, group.tile.numberVarMatchesPairInSuperGroup);
+      }
+    } else if (group.tile.suitVar && !group.tile.numberVar) {
+      // Group has suitVar but no numberVar - check if it needs free choice expansion
+      const constraints = group.tile.constraints;
+      if (constraints) {
+        if (constraints.specificValues && constraints.specificValues.length > 1) {
+          // Multiple specificValues - expand to each
+          freeNumberChoices.push({
+            groupIndex,
+            validNumbers: constraints.specificValues,
+          });
+        } else if (constraints.oddOnly) {
+          // oddOnly without numberVar - can be any odd number
+          freeNumberChoices.push({
+            groupIndex,
+            validNumbers: [1, 3, 5, 7, 9],
+          });
+        } else if (constraints.evenOnly) {
+          // evenOnly without numberVar - can be any even number
+          freeNumberChoices.push({
+            groupIndex,
+            validNumbers: [2, 4, 6, 8],
+          });
+        }
+      }
     }
     // Track if we have any "any dragon" or "any wind" patterns
     if (group.tile.isAnyDragon) {
@@ -229,9 +292,29 @@ function collectVariables(groups: PatternGroup[]): {
     if (group.tile.isAnyWind) {
       hasAnyWind = true;
     }
+    // Build super group info (what numberVar and offsets are used)
+    if (group.superGroupId && group.tile.numberVar) {
+      const existing = superGroupInfo.get(group.superGroupId);
+      const offset = group.tile.numberOffset ?? 0;
+      if (existing) {
+        if (!existing.offsets.includes(offset)) {
+          existing.offsets.push(offset);
+        }
+        // Track if this is the pair
+        if (group.type === GroupType.PAIR) {
+          existing.pairOffset = offset;
+        }
+      } else {
+        superGroupInfo.set(group.superGroupId, {
+          baseVar: group.tile.numberVar,
+          offsets: [offset],
+          pairOffset: group.type === GroupType.PAIR ? offset : undefined,
+        });
+      }
+    }
   }
 
-  return { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind };
+  return { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind, superGroupInfo, numberVarSuperGroupConstraint, numberVarPairInSuperGroupConstraint, freeNumberChoices };
 }
 
 /**
@@ -285,7 +368,7 @@ function isValidConsecutive(groups: PatternGroup[], numberBindings: Map<string, 
  * Expand pattern groups to all concrete patterns
  */
 export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
-  const { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind } = collectVariables(groups);
+  const { suitVars, numberVars, constraints, hasAnyDragon, hasAnyWind, superGroupInfo, numberVarSuperGroupConstraint, numberVarPairInSuperGroupConstraint, freeNumberChoices } = collectVariables(groups);
   const results: ConcretePattern[] = [];
 
   // Generate all suit combinations
@@ -317,8 +400,22 @@ export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
     generateSuitCombos(0, new Map(), new Set());
   }
 
-  // Generate all number combinations (including special dragon/wind variables)
-  const numberVarList = Array.from(numberVars);
+  // Separate numberVars into base vars (no super group constraint) and constrained vars
+  const baseNumberVars: string[] = [];
+  const constrainedNumberVars: string[] = [];
+  const pairConstrainedNumberVars: string[] = [];
+  for (const varName of numberVars) {
+    if (numberVarPairInSuperGroupConstraint.has(varName)) {
+      pairConstrainedNumberVars.push(varName);
+    } else if (numberVarSuperGroupConstraint.has(varName)) {
+      constrainedNumberVars.push(varName);
+    } else {
+      baseNumberVars.push(varName);
+    }
+  }
+
+  // Build list of vars to iterate: base vars first, then special vars
+  const numberVarList = [...baseNumberVars];
   // Add special variables for "any dragon" and "any wind" patterns
   if (hasAnyDragon) {
     numberVarList.push('dragon');
@@ -329,15 +426,72 @@ export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
 
   const numberCombinations: Map<string, number>[] = [];
 
-  if (numberVarList.length === 0) {
+  /**
+   * Calculate what numbers are used in a super group given current bindings
+   */
+  const getSuperGroupNumbers = (superGroupId: string, bindings: Map<string, number>): number[] => {
+    const info = superGroupInfo.get(superGroupId);
+    if (!info) return [];
+    const baseValue = bindings.get(info.baseVar);
+    if (baseValue === undefined) return [];
+    return info.offsets.map(offset => baseValue + offset).filter(n => n >= 1 && n <= 9);
+  };
+
+  /**
+   * Get the pair's number value in a super group given current bindings
+   */
+  const getSuperGroupPairNumber = (superGroupId: string, bindings: Map<string, number>): number | null => {
+    const info = superGroupInfo.get(superGroupId);
+    if (!info || info.pairOffset === undefined) return null;
+    const baseValue = bindings.get(info.baseVar);
+    if (baseValue === undefined) return null;
+    const pairValue = baseValue + info.pairOffset;
+    return (pairValue >= 1 && pairValue <= 9) ? pairValue : null;
+  };
+
+  if (numberVarList.length === 0 && constrainedNumberVars.length === 0 && pairConstrainedNumberVars.length === 0) {
     numberCombinations.push(new Map());
   } else {
     const generateNumberCombos = (index: number, current: Map<string, number>) => {
       if (index === numberVarList.length) {
-        // Validate consecutive patterns
-        if (isValidConsecutive(groups, current)) {
-          numberCombinations.push(new Map(current));
-        }
+        // Now generate combinations for constrained vars, then pair-constrained vars
+        const generateConstrainedCombos = (cIndex: number, cCurrent: Map<string, number>) => {
+          if (cIndex === constrainedNumberVars.length) {
+            // Now handle pair-constrained vars
+            const generatePairConstrainedCombos = (pIndex: number, pCurrent: Map<string, number>) => {
+              if (pIndex === pairConstrainedNumberVars.length) {
+                if (isValidConsecutive(groups, pCurrent)) {
+                  numberCombinations.push(new Map(pCurrent));
+                }
+                return;
+              }
+
+              const varName = pairConstrainedNumberVars[pIndex];
+              const superGroupId = numberVarPairInSuperGroupConstraint.get(varName)!;
+              const pairNumber = getSuperGroupPairNumber(superGroupId, pCurrent);
+
+              if (pairNumber !== null) {
+                pCurrent.set(varName, pairNumber);
+                generatePairConstrainedCombos(pIndex + 1, pCurrent);
+              }
+              // If no pair found, skip this combination
+            };
+
+            generatePairConstrainedCombos(0, new Map(cCurrent));
+            return;
+          }
+
+          const varName = constrainedNumberVars[cIndex];
+          const superGroupId = numberVarSuperGroupConstraint.get(varName)!;
+          const validNumbers = getSuperGroupNumbers(superGroupId, cCurrent);
+
+          for (const num of validNumbers) {
+            cCurrent.set(varName, num);
+            generateConstrainedCombos(cIndex + 1, cCurrent);
+          }
+        };
+
+        generateConstrainedCombos(0, new Map(current));
         return;
       }
 
@@ -371,39 +525,62 @@ export function expandPatternGroups(groups: PatternGroup[]): ConcretePattern[] {
     generateNumberCombos(0, new Map());
   }
 
-  // Combine suit and number combinations
+  // Generate all free number combinations
+  const freeNumberCombinations: Map<number, number>[] = [];
+  if (freeNumberChoices.length === 0) {
+    freeNumberCombinations.push(new Map());
+  } else {
+    const generateFreeNumberCombos = (index: number, current: Map<number, number>) => {
+      if (index === freeNumberChoices.length) {
+        freeNumberCombinations.push(new Map(current));
+        return;
+      }
+      const choice = freeNumberChoices[index];
+      for (const num of choice.validNumbers) {
+        current.set(choice.groupIndex, num);
+        generateFreeNumberCombos(index + 1, current);
+      }
+    };
+    generateFreeNumberCombos(0, new Map());
+  }
+
+  // Combine suit, number, and free number combinations
   for (const suitBinding of suitCombinations) {
     for (const numberBinding of numberCombinations) {
-      const ctx: ExpansionContext = {
-        suitBindings: suitBinding,
-        numberBindings: numberBinding,
-      };
+      for (const freeNumberBinding of freeNumberCombinations) {
+        const ctx: ExpansionContext = {
+          suitBindings: suitBinding,
+          numberBindings: numberBinding,
+          freeNumberBindings: freeNumberBinding,
+        };
 
-      const concreteGroups: ConcreteGroup[] = [];
-      let valid = true;
-      let totalTiles = 0;
+        const concreteGroups: ConcreteGroup[] = [];
+        let valid = true;
+        let totalTiles = 0;
 
-      for (const group of groups) {
-        const tile = expandGroupWithContext(group, ctx);
-        if (tile === null) {
-          valid = false;
-          break;
+        for (let i = 0; i < groups.length; i++) {
+          const group = groups[i];
+          const tile = expandGroupWithContext(group, i, ctx);
+          if (tile === null) {
+            valid = false;
+            break;
+          }
+
+          const count = getGroupCount(group.type);
+          concreteGroups.push({
+            type: group.type,
+            tile,
+            count,
+          });
+          totalTiles += count;
         }
 
-        const count = getGroupCount(group.type);
-        concreteGroups.push({
-          type: group.type,
-          tile,
-          count,
-        });
-        totalTiles += count;
-      }
-
-      if (valid) {
-        results.push({
-          groups: concreteGroups,
-          totalTiles,
-        });
+        if (valid) {
+          results.push({
+            groups: concreteGroups,
+            totalTiles,
+          });
+        }
       }
     }
   }

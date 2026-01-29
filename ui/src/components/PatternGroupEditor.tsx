@@ -340,6 +340,17 @@ function getNumberVar(tile: TilePattern): string {
   return tile.numberVar || '';
 }
 
+// Helper to get the dropdown value for Num Var (handles super group matching)
+function getNumVarDropdownValue(tile: TilePattern): string {
+  if (tile.numberVarMatchesSuperGroup) {
+    return `sg_any_${tile.numberVarMatchesSuperGroup}`;
+  }
+  if (tile.numberVarMatchesPairInSuperGroup) {
+    return `sg_pair_${tile.numberVarMatchesPairInSuperGroup}`;
+  }
+  return tile.numberVar || '';
+}
+
 // Helper to get number offset from tile pattern
 function getNumberOffset(tile: TilePattern): number {
   return tile.numberOffset ?? 0;
@@ -348,6 +359,16 @@ function getNumberOffset(tile: TilePattern): number {
 // Helper to get numberMatchesSuperGroup from tile pattern
 function getNumberMatchesSuperGroup(tile: TilePattern): string {
   return tile.numberMatchesSuperGroup || '';
+}
+
+// Helper to get numberVarMatchesSuperGroup from tile pattern
+function getNumberVarMatchesSuperGroup(tile: TilePattern): string {
+  return tile.numberVarMatchesSuperGroup || '';
+}
+
+// Helper to get numberVarMatchesPairInSuperGroup from tile pattern
+function getNumberVarMatchesPairInSuperGroup(tile: TilePattern): string {
+  return tile.numberVarMatchesPairInSuperGroup || '';
 }
 
 // Helper to get suit from fixed tile
@@ -369,7 +390,9 @@ function createTilePattern(
   numberVar: string = '',
   numberConstraint: string = 'specific',
   numberOffset: number = 0,
-  numberMatchesSuperGroup: string = ''
+  numberMatchesSuperGroup: string = '',
+  numberVarMatchesSuperGroup: string = '',
+  numberVarMatchesPairInSuperGroup: string = ''
 ): TilePattern {
   switch (category) {
     case 'flower':
@@ -399,9 +422,16 @@ function createTilePattern(
         if (numberOffset !== 0) {
           pattern.numberOffset = numberOffset;
         }
+        // Add super group matching constraints
+        if (numberVarMatchesSuperGroup) {
+          pattern.numberVarMatchesSuperGroup = numberVarMatchesSuperGroup;
+        }
+        if (numberVarMatchesPairInSuperGroup) {
+          pattern.numberVarMatchesPairInSuperGroup = numberVarMatchesPairInSuperGroup;
+        }
       }
 
-      // Add numberMatchesSuperGroup if set
+      // Add numberMatchesSuperGroup if set (direct number matching, not via var)
       if (numberMatchesSuperGroup) {
         pattern.numberMatchesSuperGroup = numberMatchesSuperGroup;
       }
@@ -500,27 +530,49 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
     const numberConstraint = getNumberConstraintType(currentTile);
     const numberOffset = getNumberOffset(currentTile);
     const matchSuperGroup = getNumberMatchesSuperGroup(currentTile);
+    const varMatchSuperGroup = getNumberVarMatchesSuperGroup(currentTile);
+    const varMatchPairSuperGroup = getNumberVarMatchesPairInSuperGroup(currentTile);
 
     newGroups[index] = {
       ...newGroups[index],
-      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup),
+      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup, varMatchSuperGroup, varMatchPairSuperGroup),
     };
     onChange(newGroups);
   };
 
-  const handleNumberVarChange = (index: number, numberVar: string) => {
+  const handleNumberVarChange = (index: number, value: string) => {
     const newGroups = [...groups];
     const currentTile = newGroups[index].tile;
     const suitVar = currentTile.suitVar || 'A';
     const number = getTileNumber(currentTile);
     const numberConstraint = getNumberConstraintType(currentTile);
-    // Reset offset when changing numberVar
-    const numberOffset = numberVar ? getNumberOffset(currentTile) : 0;
     const matchSuperGroup = getNumberMatchesSuperGroup(currentTile);
+
+    // Parse the value - it could be "X", "Y", "Z", "sg_any_XXX", "sg_pair_XXX", or ""
+    let numberVar = '';
+    let numberOffset = 0;
+    let varMatchSuperGroup = '';
+    let varMatchPairSuperGroup = '';
+
+    if (value.startsWith('sg_any_')) {
+      // Match any value in super group
+      const superGroupId = value.replace('sg_any_', '');
+      numberVar = 'Y'; // Use Y as the variable name for super group matching
+      varMatchSuperGroup = superGroupId;
+    } else if (value.startsWith('sg_pair_')) {
+      // Match pair in super group
+      const superGroupId = value.replace('sg_pair_', '');
+      numberVar = 'Y'; // Use Y as the variable name for super group matching
+      varMatchPairSuperGroup = superGroupId;
+    } else if (value) {
+      // Regular variable (X, Y, Z)
+      numberVar = value;
+      numberOffset = getNumberOffset(currentTile);
+    }
 
     newGroups[index] = {
       ...newGroups[index],
-      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup),
+      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup, varMatchSuperGroup, varMatchPairSuperGroup),
     };
     onChange(newGroups);
   };
@@ -533,10 +585,12 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
     const numberVar = getNumberVar(currentTile);
     const numberConstraint = getNumberConstraintType(currentTile);
     const matchSuperGroup = getNumberMatchesSuperGroup(currentTile);
+    const varMatchSuperGroup = getNumberVarMatchesSuperGroup(currentTile);
+    const varMatchPairSuperGroup = getNumberVarMatchesPairInSuperGroup(currentTile);
 
     newGroups[index] = {
       ...newGroups[index],
-      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, offset, matchSuperGroup),
+      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, offset, matchSuperGroup, varMatchSuperGroup, varMatchPairSuperGroup),
     };
     onChange(newGroups);
   };
@@ -549,10 +603,12 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
     const numberVar = getNumberVar(currentTile);
     const numberConstraint = getNumberConstraintType(currentTile);
     const numberOffset = getNumberOffset(currentTile);
+    const varMatchSuperGroup = getNumberVarMatchesSuperGroup(currentTile);
+    const varMatchPairSuperGroup = getNumberVarMatchesPairInSuperGroup(currentTile);
 
     newGroups[index] = {
       ...newGroups[index],
-      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, superGroupId),
+      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, superGroupId, varMatchSuperGroup, varMatchPairSuperGroup),
     };
     onChange(newGroups);
   };
@@ -565,10 +621,12 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
     const numberVar = getNumberVar(currentTile);
     const numberOffset = getNumberOffset(currentTile);
     const matchSuperGroup = getNumberMatchesSuperGroup(currentTile);
+    const varMatchSuperGroup = getNumberVarMatchesSuperGroup(currentTile);
+    const varMatchPairSuperGroup = getNumberVarMatchesPairInSuperGroup(currentTile);
 
     newGroups[index] = {
       ...newGroups[index],
-      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup),
+      tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, numberConstraint, numberOffset, matchSuperGroup, varMatchSuperGroup, varMatchPairSuperGroup),
     };
     onChange(newGroups);
   };
@@ -589,10 +647,12 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
       const numberVar = getNumberVar(currentTile);
       const numberOffset = getNumberOffset(currentTile);
       const matchSuperGroup = getNumberMatchesSuperGroup(currentTile);
+      const varMatchSuperGroup = getNumberVarMatchesSuperGroup(currentTile);
+      const varMatchPairSuperGroup = getNumberVarMatchesPairInSuperGroup(currentTile);
       // When changing specific number, set constraint to 'specific'
       newGroups[index] = {
         ...newGroups[index],
-        tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, 'specific', numberOffset, matchSuperGroup),
+        tile: createTilePattern('suit_var', suitVar, number, TileType.DOT, 1, 1, numberVar, 'specific', numberOffset, matchSuperGroup, varMatchSuperGroup, varMatchPairSuperGroup),
       };
     }
     onChange(newGroups);
@@ -819,16 +879,31 @@ export function PatternGroupEditor({ groups, onChange }: PatternGroupEditorProps
                       <span className={classes.fieldLabel}>Num Var</span>
                       <select
                         className={classes.select}
-                        value={getNumberVar(group.tile)}
+                        value={getNumVarDropdownValue(group.tile)}
                         onChange={(e) => handleNumberVarChange(index, e.target.value)}
                       >
                         <option value="">None</option>
                         {NUMBER_VARS.map((nv) => (
                           <option key={nv} value={nv}>Match {nv}</option>
                         ))}
+                        {superGroupIds.length > 0 && (
+                          <>
+                            <option disabled>── Super Group ──</option>
+                            {superGroupIds.map((sgId, sgIndex) => (
+                              <option key={`sg_any_${sgId}`} value={`sg_any_${sgId}`}>
+                                Match any in SG {sgIndex + 1}
+                              </option>
+                            ))}
+                            {superGroupIds.map((sgId, sgIndex) => (
+                              <option key={`sg_pair_${sgId}`} value={`sg_pair_${sgId}`}>
+                                Match pair in SG {sgIndex + 1}
+                              </option>
+                            ))}
+                          </>
+                        )}
                       </select>
                     </div>
-                    {getNumberVar(group.tile) && (
+                    {getNumberVar(group.tile) && !getNumberVarMatchesSuperGroup(group.tile) && !getNumberVarMatchesPairInSuperGroup(group.tile) && (
                       <div className={classes.fieldGroup}>
                         <span className={classes.fieldLabel}>Offset</span>
                         <input

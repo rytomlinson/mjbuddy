@@ -48,6 +48,15 @@ export const TilePatternSchema = z.object({
   // Number must match one of the numbers used in the specified super group
   numberMatchesSuperGroup: z.string().optional(),
 
+  // Constrain this numberVar to only take values from the specified super group
+  // Use with numberVar to define a variable that other tiles can reference
+  // E.g., numberVar: "Y", numberVarMatchesSuperGroup: "run" means Y must be one of the numbers in "run"
+  numberVarMatchesSuperGroup: z.string().optional(),
+
+  // Match the value of whichever group in the super group is a PAIR
+  // Useful when a super group has flexible pair position and other groups need to match it
+  numberVarMatchesPairInSuperGroup: z.string().optional(),
+
   // Tile type constraint (when using variables)
   tileType: TileTypeSchema.optional(),
 

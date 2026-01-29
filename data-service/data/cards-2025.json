@@ -1,7 +1,7 @@
 {
   "year": 2025,
   "name": "NMJL_2025",
-  "exportedAt": "2026-01-28T21:21:19.915Z",
+  "exportedAt": "2026-01-28T21:58:00.821Z",
   "categories": [
     {
       "name": "2025",
@@ -725,7 +725,7 @@
         },
         {
           "displayName": "2468 #4",
-          "displayPattern": "FFFF 2 4 6 8 ??? ???",
+          "displayPattern": "FFFF 2468 222 222",
           "patternGroups": [
             {
               "tile": {
@@ -1055,70 +1055,8 @@
           ]
         },
         {
-          "displayName": "2468 #8",
-          "displayPattern": "FF ???? DDDD ????",
-          "patternGroups": [
-            {
-              "tile": {
-                "isAnyFlower": true
-              },
-              "type": 2
-            },
-            {
-              "tile": {
-                "suitVar": "A",
-                "numberVar": "X",
-                "constraints": {
-                  "evenOnly": true
-                }
-              },
-              "type": 4
-            },
-            {
-              "tile": {
-                "isAnyDragon": true
-              },
-              "type": 4
-            },
-            {
-              "tile": {
-                "suitVar": "B",
-                "numberVar": "X",
-                "constraints": {
-                  "evenOnly": true
-                }
-              },
-              "type": 4
-            }
-          ],
-          "isConcealed": false,
-          "points": 25,
-          "notes": "Any 3 Suits, Like Kongs Any Even No,.",
-          "examples": [
-            {
-              "tiles": [
-                97,
-                97,
-                18,
-                18,
-                18,
-                18,
-                81,
-                81,
-                81,
-                81,
-                34,
-                34,
-                34,
-                34
-              ],
-              "isValid": true
-            }
-          ]
-        },
-        {
-          "displayName": "2468 #9",
-          "displayPattern": "22 44 66 88 ??? ???",
+          "displayName": "2468 #10",
+          "displayPattern": "22 44 66 88 222 222",
           "patternGroups": [
             {
               "tile": {
@@ -1186,7 +1124,7 @@
             }
           ],
           "isConcealed": true,
-          "points": 23,
+          "points": 30,
           "notes": "Any 3 Suits, Like Pungs Any Even No",
           "examples": [
             {
@@ -1273,7 +1211,7 @@
                 17,
                 17,
                 17,
-                81,
+                83,
                 33,
                 33,
                 33,
@@ -2018,10 +1956,11 @@
             {
               "tile": {
                 "suitVar": "A",
-                "numberVar": "X"
+                "numberVar": "X",
+                "constraints": { "range": [1, 5] }
               },
               "type": 1,
-              "superGroupId": "sg_1769581971836"
+              "superGroupId": "run"
             },
             {
               "tile": {
@@ -2030,7 +1969,7 @@
                 "numberOffset": 1
               },
               "type": 1,
-              "superGroupId": "sg_1769581971836"
+              "superGroupId": "run"
             },
             {
               "tile": {
@@ -2039,7 +1978,7 @@
                 "numberOffset": 2
               },
               "type": 1,
-              "superGroupId": "sg_1769581971836"
+              "superGroupId": "run"
             },
             {
               "tile": {
@@ -2057,6 +1996,110 @@
               },
               "type": 4
             }
+          ],
+          "alternativePatterns": [
+            [
+              {
+                "tile": {
+                  "isAnyFlower": true
+                },
+                "type": 3
+              },
+              {
+                "tile": {
+                  "suitVar": "A",
+                  "numberVar": "X",
+                  "constraints": { "range": [1, 5] }
+                },
+                "type": 4
+              },
+              {
+                "tile": {
+                  "suitVar": "B",
+                  "numberVar": "X",
+                  "numberOffset": 1
+                },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": {
+                  "suitVar": "B",
+                  "numberVar": "X",
+                  "numberOffset": 2
+                },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": {
+                  "suitVar": "B",
+                  "numberVar": "X",
+                  "numberOffset": 3
+                },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": {
+                  "suitVar": "C",
+                  "numberVar": "X",
+                  "numberOffset": 4
+                },
+                "type": 4
+              }
+            ],
+            [
+              {
+                "tile": {
+                  "isAnyFlower": true
+                },
+                "type": 3
+              },
+              {
+                "tile": {
+                  "suitVar": "A",
+                  "numberVar": "X",
+                  "constraints": { "range": [1, 5] }
+                },
+                "type": 4
+              },
+              {
+                "tile": {
+                  "suitVar": "B",
+                  "numberVar": "X",
+                  "numberOffset": 1
+                },
+                "type": 4
+              },
+              {
+                "tile": {
+                  "suitVar": "C",
+                  "numberVar": "X",
+                  "numberOffset": 2
+                },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": {
+                  "suitVar": "C",
+                  "numberVar": "X",
+                  "numberOffset": 3
+                },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": {
+                  "suitVar": "C",
+                  "numberVar": "X",
+                  "numberOffset": 4
+                },
+                "type": 1,
+                "superGroupId": "run"
+              }
+            ]
           ],
           "isConcealed": false,
           "points": 25,
@@ -2208,8 +2251,8 @@
                 19,
                 82,
                 82,
-                83,
-                83
+                81,
+                81
               ],
               "isValid": true
             }
@@ -2220,65 +2263,184 @@
           "displayPattern": "111111 1111 1111",
           "patternGroups": [
             {
-              "tile": {
-                "suitVar": "A",
-                "numberVar": "X"
-              },
+              "tile": { "suitVar": "A", "numberVar": "X", "constraints": { "range": [1, 5] } },
               "type": 2,
-              "superGroupId": "sg_1769582842967"
+              "superGroupId": "run"
             },
             {
-              "tile": {
-                "suitVar": "A",
-                "numberVar": "X",
-                "numberOffset": 1
-              },
+              "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 1 },
               "type": 1,
-              "superGroupId": "sg_1769582842967"
+              "superGroupId": "run"
             },
             {
-              "tile": {
-                "suitVar": "A",
-                "numberVar": "X",
-                "numberOffset": 2
-              },
+              "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 2 },
               "type": 1,
-              "superGroupId": "sg_1769582842967"
+              "superGroupId": "run"
             },
             {
-              "tile": {
-                "suitVar": "A",
-                "numberMatchesSuperGroup": "sg_1769582842967"
-              },
+              "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 3 },
               "type": 1,
-              "superGroupId": "sg_1769582842967"
+              "superGroupId": "run"
             },
             {
-              "tile": {
-                "suitVar": "A",
-                "numberMatchesSuperGroup": "sg_1769582842967"
-              },
+              "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 4 },
               "type": 1,
-              "superGroupId": "sg_1769582842967"
+              "superGroupId": "run"
             },
             {
-              "tile": {
-                "suitVar": "B",
-                "numberVar": "Y"
-              },
+              "tile": { "suitVar": "B", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
               "type": 4
             },
             {
-              "tile": {
-                "suitVar": "C",
-                "numberVar": "Y"
-              },
+              "tile": { "suitVar": "C", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
               "type": 4
             }
           ],
+          "alternativePatterns": [
+            [
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "constraints": { "range": [1, 5] } },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 1 },
+                "type": 2,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 2 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 3 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 4 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "B", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              },
+              {
+                "tile": { "suitVar": "C", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              }
+            ],
+            [
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "constraints": { "range": [1, 5] } },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 1 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 2 },
+                "type": 2,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 3 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 4 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "B", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              },
+              {
+                "tile": { "suitVar": "C", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              }
+            ],
+            [
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "constraints": { "range": [1, 5] } },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 1 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 2 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 3 },
+                "type": 2,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 4 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "B", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              },
+              {
+                "tile": { "suitVar": "C", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              }
+            ],
+            [
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "constraints": { "range": [1, 5] } },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 1 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 2 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 3 },
+                "type": 1,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "A", "numberVar": "X", "numberOffset": 4 },
+                "type": 2,
+                "superGroupId": "run"
+              },
+              {
+                "tile": { "suitVar": "B", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              },
+              {
+                "tile": { "suitVar": "C", "numberVar": "Y", "numberVarMatchesPairInSuperGroup": "run" },
+                "type": 4
+              }
+            ]
+          ],
           "isConcealed": false,
           "points": 30,
-          "notes": "Any 5 Consec. Nos. Pair ANy No. in Run Knogs Match Pair",
+          "notes": "Any 5 Consec. Nos. Pair Any No. in Run. Kongs Match Pair",
           "examples": [
             {
               "tiles": [
@@ -2286,8 +2448,8 @@
                 17,
                 18,
                 19,
-                17,
-                17,
+                20,
+                21,
                 33,
                 33,
                 33,
@@ -2297,7 +2459,8 @@
                 49,
                 49
               ],
-              "isValid": true
+              "isValid": true,
+              "note": "Pair at position 1 (DOT 1-1-2-3-4-5, BAM 1111, CRAK 1111)"
             }
           ]
         },
@@ -2768,9 +2931,9 @@
                 21,
                 21,
                 21,
-                81,
-                81,
-                81
+                83,
+                83,
+                83
               ],
               "isValid": true
             }
@@ -2838,9 +3001,9 @@
                 25,
                 25,
                 25,
-                81,
-                81,
-                81
+                83,
+                83,
+                83
               ],
               "isValid": true
             }
@@ -3181,8 +3344,8 @@
                 21,
                 82,
                 82,
-                83,
-                83
+                81,
+                81
               ],
               "isValid": true
             }
@@ -3258,8 +3421,8 @@
                 25,
                 82,
                 82,
-                83,
-                83
+                81,
+                81
               ],
               "isValid": true
             }
@@ -3920,13 +4083,13 @@
                 19,
                 82,
                 82,
-                83,
-                83,
-                83,
                 81,
                 81,
                 81,
-                81
+                83,
+                83,
+                83,
+                83
               ],
               "isValid": true
             }
@@ -4055,9 +4218,9 @@
                 97,
                 97,
                 97,
-                81,
-                81,
-                81,
+                83,
+                83,
+                83,
                 68,
                 65,
                 67,
@@ -4756,9 +4919,9 @@
                 19,
                 19,
                 19,
-                81,
-                81,
-                81,
+                83,
+                83,
+                83,
                 35,
                 35,
                 35,
@@ -5032,7 +5195,7 @@
                 19,
                 19,
                 19,
-                81,
+                83,
                 38,
                 38,
                 38,
@@ -5040,7 +5203,7 @@
                 57,
                 57,
                 57,
-                83
+                81
               ],
               "isValid": true
             }
@@ -5271,8 +5434,8 @@
                 20,
                 22,
                 24,
-                81,
-                81,
+                83,
+                83,
                 34,
                 36,
                 38,
